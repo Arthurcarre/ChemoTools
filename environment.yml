@@ -1,10 +1,6 @@
 name: EnvChemoTWeb
 channels:
-  - anaconda
   - conda-forge
-  - ostrokach-forge
-  - rdkit
-  - openbabel
   - defaults
 dependencies:
   - altair=4.2.0=pyhd8ed1ab_1
