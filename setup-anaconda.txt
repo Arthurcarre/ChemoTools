@@ -1,6 +1,0 @@
-conda install -c conda-forge matplotlib
-conda install -c anaconda seaborn
-conda install -c rdkit rdkit
-conda install pip
-pip install numpy
-pip install streamlit
