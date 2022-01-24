@@ -1016,82 +1016,78 @@ def main():
                                         label="Download your sdf file",
                                         data=file,
                                          file_name=f"Conformation n°{st.session_state.temp}.sdf")
-                             
-                        
-                        with st.spinner('Please wait, barplot is coming...'):              
-                            if "fig4" in st.session_state :
-                                del st.session_state.fig4
-                            if "fig5" in st.session_state :
-                                del st.session_state.fig5
-                            if "fig6" in st.session_state :
-                                del st.session_state.fig6
-                            if "fig7" in st.session_state :
-                                del st.session_state.fig7
-                            if "fig8" in st.session_state :
-                                del st.session_state.fig8 
-                            
-                            st.session_state.ConformationClass.get_plots(
-                                st.session_state.temp,
-                                st.session_state.molecule_name,
-                                aspect_plot = st.session_state.aspect_plot,
-                                height_plot = st.session_state.height_plot,
-                                size_xlabels = st.session_state.size_xlabels,
-                                size_ylabels = st.session_state.size_ylabels,
-                                aspect_density_plot = st.session_state.aspect_density_plot,
-                                height_density_plot = st.session_state.height_density_plot,
-                                gap_density_plot = st.session_state.gap_density_plot)
-                            
-                            st.pyplot(st.session_state.fig4)
-                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-                            
-                            with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
-                                 btn = st.download_button(
-                                         label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
-                                         data=file,
-                                         file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
-                                         mime="image/jpeg")
-                            
-                        with st.spinner('Please wait, boxplots and density plots are coming...'):
-                            col1, col2 = st.columns(2)
-                            with col1 :
-                                st.write("Boxplot built following the order of the above barplot.")
-                                st.pyplot(st.session_state.fig5)
-                                with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Box PLOT1 Conformation n°{st.session_state.temp} ",
-                                             data=file,
-                                             file_name=f"Boxplot1_Conformation n°{st.session_state.temp}.jpeg",
-                                             mime="image/jpeg")
-                            with col2 :
-                                st.write("Density plot built following the order of the above barplot.")
-                                st.pyplot(st.session_state.fig6)
-                                with open(f"Density_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Density PLOT1 Conformation n°{st.session_state.temp} ",
-                                             data=file,
-                                             file_name=f"Densityplot1_Conformation n°{st.session_state.temp}.jpeg",
-                                             mime="image/jpeg")
+                                         
+                        if "fig4" in st.session_state :
+                            del st.session_state.fig4
+                        if "fig5" in st.session_state :
+                            del st.session_state.fig5
+                        if "fig6" in st.session_state :
+                            del st.session_state.fig6
+                        if "fig7" in st.session_state :
+                            del st.session_state.fig7
+                        if "fig8" in st.session_state :
+                            del st.session_state.fig8 
 
-                        with st.spinner('Please wait, boxplots and density plots are coming...'):
-                            col1, col2 = st.columns(2)
-                            with col1 :
-                                st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                                st.pyplot(st.session_state.fig7)
-                                with open(f"Box2_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Box PLOT2 Conformation n°{st.session_state.temp} ",
-                                             data=file,
-                                             file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
-                                             mime="image/jpeg")
-                            with col2 :
-                                st.write(f"Density Plot built following the descending order of the {st.session_state.score}.")
-                                st.pyplot(st.session_state.fig8)
-                                with open(f"Density2_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Density PLOT2 Conformation n°{st.session_state.temp} ",
-                                             data=file,
-                                             file_name=f"Densityplot2_Conformation n°{st.session_state.temp}.jpeg",
-                                             mime="image/jpeg")
+                        st.session_state.ConformationClass.get_plots(
+                            st.session_state.temp,
+                            st.session_state.molecule_name,
+                            aspect_plot = st.session_state.aspect_plot,
+                            height_plot = st.session_state.height_plot,
+                            size_xlabels = st.session_state.size_xlabels,
+                            size_ylabels = st.session_state.size_ylabels,
+                            aspect_density_plot = st.session_state.aspect_density_plot,
+                            height_density_plot = st.session_state.height_density_plot,
+                            gap_density_plot = st.session_state.gap_density_plot)
+
+                        st.pyplot(st.session_state.fig4)
+                        st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+
+                        with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                             btn = st.download_button(
+                                     label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                     data=file,
+                                     file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                     mime="image/jpeg")
+
+                        col1, col2 = st.columns(2)
+                        with col1 :
+                            st.write("Boxplot built following the order of the above barplot.")
+                            st.pyplot(st.session_state.fig5)
+                            with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Box PLOT1 Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Boxplot1_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg")
+                        with col2 :
+                            st.write("Density plot built following the order of the above barplot.")
+                            st.pyplot(st.session_state.fig6)
+                            with open(f"Density_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Density PLOT1 Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Densityplot1_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg")
+
+                        col1, col2 = st.columns(2)
+                        with col1 :
+                            st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.fig7)
+                            with open(f"Box2_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Box PLOT2 Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg")
+                        with col2 :
+                            st.write(f"Density Plot built following the descending order of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.fig8)
+                            with open(f"Density2_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Density PLOT2 Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Densityplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg")
                     else :
                         try :
                             with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
@@ -1199,80 +1195,77 @@ def main():
                                     data=file,
                                      file_name=f"Unique Conformation.sdf")
                     
-                        with st.spinner('Please wait, the barplot is coming...'):
-                            if "fig4" in st.session_state :
-                                del st.session_state.fig4
-                            if "fig5" in st.session_state :
-                                del st.session_state.fig5
-                            if "fig6" in st.session_state :
-                                del st.session_state.fig6
-                            if "fig7" in st.session_state :
-                                del st.session_state.fig7
-                            if "fig8" in st.session_state :
-                                del st.session_state.fig8 
-                            
-                            st.session_state.ConformationClass.get_plots(
-                                1,
-                                st.session_state.molecule_name,
-                                aspect_plot = st.session_state.aspect_plot,
-                                height_plot = st.session_state.height_plot,
-                                size_xlabels = st.session_state.size_xlabels,
-                                size_ylabels = st.session_state.size_ylabels,
-                                aspect_density_plot = st.session_state.aspect_density_plot,
-                                height_density_plot = st.session_state.height_density_plot,
-                                gap_density_plot = st.session_state.gap_density_plot)
-                            
-                            st.pyplot(st.session_state.fig4)
-                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-                            
-                            with open(f"Barplot_Conformation1.jpeg", "rb") as file:
+                        if "fig4" in st.session_state :
+                            del st.session_state.fig4
+                        if "fig5" in st.session_state :
+                            del st.session_state.fig5
+                        if "fig6" in st.session_state :
+                            del st.session_state.fig6
+                        if "fig7" in st.session_state :
+                            del st.session_state.fig7
+                        if "fig8" in st.session_state :
+                            del st.session_state.fig8 
+
+                        st.session_state.ConformationClass.get_plots(
+                            1,
+                            st.session_state.molecule_name,
+                            aspect_plot = st.session_state.aspect_plot,
+                            height_plot = st.session_state.height_plot,
+                            size_xlabels = st.session_state.size_xlabels,
+                            size_ylabels = st.session_state.size_ylabels,
+                            aspect_density_plot = st.session_state.aspect_density_plot,
+                            height_density_plot = st.session_state.height_density_plot,
+                            gap_density_plot = st.session_state.gap_density_plot)
+
+                        st.pyplot(st.session_state.fig4)
+                        st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+
+                        with open(f"Barplot_Conformation1.jpeg", "rb") as file:
+                             btn = st.download_button(
+                                     label=f"Download Bar PLOT Conformation n°1 ",
+                                     data=file,
+                                     file_name=f"Barplot_Conformation n°1.jpeg",
+                                     mime="image/jpeg")
+
+                        col1, col2 = st.columns(2)
+                        with col1 :
+                            st.write("Boxplot built following the order of the above barplot.")
+                            st.pyplot(st.session_state.fig5)
+                            with open(f"Box_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Bar PLOT Conformation n°1 ",
+                                         label=f"Download Box PLOT1 Conformation n°1 ",
                                          data=file,
-                                         file_name=f"Barplot_Conformation n°1.jpeg",
+                                         file_name=f"Boxplot1_Conformation n°1.jpeg",
                                          mime="image/jpeg")
-                            
-                        with st.spinner('Please wait, boxplots and density plots are coming...'):
-                            col1, col2 = st.columns(2)
-                            with col1 :
-                                st.write("Boxplot built following the order of the above barplot.")
-                                st.pyplot(st.session_state.fig5)
-                                with open(f"Box_Plot1.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Box PLOT1 Conformation n°1 ",
-                                             data=file,
-                                             file_name=f"Boxplot1_Conformation n°1.jpeg",
-                                             mime="image/jpeg")
-                            with col2 :
-                                st.write("Density plot built following the order of the above barplot.")
-                                st.pyplot(st.session_state.fig6)
-                                with open(f"Density_Plot1.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Density PLOT1 Conformation n°1 ",
-                                             data=file,
-                                             file_name=f"Densityplot1_Conformation n°1.jpeg",
-                                             mime="image/jpeg")
-                            
-                        with st.spinner('Please wait, boxplots and density plots are coming...'):
-                            col1, col2 = st.columns(2)
-                            with col1 :
-                                st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                                st.pyplot(st.session_state.fig7)
-                                with open(f"Box2_Plot1.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Box PLOT2 Conformation n°1 ",
-                                             data=file,
-                                             file_name=f"Boxplot2_Conformation n°1.jpeg",
-                                             mime="image/jpeg")
-                            with col2 :
-                                st.write(f"Density Plot built following the descending order of the {st.session_state.score}.")
-                                st.pyplot(st.session_state.fig8)
-                                with open(f"Density2_Plot1.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                             label=f"Download Density PLOT2 Conformation n°1 ",
-                                             data=file,
-                                             file_name=f"Densityplot2_Conformation n°1.jpeg",
-                                             mime="image/jpeg")
+                        with col2 :
+                            st.write("Density plot built following the order of the above barplot.")
+                            st.pyplot(st.session_state.fig6)
+                            with open(f"Density_Plot1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Density PLOT1 Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Densityplot1_Conformation n°1.jpeg",
+                                         mime="image/jpeg")
+
+                        col1, col2 = st.columns(2)
+                        with col1 :
+                            st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.fig7)
+                            with open(f"Box2_Plot1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Box PLOT2 Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Boxplot2_Conformation n°1.jpeg",
+                                         mime="image/jpeg")
+                        with col2 :
+                            st.write(f"Density Plot built following the descending order of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.fig8)
+                            with open(f"Density2_Plot1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Density PLOT2 Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Densityplot2_Conformation n°1.jpeg",
+                                         mime="image/jpeg")
                     else :
                         try :
                             with open(f'Conformation1.sdf', "rb") as file:
