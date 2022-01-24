@@ -707,7 +707,7 @@ class ConformationTool :
         # Initialize the FacetGrid object
         #pal = sns.cubehelix_palette(len(data_frame2.index), rot=-.25, light=.7)
         #g = sns.FacetGrid(data_frame2, row="Name", hue="Name", aspect=aspect_density_plot,
-                          height=height_density_plot, palette="rocket")
+        #                  height=height_density_plot, palette="rocket")
 
         # Draw the densities in a few steps
         #g.map(sns.kdeplot, self.score,
