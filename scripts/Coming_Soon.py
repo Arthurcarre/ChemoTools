@@ -1,11 +1,14 @@
 """
 #####################################################
 ##                                                 ##
-##       -- STREAMLIT CHEMOTOOLS V1.1 --           ##
+##     -- STREAMLIT CHEMOINFOTOOLS V1.1 --         ##
 ##                                                 ##
 #####################################################
 """
     
-st.header('Coming Soon')
+import streamlit as st
 
-st.markdown('This section is coming soon...')
+def main():
+    st.header('Coming Soon')
+
+    st.markdown('This section is coming soon...')
