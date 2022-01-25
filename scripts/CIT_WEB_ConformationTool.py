@@ -1034,7 +1034,7 @@ def main():
                             aspect_plot = st.session_state.aspect_plot,
                             height_plot = st.session_state.height_plot,
                             size_xlabels = st.session_state.size_xlabels,
-                            size_ylabels = st.session_state.size_ylabels,
+                            size_ylabels = st.session_state.size_ylabels)
                         #    aspect_density_plot = st.session_state.aspect_density_plot,
                         #    height_density_plot = st.session_state.height_density_plot,
                         #    gap_density_plot = st.session_state.gap_density_plot)
@@ -1212,7 +1212,7 @@ def main():
                             aspect_plot = st.session_state.aspect_plot,
                             height_plot = st.session_state.height_plot,
                             size_xlabels = st.session_state.size_xlabels,
-                            size_ylabels = st.session_state.size_ylabels,
+                            size_ylabels = st.session_state.size_ylabels)
                         #    aspect_density_plot = st.session_state.aspect_density_plot,
                         #    height_density_plot = st.session_state.height_density_plot,
                         #    gap_density_plot = st.session_state.gap_density_plot)
