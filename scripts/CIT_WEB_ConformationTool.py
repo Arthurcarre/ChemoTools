@@ -990,17 +990,17 @@ def main():
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
                         st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 25)
                         
-                        st.session_state.aspect_density_plot = st.slider(
-                            'Configure the aspect ratio of the density plots figure', 0, 100, 25,
-                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+                    #    st.session_state.aspect_density_plot = st.slider(
+                    #        'Configure the aspect ratio of the density plots figure', 0, 100, 25,
+                    #        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
                         
-                        st.session_state.height_density_plot = st.slider(
-                            'Configure the height of the density plots figure', 0.0, 2.0, 0.4,
-                            help="Height (in inches) of each facet.")
+                    #    st.session_state.height_density_plot = st.slider(
+                    #        'Configure the height of the density plots figure', 0.0, 2.0, 0.4,
+                    #        help="Height (in inches) of each facet.")
                         
-                        st.session_state.gap_density_plot = st.slider(
-                            'Configure the gap between each density plot (It is preferable to configure the height)',
-                            -1.0, 1.0, -0.55)
+                    #    st.session_state.gap_density_plot = st.slider(
+                    #        'Configure the gap between each density plot (It is preferable to configure the height)',
+                    #        -1.0, 1.0, -0.55)
                     else :
                         pass
                     
@@ -1035,9 +1035,9 @@ def main():
                             height_plot = st.session_state.height_plot,
                             size_xlabels = st.session_state.size_xlabels,
                             size_ylabels = st.session_state.size_ylabels,
-                            aspect_density_plot = st.session_state.aspect_density_plot,
-                            height_density_plot = st.session_state.height_density_plot,
-                            gap_density_plot = st.session_state.gap_density_plot)
+                        #    aspect_density_plot = st.session_state.aspect_density_plot,
+                        #    height_density_plot = st.session_state.height_density_plot,
+                        #    gap_density_plot = st.session_state.gap_density_plot)
 
                         st.pyplot(st.session_state.fig4)
                         st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
@@ -1172,17 +1172,17 @@ def main():
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
                         st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 25)
                         
-                        st.session_state.aspect_density_plot = st.slider(
-                            'Configure the aspect ratio of the density plots figure', 0, 100, 25,
-                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+                    #    st.session_state.aspect_density_plot = st.slider(
+                    #        'Configure the aspect ratio of the density plots figure', 0, 100, 25,
+                    #        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
                         
-                        st.session_state.height_density_plot = st.slider(
-                            'Configure the height of the density plots figure', 0.0, 2.0, 0.4,
-                            help="Height (in inches) of each facet.")
+                    #    st.session_state.height_density_plot = st.slider(
+                    #        'Configure the height of the density plots figure', 0.0, 2.0, 0.4,
+                    #        help="Height (in inches) of each facet.")
                         
-                        st.session_state.gap_density_plot = st.slider(
-                            'Configure the gap between each density plot (It is preferable to configure the height)',
-                            -1.0, 1.0, -0.55)
+                    #    st.session_state.gap_density_plot = st.slider(
+                    #        'Configure the gap between each density plot (It is preferable to configure the height)',
+                    #        -1.0, 1.0, -0.55)
                     
                     bouton = st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.')
                     if bouton :
@@ -1213,9 +1213,9 @@ def main():
                             height_plot = st.session_state.height_plot,
                             size_xlabels = st.session_state.size_xlabels,
                             size_ylabels = st.session_state.size_ylabels,
-                            aspect_density_plot = st.session_state.aspect_density_plot,
-                            height_density_plot = st.session_state.height_density_plot,
-                            gap_density_plot = st.session_state.gap_density_plot)
+                        #    aspect_density_plot = st.session_state.aspect_density_plot,
+                        #    height_density_plot = st.session_state.height_density_plot,
+                        #    gap_density_plot = st.session_state.gap_density_plot)
 
                         st.pyplot(st.session_state.fig4)
                         st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
@@ -1364,20 +1364,18 @@ def main():
                         st.session_state.size_xlabels = 25
                     if "size_ylabels" not in st.session_state :
                         st.session_state.size_ylabels = 25
-                    if "aspect_density_plot" not in st.session_state :
-                        st.session_state.aspect_density_plot = 25
-                    if "height_density_plot" not in st.session_state :
-                        st.session_state.height_density_plot = 0.4
-                    if "gap_density_plot" not in st.session_state :
-                        st.session_state.gap_density_plot = -0.55
+                    #if "aspect_density_plot" not in st.session_state :
+                    #    st.session_state.aspect_density_plot = 25
+                    #if "height_density_plot" not in st.session_state :
+                    #    st.session_state.height_density_plot = 0.4
+                    #if "gap_density_plot" not in st.session_state :
+                    #    st.session_state.gap_density_plot = -0.55
                     
                     st.session_state.help_paragraph = (
                         "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
-                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30,"
-                        " Aspect ratio density plot = 25,Height density plot = 0.3, Gap = -0.55\n "
+                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
                         "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
-                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15, Aspect ratio density plot = 25,"
-                        " Height density plot = 0.5, Gap = -0.45")
+                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
                     
                     settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
                                                     help=st.session_state.help_paragraph)
@@ -1431,11 +1429,9 @@ def main():
                     
                     st.session_state.help_paragraph = (
                         "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
-                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30,"
-                        " Aspect ratio density plot = 25,Height density plot = 0.3, Gap = -0.55\n "
+                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
                         "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
-                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15, Aspect ratio density plot = 25,"
-                        " Height density plot = 0.5, Gap = -0.45")
+                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
                     
                     settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
                                                     help=st.session_state.help_paragraph)
@@ -1451,17 +1447,17 @@ def main():
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
                         st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 25)
                         
-                        st.session_state.aspect_density_plot = st.slider(
-                            'Configure the aspect ratio of the density plots figure', 0, 100, 25,
-                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+                        #st.session_state.aspect_density_plot = st.slider(
+                        #    'Configure the aspect ratio of the density plots figure', 0, 100, 25,
+                        #    help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
                         
-                        st.session_state.height_density_plot = st.slider(
-                            'Configure the height of the density plots figure', 0.0, 2.0, 0.4,
-                            help="Height (in inches) of each facet.")
+                        #st.session_state.height_density_plot = st.slider(
+                        #    'Configure the height of the density plots figure', 0.0, 2.0, 0.4,
+                        #    help="Height (in inches) of each facet.")
                         
-                        st.session_state.gap_density_plot = st.slider(
-                            'Configure the gap between each density plot (It is preferable to configure the height)',
-                            -1.0, 1.0, -0.55)
+                       # st.session_state.gap_density_plot = st.slider(
+                       #     'Configure the gap between each density plot (It is preferable to configure the height)',
+                       #     -1.0, 1.0, -0.55)
                     
                     if st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.'):             
                         st.session_state.ConformationClass.get_sdf_conformations(
