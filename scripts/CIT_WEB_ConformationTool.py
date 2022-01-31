@@ -46,11 +46,10 @@ class ConformationTool :
         
         mols = []
         error_mols = []
-        for i, mol in enumerate(self.mols_brut) :
-            try :
-                rdMolAlign.CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(Chem.MolFromMolFile(benchmark_molecule)))
-                mols.append(self.mols_brut[i])
-            except RuntimeError as e :
+        for mol in self.mols_brut :
+            if GetScaffoldForMol(mol) == GetScaffoldForMol(Chem.MolFromMolFile(benchmark_molecule)) :
+                mols.append(mol)
+            else :
                 error_mols.append(mol.GetProp("_Name"))
 
         st.session_state.error_mols = error_mols
