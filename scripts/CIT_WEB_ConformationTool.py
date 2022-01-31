@@ -48,7 +48,7 @@ class ConformationTool :
         error_mols = []
         for mol in self.mols_brut :
             try :
-                rdMolAlign.CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(Chem.MolFromMolFile(benchmark_molecule)) :
+                rdMolAlign.CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(Chem.MolFromMolFile(benchmark_molecule))
                 mols.append(mol)
             except RuntimeError as e :
                 error_mols.append(mol.GetProp("_Name"))
