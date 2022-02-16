@@ -9,5 +9,5 @@ channels:
   - defaults
 dependencies:
   - conda install:
-    - schrodinger pymol
+    - -c schrodinger pymol
 prefix: /opt/anaconda3/envs/teachopencadd
