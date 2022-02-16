@@ -8,6 +8,5 @@ channels:
   - openbabel
   - defaults
 dependencies:
-  - pip:
-    - pymol==2.5.2=py38h25331b9_0
+  - pymol=2.5.2=py38h25331b9_0
 prefix: /opt/anaconda3/envs/teachopencadd
