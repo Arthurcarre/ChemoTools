@@ -8,6 +8,5 @@ channels:
   - openbabel
   - defaults
 dependencies:
-  - conda-env-conda install -c :
-    - schrodinger pymol
+  - conda install -c schrodinger pymol
 prefix: /opt/anaconda3/envs/teachopencadd
