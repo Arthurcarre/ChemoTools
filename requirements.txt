@@ -1,4 +1,4 @@
-conda install -c schrodinger pymol
+pip install schrodinger pymol
 matplotlib==3.3.4
 nglview==3.0.3
 numpy==1.20.1
