@@ -4,8 +4,8 @@ numpy==1.20.1
 pandas==1.2.4
 Pillow==9.0.1
 py3Dmol==1.8.0
-pymol==2.5.2
 rdkit-pypi
 seaborn==0.11.1
 stmol==0.0.7
 streamlit==1.2.0
+pymol=2.5.2=py38h25331b9_0
