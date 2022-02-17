@@ -10,13 +10,13 @@ channels:
 dependencies:
   - matplotlib=3.3.4
   - nglview=3.0.3=pyh8a188c0_0
-  - pymol=2.5.2=py38h25331b9_0
   - seaborn=0.11.2=hd8ed1ab_0
   - pip:
     - numpy==1.20.1
     - pandas==1.2.4
     - Pillow==9.0.1
     - py3dmol==1.8.0
+    - pymol==2.5.2
     - rdkit-pypi
     - stmol==0.0.7
     - streamlit==1.4.0
