@@ -1,0 +1,23 @@
+name: teachopencadd
+channels:
+  - openeye
+  - schrodinger
+  - conda-forge
+  - ostrokach-forge
+  - rdkit
+  - openbabel
+  - defaults
+dependencies:
+  - matplotlib=3.3.4
+  - nglview=3.0.3=pyh8a188c0_0
+  - numpy=1.21.4=py38h49b9922_0
+  - pandas=1.3.4=py38ha53d530_1
+  - pillow=8.3.2=py38hee640a0_0
+  - pymol=2.5.2=py38h25331b9_0
+  - rdkit=2021.09.2=py38h0bd8f9b_0
+  - seaborn=0.11.2=hd8ed1ab_0
+  - pip:
+    - py3dmol==1.8.0
+    - stmol==0.0.7
+    - streamlit==1.4.0
+prefix: /opt/anaconda3/envs/teachopencadd
