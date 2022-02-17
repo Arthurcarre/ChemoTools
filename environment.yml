@@ -1,0 +1,12 @@
+name: teachopencadd
+channels:
+  - openeye
+  - schrodinger
+  - conda-forge
+  - ostrokach-forge
+  - rdkit
+  - openbabel
+  - defaults
+dependencies:
+  - pymol
+prefix: /opt/anaconda3/envs/teachopencadd
