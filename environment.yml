@@ -1,4 +1,0 @@
-channels:
-  - conda-forge
-dependencies:
-  - pymol==2.5.2
