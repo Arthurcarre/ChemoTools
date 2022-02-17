@@ -9,10 +9,10 @@ channels:
   - defaults
 dependencies:
   - pymol=2.5.2
+  - numpy
   - pip :
     - matplotlib==3.3.4
     - nglview==3.0.3
-    - numpy==1.21.4
     - pandas==1.2.4
     - Pillow==9.0.1
     - py3Dmol==1.8.0
