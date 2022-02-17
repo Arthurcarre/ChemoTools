@@ -8,7 +8,7 @@ channels:
   - openbabel
   - defaults
 dependencies:
-  - pymol
+  - pymol=2.5.2
   - pip :
     - matplotlib==3.3.4
     - nglview==3.0.3
