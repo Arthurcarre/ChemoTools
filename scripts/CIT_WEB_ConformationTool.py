@@ -568,7 +568,7 @@ class ConformationTool :
                     xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
                     pdb = xyz_pdb.read().strip()
                     xyz_pdb.close()
-                    xyzview = py3Dmol.view(width=800,height=500)
+                    xyzview = py3Dmol.view(width=700,height=500)
                     xyzview.addModel(pdb, 'pdb')
                     xyzview.setStyle({style:{'color':'spectrum'}})
                     #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
@@ -793,15 +793,15 @@ st.markdown('Welcome to ConformationTool ! This version is compatible with the d
 sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
                                     type = ["sdf"])
 if sdf:
+    molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
+                      " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
+    st.session_state.molecule_name = molecule_name
+    score = st.selectbox(
+         'What is the scoring function used in your sdf file ?',
+         ('Gold.PLP.Fitness', 'Gold.Goldscore.Fitness'))
+    st.session_state.score = score
     if 'sdf_file_stock' not in st.session_state :
         st.session_state.sdf_file_stock = sdf
-        molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
-                          " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
-        st.session_state.molecule_name = molecule_name
-        score = st.selectbox(
-             'What is the scoring function used in your sdf file ?',
-             ('Gold.PLP.Fitness', 'Gold.Goldscore.Fitness'))
-        st.session_state.score = score
         with open("sdf_file.sdf", "wb") as f:
             f.write(st.session_state.sdf_file_stock.getbuffer())
         mols = [x for x in Chem.SDMolSupplier("sdf_file.sdf")]
@@ -1000,7 +1000,7 @@ if first_checkbox :
                     xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
                     pdb = xyz_pdb.read().strip()
                     xyz_pdb.close()
-                    xyzview = py3Dmol.view(width=800,height=500)
+                    xyzview = py3Dmol.view(width=700,height=500)
                     xyzview.addModel(pdb, 'pdb')
                     xyzview.setStyle({style:{'color':'spectrum'}})
                     #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
