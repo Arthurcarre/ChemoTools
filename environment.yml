@@ -10,7 +10,6 @@ channels:
 dependencies:
   - abseil-cpp=20200225.2
   - altair=4.2.0
-  - appnope=0.1.2
   - argh=0.26.2
   - argon2-cffi=21.3.0
   - argon2-cffi-bindings=21.2.0
@@ -104,7 +103,6 @@ dependencies:
   - libev=4.33
   - libevent=2.1.10
   - libffi=3.3
-  - libgfortran=3.0.1
   - libholoplaycore=0.1.0_rc4
   - libiconv=1.16
   - libnetcdf=4.8.1
