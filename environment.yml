@@ -16,10 +16,10 @@ dependencies:
   - py3dmol=1.8.0
   - pymol=2.5.2
   - python=3.8.5
-  - rdkit=2020.09.3
   - seaborn=0.11.0
   - streamlit=1.5.1
   - watchdog=2.1.6
   - pip:
     - stmol==0.0.7
+    - rdkit-pypi
 prefix: /opt/anaconda3/envs/ConformationTool
