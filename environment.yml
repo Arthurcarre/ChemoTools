@@ -10,7 +10,6 @@ channels:
 dependencies:
   - pip :
     - matplotlib==3.3.4
-    - numpy
     - nglview==3.0.3
     - pandas==1.2.4
     - Pillow==9.0.1
