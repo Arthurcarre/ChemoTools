@@ -14,7 +14,7 @@ dependencies:
   - pandas=1.3.4=py38ha53d530_1
   - pillow=8.3.2=py38hee640a0_0
   - pip=21.3.1=pyhd8ed1ab_0
-  - python=3.8.12=h17280f6_2_cpython
+  - python=3.8.8
   - rdkit=2021.09.2=py38h0bd8f9b_0
   - seaborn=0.11.2=hd8ed1ab_0
   - pip:
