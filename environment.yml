@@ -8,10 +8,10 @@ channels:
   - openbabel
   - defaults
 dependencies:
-  - pymol=2.5.2
-  - numpy
+  - pymol
   - pip :
     - matplotlib==3.3.4
+    - numpy
     - nglview==3.0.3
     - pandas==1.2.4
     - Pillow==9.0.1
