@@ -8,7 +8,9 @@ channels:
   - openbabel
   - defaults
 dependencies:
+  - python=3.8.8
   - pip :
+    - numpy
     - matplotlib==3.3.4
     - nglview==3.0.3
     - pandas==1.2.4
