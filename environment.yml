@@ -1,6 +1,5 @@
 name: ConformationTool
 channels:
-  - schrodinger
   - anaconda
   - conda-forge
   - ostrokach-forge
