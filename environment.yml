@@ -2,6 +2,7 @@ name: ConformationTool
 channels:
   - conda-forge
 dependencies:
+  - python=3.8.8
   - pymol-open-source==2.5.0
   - pip:
     - matplotlib==3.3.4
