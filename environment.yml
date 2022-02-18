@@ -21,7 +21,7 @@ dependencies:
   - py3dmol=1.8.0
   - streamlit=1.4.0
   - watchdog=2.1.6
-  pip:
+  - pip:
     - py3dmol==1.8.0
     - stmol==0.0.7
 prefix: /opt/anaconda3/envs/teachopencadd
