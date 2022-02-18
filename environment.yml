@@ -2,9 +2,7 @@ name: ConformationTool
 channels:
   - anaconda
   - conda-forge
-  - ostrokach-forge
   - rdkit
-  - defaults
 dependencies:
   - abseil-cpp=20200225.2
   - altair=4.2.0
