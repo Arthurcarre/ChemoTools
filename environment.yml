@@ -2,7 +2,6 @@ name: ConformationTool
 channels:
   - anaconda
   - conda-forge
-  - rdkit
 dependencies:
   - abseil-cpp=20200225.2
   - altair=4.2.0
@@ -178,7 +177,6 @@ dependencies:
   - qtconsole=5.2.2
   - qtconsole-base=5.2.2
   - qtpy=2.0.1
-  - rdkit=2020.09.3
   - re2=2020.07.06
   - readline=8.0
   - reportlab=3.5.68
@@ -225,4 +223,5 @@ dependencies:
   - zstd=1.4.4
   - pip:
     - stmol==0.0.7
+    - rdkit-pypi
 prefix: /opt/anaconda3/envs/ConformationTool
