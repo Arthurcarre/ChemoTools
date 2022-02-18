@@ -17,9 +17,8 @@ dependencies:
   - python=3.8.8
   - rdkit=2021.09.2
   - seaborn=0.11.2=hd8ed1ab_0
-  - pip:
-    - py3dmol==1.8.0
-    - stmol==0.0.7
-    - streamlit==1.4.0
-    - watchdog==2.1.6
+  - py3dmol=1.8.0
+  - stmol==0.0.7
+  - streamlit==1.4.0
+  - watchdog==2.1.6
 prefix: /opt/anaconda3/envs/teachopencadd
