@@ -2,9 +2,6 @@ name: ConformationTool
 channels:
   - anaconda
   - conda-forge
-  - ostrokach-forge
-  - rdkit
-  - openbabel
   - defaults
   - schrodinger
 dependencies:
