@@ -22,7 +22,7 @@ dependencies:
   - streamlit=1.4.0
   - watchdog=2.1.6
   - pip:
-    - nglview=3.0.3
+    - nglview==3.0.3
     - py3dmol==1.8.0
     - stmol==0.0.7
 prefix: /opt/anaconda3/envs/teachopencadd
