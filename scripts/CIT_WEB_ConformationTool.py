@@ -6,7 +6,7 @@
 #####################################################
 """
 
-import os, copy, random, py3Dmol
+import os, copy, random, #py3Dmol
 import numpy as np
 import pandas as pd
 import streamlit as st
