@@ -352,42 +352,42 @@ def get_barsplot(k) :
 
 def main():
 
-st.header('Chemotools ! V1.0')
+    st.header('Chemotools ! V1.0')
 
-st.markdown('Welcome to Chemotools first version ! This version is compatible with the docking results files from the GOLD software'
+    st.markdown('Welcome to Chemotools first version ! This version is compatible with the docking results files from the GOLD software'
             ' using the scoring functions: ChemPLP Score and GoldScore.\n' 'In this version, make sure, through the DataWarrior '
             'software, that the column containing the name of the molecule (and not the name of the pose itself) is named "SourceTag".')
 
-sdf = st.file_uploader("Upload docked ligand coordinates in SDF format:",
+    sdf = st.file_uploader("Upload docked ligand coordinates in SDF format:",
                                     type = ["sdf"])
-if sdf:
+    if sdf:
     st.session_state.sdf_file_stock = sdf
-else:
+    else:
     try : 
         del st.session_state.sdf_file_stock
     except :
         pass
-    
-if 'molref_stock' not in st.session_state:
+
+    if 'molref_stock' not in st.session_state:
     st.session_state.molref_stock = None
 
-molref = st.file_uploader("Input your benchmark molecule (mol file in 2D or 3D) here.")
+    molref = st.file_uploader("Input your benchmark molecule (mol file in 2D or 3D) here.")
 
-if molref :
+    if molref :
     st.session_state.molref_stock = molref
-else:
+    else:
     try : 
         del st.session_state.molref_stock
     except :
         pass
 
 
-individuals = st.slider('Select the size of your sample. Default size of sample = 200', 0, 500, 200,
+    individuals = st.slider('Select the size of your sample. Default size of sample = 200', 0, 500, 200,
                         help='If you want to change this setting during the program, make sure the box below is unchecked!')
 
 
-first_checkbox = st.checkbox('Check your sdf')
-if first_checkbox :
+    first_checkbox = st.checkbox('Check your sdf')
+    if first_checkbox :
     if 'output_name_prefix' not in st.session_state :
         st.session_state.output_name_prefix = "Chemotools_Work_" + datetime.now().strftime("%b-%d-%Y_%H-%M-%S") + "_" + str(random.randint(10000, 99999))
     if 'structures_directory' not in st.session_state :
@@ -417,7 +417,7 @@ if first_checkbox :
             suppl.append(st.session_state.suppl_brut[i])
         except RuntimeError as e :
             error_molecules.append(mol.GetProp("_Name"))
-            
+
     if 'mols' not in st.session_state:
         st.session_state.mols = mols
     if 'suppl' not in st.session_state:
@@ -445,14 +445,14 @@ if first_checkbox :
         os.remove(st.session_state.output_name_prefix + "_mol_ref.mol")
     except :
         pass
-    
+
     second_checkbox = st.checkbox('Get the sample heatmap')
     if second_checkbox :
         try:
             st.pyplot(st.session_state.fig1)
         except:
             pass
-        
+
         if 'fig1' not in st.session_state:
             array = np.ones(shape=(len(st.session_state.samples),len(st.session_state.samples)))
             for i, indivduali in enumerate(st.session_state.samples) :
@@ -476,12 +476,12 @@ if first_checkbox :
 
     RMSD_Target = st.slider('RMSD threshold: Select the maximum RMSD threshold that should constitute a conformation. Default RMSD threshold = 1',
                          0.0, 15.0, 1.0, help='If you want to change this setting during the program, make sure the box below is unchecked!')
-    
+
     loop = st.slider('Number of Loops', 0, 20, 1, help="In the aim to build the sorted heatmap, the sorting process may requires to"
                      " be repeating many times, this is the number of loops, in order to have more resolution. However, especially"
                      " in the case of there is only one predominant conformation adopted by the large majority of the poses, you may"
                      " be invited to reduce the number of loops as the sorting process may remove a lot of individuals of the sample.")
-    
+
     third_checkbox = st.checkbox('Get the sorted heatmap (Attention ! Before closing this app, please, UNCHECK THIS BOX)')
     if third_checkbox :
         try:
@@ -523,23 +523,23 @@ if first_checkbox :
             st.pyplot(st.session_state.fig3)
             st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
              " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
-            
+
             with open("Histograms_Best_Score.jpeg", "rb") as file:
                  btn = st.download_button(
                             label="Download PLOT Histograms",
                             data=file,
                              file_name="Histograms_Best_Score.jpeg",
                              mime="image/jpeg")
-            
+
             if st.session_state.numbers_conformation != 1 :
                 temp_options = range(1, st.session_state.numbers_conformation + 1)
                 st.session_state.temp = st.select_slider("You want a sdf file or a barplot including molecules in the conformation n°",
                                                          options=temp_options)
                 st.write(f"The Conformation selected is {st.session_state.temp}")
-                
+
                 st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
                 st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-                
+
 
                 if st.button('Prepare your sdf file and build the barplot'):             
                     best_PLP_poses = [GetScaffoldForMol(x) for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
@@ -548,15 +548,15 @@ if first_checkbox :
                             if rdMolAlign.CalcRMS(best_PLP_poses[int(st.session_state.temp - 1)], mol) < float(st.session_state.RMSD_Target_conformation) :
                                 w.write(st.session_state.suppl[j]) #Then write this molecule pose in the new sdf file.
                     w.close()
-                        
+
 
                     with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
                          btn = st.download_button(
                                     label="Download your sdf file",
                                     data=file,
                                      file_name=f"Conformation n°{st.session_state.temp}.sdf")
-                         
-                    
+
+
                     with st.spinner('Please wait, the barplot is coming...'):              
                         if "fig4" in st.session_state :
                             del st.session_state.fig4
@@ -569,11 +569,11 @@ if first_checkbox :
                                      data=file,
                                      file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
                                      mime="image/jpeg")
-                
+
             else :                              
                 st.session_state.RMSD_Target_conformation = st.slider('You want a sdf file or a barplot including molecules in the unique predominant conformation with all poses under a RMSD =', 0.0, 15.0, 2.0)
                 st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-                
+
                 st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
                 bouton = st.button('I want to have the sdf file of poses in this conformation OR the barplot analysis.')
                 if bouton :
@@ -584,13 +584,13 @@ if first_checkbox :
                                 if rdMolAlign.CalcRMS(best_PLP_pose, mol) < float(st.session_state.RMSD_Target_conformation) :
                                     w.write(st.session_state.suppl[j]) #Then write this molecule pose in the new sdf file.
                         w.close()
-                    
+
                     with open('Conformation1.sdf', "rb") as file:
                      btn = st.download_button(
                                 label="Download your sdf file",
                                 data=file,
                                  file_name=f"Unique Conformation.sdf")
-                
+
                     with st.spinner('Please wait, the barplot is coming...'):
                         if "fig4" in st.session_state :
                             del st.session_state.fig4
@@ -603,12 +603,12 @@ if first_checkbox :
                                      data=file,
                                      file_name="Barplot Unique Conformation.jpeg",
                                      mime="image/jpeg")
-                        
-            
+
+
         except Exception as e:
             #st.exception(e)
             pass
-        
+
         if 'fig2' not in st.session_state:
             with st.spinner('Please wait, the sorted heatmap is coming...'):
                 output_liste = sorted_list_lengroups(get_groups_inside_list(improve_sort(
@@ -677,19 +677,19 @@ if first_checkbox :
                                     data=file,
                                      file_name="Histograms_Best_Score.jpeg",
                                      mime="image/jpeg")
-                    
+
                 except ValueError :
                     st.error("OOPS ! The number of loops is too high. Please uncheck the sorted heatmap box and then lower it")
-                
+
             if st.session_state.numbers_conformation != 1 :
                 temp_options = range(1, st.session_state.numbers_conformation + 1)
                 st.session_state.temp = st.select_slider("You want a sdf file or a barplot including molecules in the conformation n°",
                                                          options=temp_options)
                 st.write(f"The Conformation selected is {st.session_state.temp}")
-                                    
+
                 st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
                 st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-                
+
                 if st.button('Prepare your sdf file and build the barplot'):             
                     best_PLP_poses = [GetScaffoldForMol(x) for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
                     with Chem.SDWriter(f'Conformation{st.session_state.temp}.sdf') as w: #Create a sdf file
@@ -710,8 +710,8 @@ if first_checkbox :
                                     w.write(st.session_state.suppl[j]) #Then write this molecule pose in the new sdf file.
                         w.close()
 
-                     
-                
+
+
 
     else :
         if 'numbers_conformation' in st.session_state:
@@ -726,7 +726,7 @@ if first_checkbox :
                     os.remove(f'Barplot_Conformation{i+1}.jpeg')
                 except :
                     pass
-                    
+
             del st.session_state.numbers_conformation
         if 'indviduals_deleted' in st.session_state:
             del st.session_state.indviduals_deleted
@@ -751,7 +751,7 @@ if first_checkbox :
 
 
 
-else :
+    else :
     try :
         if 'output_name_prefix' in st.session_state:
             del st.session_state.output_name_prefix        
