@@ -1,0 +1,15 @@
+name: ConformationTool
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - numpy
+  - matplotlib
+  - pandas
+  - pillow
+  - rdkit
+  - seaborn
+  - streamlit
+  - pip:
+    - stmol==0.0.7
+prefix: /opt/anaconda3/envs/ConformationTool
