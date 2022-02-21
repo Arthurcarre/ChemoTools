@@ -6,13 +6,14 @@
 #####################################################
 """
 
-import os, copy, random #py3Dmol
+import os, copy, random 
+#import py3Dmol
 import numpy as np
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
-from pymol import cmd
+#from pymol import cmd
 from PIL import Image
 from stmol import showmol
 from rdkit import Chem
