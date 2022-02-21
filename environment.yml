@@ -1,6 +1,5 @@
 name: ConformationTool
 channels:
-  - rdkit
   - conda-forge
 dependencies:
   - numpy=1.20.1
