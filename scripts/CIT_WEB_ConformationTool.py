@@ -556,13 +556,11 @@ class ConformationTool :
             if 'pdb' in st.session_state :
                 style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
                 #bcolor = st.color_picker('Pick A Color', '#ffffff')
+                pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
                 best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
                 for i, mol in enumerate(best_mols) :
-                    Chem.MolToMolFile(mol, f"Conformation n°{i+1}.mol")
-                    cmd.load('pdb_file.pdb')
-                    cmd.load(f'Conformation n°{i+1}.mol')
-                    cmd.save(f'Conformation n°{i+1}.pdb')
-                    cmd.delete('all')
+                    merged = Chem.CombineMols(pdb_file, mol)
+                    Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
                     xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
                     pdb = xyz_pdb.read().strip()
                     xyz_pdb.close()
@@ -573,7 +571,6 @@ class ConformationTool :
                     xyzview.setStyle({'resn':'UNK'},{'stick':{}})
                     xyzview.zoomTo({'resn':'UNK'})
                     showmol(xyzview, height = 500,width=1000)
-                    os.remove(f'Conformation n°{i+1}.mol')
                     os.remove(f'Conformation n°{i+1}.pdb')
                     st.write(f'Conformation n°{i+1}')
                     with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
@@ -988,13 +985,11 @@ if first_checkbox :
             if 'pdb' in st.session_state :
                 style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
                 #bcolor = st.color_picker('Pick A Color', '#ffffff')
+                pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
                 best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
                 for i, mol in enumerate(best_mols) :
-                    Chem.MolToMolFile(mol, f"Conformation n°{i+1}.mol")
-                    cmd.load('pdb_file.pdb')
-                    cmd.load(f'Conformation n°{i+1}.mol')
-                    cmd.save(f'Conformation n°{i+1}.pdb')
-                    cmd.delete('all')
+                    merged = Chem.CombineMols(pdb_file, mol)
+                    Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
                     xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
                     pdb = xyz_pdb.read().strip()
                     xyz_pdb.close()
@@ -1005,7 +1000,6 @@ if first_checkbox :
                     xyzview.setStyle({'resn':'UNK'},{'stick':{}})
                     xyzview.zoomTo({'resn':'UNK'})
                     showmol(xyzview, height = 500,width=1000)
-                    os.remove(f'Conformation n°{i+1}.mol')
                     os.remove(f'Conformation n°{i+1}.pdb')
                     st.write(f'Conformation n°{i+1}')
                     with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
