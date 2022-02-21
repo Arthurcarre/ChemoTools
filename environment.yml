@@ -1,6 +1,5 @@
 name: Test
 channels:
-  - schrodinger
   - conda-forge
   - ostrokach-forge
   - rdkit
