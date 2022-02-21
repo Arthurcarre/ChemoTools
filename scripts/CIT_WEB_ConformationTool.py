@@ -18,7 +18,7 @@ import seaborn as sns
 from datetime import datetime
 from pathlib import Path
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdMolAlign
+from rdkit.Chem import AllChem, rdMolAlign, Draw
 from rdkit.Chem.Scaffolds.MurckoScaffold import GetScaffoldForMol
 
 def RMSD_listes(sample) :
