@@ -11,20 +11,13 @@ from scripts import CIT_WEB_ConformationTool, Coming_Soon
 
 def main():
 
-    about_str = \
-    """
-    **CIT : ChemoInfoTools 1.1**
-    **Contact:** [Arthur Carré](mailto:arthur.carre@icloud.com)
-    **License:** [MIT License](https://github.com/Arthurcarre/CIT/blob/master/LICENSE.md)
-    """
 
     st.set_page_config(page_title = "CIT : ChemoInfoTools !",
                        page_icon = ":test_tube:",
                        layout = "centered",
                        initial_sidebar_state = "expanded",
                        menu_items = {"Get Help": "https://github.com/Arthurcarre/CIT/discussions",
-                                     "Report a bug": "https://github.com/Arthurcarre/CIT/issues",
-                                     "About": about_str}
+                                     "Report a bug": "https://github.com/Arthurcarre/CIT/issues"}
                        )
 
     pages = ("CIT: ConformationTool", "CIT: Coming Soon")
