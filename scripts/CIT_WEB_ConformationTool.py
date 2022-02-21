@@ -778,373 +778,340 @@ def render_mol(xyz):
     xyzview.zoomTo()
     showmol(xyzview, height=500, width=1000)
 
-
-st.header('ConformationTool !')
-
-st.markdown('Welcome to ConformationTool ! This version is compatible with the docking results files from the GOLD software'
-            ' using the scoring functions: ChemPLP Score and GoldScore.\n')
-
-#SDF FILE SECTION#
-sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
-                                    type = ["sdf"])
-if sdf:
-    molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
-                      " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
-    st.session_state.molecule_name = molecule_name
-    score = st.selectbox(
-         'What is the scoring function used in your sdf file ?',
-         ('Gold.PLP.Fitness', 'Gold.Goldscore.Fitness'))
-    st.session_state.score = score
-    if 'sdf_file_stock' not in st.session_state :
-        st.session_state.sdf_file_stock = sdf
-        with open("sdf_file.sdf", "wb") as f:
-            f.write(st.session_state.sdf_file_stock.getbuffer())
-        mols = [x for x in Chem.SDMolSupplier("sdf_file.sdf")]
-        st.session_state.mol1 = mols[0]
-        del mols
-        os.remove("sdf_file.sdf")
-else:
-    try : 
-        del st.session_state.sdf_file_stock
-        del st.session_state.mol1
-    except :
-        pass
-
-#BENCHMARK MOLECULE SECTION#
-col1, col2 = st.columns(2)
-
-with col1 :
-    if 'mol1' in st.session_state :
-        code_smiles = Chem.MolToSmiles(st.session_state.mol1)
-        smiles = st.text_input('Upload the benchmark molecule SMILES code',
-                                                  code_smiles)
-    else :
-        smiles = st.text_input('Upload the benchmark molecule SMILES code',
-                                                  'OC(COC1=C2C=CC=CC2=CC=C1)CNC(C)C')
+def main():
     
-with col2 :
-    molref = st.file_uploader("OR Upload your benchmark molecule (mol file in 2D or 3D) here.")
+    st.header('ConformationTool !')
 
-if molref :
-    with open("mol_ref.mol", "wb") as molref_file:
-        molref_file.write(molref.getbuffer())
-    mol_file = Chem.MolFromMolFile("mol_ref.mol")
-    mol_smiles = Chem.MolToSmiles(mol_file)
-    mol_benchmark = Chem.MolFromSmiles(mol_smiles)
-    AllChem.EmbedMolecule(mol_benchmark)
-    st.session_state.molref_stock = Chem.MolToSmiles(mol_benchmark)
-    os.remove("mol_ref.mol")
-else :
-    st.session_state.molref_stock = smiles
-    
-blk=makeblock(st.session_state.molref_stock)
-render_mol(blk)
-st.write("Chemical structure of the benchmark molecule")
+    st.markdown('Welcome to ConformationTool ! This version is compatible with the docking results files from the GOLD software'
+                ' using the scoring functions: ChemPLP Score and GoldScore.\n')
 
-#PDB PROTEIN SECTION#
+    #SDF FILE SECTION#
+    sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
+                                        type = ["sdf"])
+    if sdf:
+        molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
+                          " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
+        st.session_state.molecule_name = molecule_name
+        score = st.selectbox(
+             'What is the scoring function used in your sdf file ?',
+             ('Gold.PLP.Fitness', 'Gold.Goldscore.Fitness'))
+        st.session_state.score = score
+        if 'sdf_file_stock' not in st.session_state :
+            st.session_state.sdf_file_stock = sdf
+            with open("sdf_file.sdf", "wb") as f:
+                f.write(st.session_state.sdf_file_stock.getbuffer())
+            mols = [x for x in Chem.SDMolSupplier("sdf_file.sdf")]
+            st.session_state.mol1 = mols[0]
+            del mols
+            os.remove("sdf_file.sdf")
+    else:
+        try : 
+            del st.session_state.sdf_file_stock
+            del st.session_state.mol1
+        except :
+            pass
 
-pdb = st.file_uploader("Upload a pdb file for viewing purposes. (FACULTATIVE)",
-                                    type = ["pdb"])
-if pdb :
-    st.session_state.pdb = pdb
-    with open("pdb_file.pdb", "wb") as pdb_file:
-        pdb_file.write(pdb.getbuffer())
-
-
-###############################################
-#--        CHECKBOX "CHECK YOUR SDF"        --#                                                     
-###############################################
-
-first_checkbox = st.checkbox(
-    'Check your sdf (Attention ! Before closing this app, please, UNCHECK THIS BOX)')
-if first_checkbox :
-    try : 
-        if 'ConformationClass' not in st.session_state :
-            with open("sdf_file.sdf", "wb") as sdf:
-                sdf.write(st.session_state.sdf_file_stock.getbuffer())
-            st.session_state.sdf_file = "sdf_file.sdf"        
-            st.session_state.ConformationClass = ConformationTool(st.session_state.sdf_file,
-                                                                  st.session_state.score)
-        if 'error_mols' not in st.session_state:
-            st.session_state.ConformationClass.check_sdf_file(st.session_state.molref_stock)
-    
-    except AttributeError:
-        st.error("OOPS ! Did you forget to input the SDF file ?")
-        #pass
-
-    mol_benchmark = Chem.MolFromSmiles(st.session_state.molref_stock)
-    scaff_mol_bench = GetScaffoldForMol(mol_benchmark)
-    AllChem.Compute2DCoords(mol_benchmark)
-    AllChem.Compute2DCoords(scaff_mol_bench)
+    #BENCHMARK MOLECULE SECTION#
     col1, col2 = st.columns(2)
+
     with col1 :
-        im = Draw.MolToImage(mol_benchmark)
-        st.image(im, caption='Chemical structure of the benchmark molecule')
+        if 'mol1' in st.session_state :
+            code_smiles = Chem.MolToSmiles(st.session_state.mol1)
+            smiles = st.text_input('Upload the benchmark molecule SMILES code',
+                                                      code_smiles)
+        else :
+            smiles = st.text_input('Upload the benchmark molecule SMILES code',
+                                                      'OC(COC1=C2C=CC=CC2=CC=C1)CNC(C)C')
+
     with col2 :
-        im = Draw.MolToImage(scaff_mol_bench)
-        st.image(im, caption='Chemical structure of the scaffold of the benchmark molecule')    
-    
-    show_molecules = st.checkbox('Show molecules name which will be not included in the algorithm')
-    if show_molecules:
-        if st.session_state.error_mols == None :
-            st.write('All molecules are good !')
-        if st.session_state.error_mols :
-            unique_name = []
-            unique_mol = []
-            for mol in st.session_state.error_mols:
-                if mol.GetProp(st.session_state.molecule_name) in unique_name:
-                    continue
-                else:
-                    unique_name.append(mol.GetProp(st.session_state.molecule_name))
-                    unique_mol.append(mol)
-            col1, col2, col3 = st.columns(3)
-            with col1 :
-                st.write("Molecule Name")
-            with col2 :
-                st.write("Chemical structure of the molecule")
-            with col3 :
-                st.write("Chemical structure of the scaffold of the molecule")           
-            for mol in unique_mol :
-                AllChem.Compute2DCoords(mol)
+        molref = st.file_uploader("OR Upload your benchmark molecule (mol file in 2D or 3D) here.")
+
+    if molref :
+        with open("mol_ref.mol", "wb") as molref_file:
+            molref_file.write(molref.getbuffer())
+        mol_file = Chem.MolFromMolFile("mol_ref.mol")
+        mol_smiles = Chem.MolToSmiles(mol_file)
+        mol_benchmark = Chem.MolFromSmiles(mol_smiles)
+        AllChem.EmbedMolecule(mol_benchmark)
+        st.session_state.molref_stock = Chem.MolToSmiles(mol_benchmark)
+        os.remove("mol_ref.mol")
+    else :
+        st.session_state.molref_stock = smiles
+
+    blk=makeblock(st.session_state.molref_stock)
+    render_mol(blk)
+    st.write("Chemical structure of the benchmark molecule")
+
+    #PDB PROTEIN SECTION#
+
+    pdb = st.file_uploader("Upload a pdb file for viewing purposes. (FACULTATIVE)",
+                                        type = ["pdb"])
+    if pdb :
+        st.session_state.pdb = pdb
+        with open("pdb_file.pdb", "wb") as pdb_file:
+            pdb_file.write(pdb.getbuffer())
+
+
+    ###############################################
+    #--        CHECKBOX "CHECK YOUR SDF"        --#                                                     
+    ###############################################
+
+    first_checkbox = st.checkbox(
+        'Check your sdf (Attention ! Before closing this app, please, UNCHECK THIS BOX)')
+    if first_checkbox :
+        try : 
+            if 'ConformationClass' not in st.session_state :
+                with open("sdf_file.sdf", "wb") as sdf:
+                    sdf.write(st.session_state.sdf_file_stock.getbuffer())
+                st.session_state.sdf_file = "sdf_file.sdf"        
+                st.session_state.ConformationClass = ConformationTool(st.session_state.sdf_file,
+                                                                      st.session_state.score)
+            if 'error_mols' not in st.session_state:
+                st.session_state.ConformationClass.check_sdf_file(st.session_state.molref_stock)
+
+        except AttributeError:
+            st.error("OOPS ! Did you forget to input the SDF file ?")
+            #pass
+
+        mol_benchmark = Chem.MolFromSmiles(st.session_state.molref_stock)
+        scaff_mol_bench = GetScaffoldForMol(mol_benchmark)
+        AllChem.Compute2DCoords(mol_benchmark)
+        AllChem.Compute2DCoords(scaff_mol_bench)
+        col1, col2 = st.columns(2)
+        with col1 :
+            im = Draw.MolToImage(mol_benchmark)
+            st.image(im, caption='Chemical structure of the benchmark molecule')
+        with col2 :
+            im = Draw.MolToImage(scaff_mol_bench)
+            st.image(im, caption='Chemical structure of the scaffold of the benchmark molecule')    
+
+        show_molecules = st.checkbox('Show molecules name which will be not included in the algorithm')
+        if show_molecules:
+            if st.session_state.error_mols == None :
+                st.write('All molecules are good !')
+            if st.session_state.error_mols :
+                unique_name = []
+                unique_mol = []
+                for mol in st.session_state.error_mols:
+                    if mol.GetProp(st.session_state.molecule_name) in unique_name:
+                        continue
+                    else:
+                        unique_name.append(mol.GetProp(st.session_state.molecule_name))
+                        unique_mol.append(mol)
                 col1, col2, col3 = st.columns(3)
                 with col1 :
-                    st.write(mol.GetProp(st.session_state.molecule_name))
+                    st.write("Molecule Name")
                 with col2 :
-                    st.image(Draw.MolToImage(mol))
+                    st.write("Chemical structure of the molecule")
                 with col3 :
-                    st.image(Draw.MolToImage(GetScaffoldForMol(mol)))
-            st.warning("All theses molecules have not sub-structure (scaffold) which match between "
-                       "the reference and probe mol.\n An RMSD can't be calculated with these molecules,"
-                       " they will therefore not be taken into account by the algorithm.\n")
+                    st.write("Chemical structure of the scaffold of the molecule")           
+                for mol in unique_mol :
+                    AllChem.Compute2DCoords(mol)
+                    col1, col2, col3 = st.columns(3)
+                    with col1 :
+                        st.write(mol.GetProp(st.session_state.molecule_name))
+                    with col2 :
+                        st.image(Draw.MolToImage(mol))
+                    with col3 :
+                        st.image(Draw.MolToImage(GetScaffoldForMol(mol)))
+                st.warning("All theses molecules have not sub-structure (scaffold) which match between "
+                           "the reference and probe mol.\n An RMSD can't be calculated with these molecules,"
+                           " they will therefore not be taken into account by the algorithm.\n")
 
-    try :
-        st.info(f"There are {st.session_state.mols_brut} molecule poses in the sdf file.\n")
-    except AttributeError :
-        st.error('OOPS ! Have you submitted your sdf file? ?')
-    st.info(f"There are {st.session_state.mols} molecule poses which will be used by the algorithm.\n")
-    
-    try :
-        os.remove("sdf_file.sdf")
-        os.remove("mol_ref.mol")
-    except :
-        pass
+        try :
+            st.info(f"There are {st.session_state.mols_brut} molecule poses in the sdf file.\n")
+        except AttributeError :
+            st.error('OOPS ! Have you submitted your sdf file? ?')
+        st.info(f"There are {st.session_state.mols} molecule poses which will be used by the algorithm.\n")
 
-    if st.session_state.mols > 200 :
-        size_sample = 200
-    else :
-        size_sample = st.session_state.mols
-    individuals = st.slider('Select the size of your sample. Default size of sample = 200', 0, 500, size_sample,
-                            help='If you want to change this setting during the program, make sure the box below is unchecked!')
-
-    #SECOND BOX
-    second_checkbox = st.checkbox('Get the sample heatmap')
-    if second_checkbox :
-        try:
-            st.pyplot(st.session_state.heatmap)
-        except:
+        try :
+            os.remove("sdf_file.sdf")
+            os.remove("mol_ref.mol")
+        except :
             pass
-        
-        if 'heatmap' not in st.session_state :
-            st.session_state.ConformationClass.get_heatmap_sample(individuals)
-    
-    else:
-        if 'heatmap' in st.session_state:
-            del st.session_state.heatmap
 
-    RMSD_Target = st.slider('RMSD threshold: Select the maximum RMSD threshold that should constitute a conformation.'
-                            ' Default RMSD threshold = 2 A',
-                             0.0, 15.0, 2.0,
-                            help='If you want to change this setting during the program, make sure the box below'
-                            ' is unchecked!')
+        if st.session_state.mols > 200 :
+            size_sample = 200
+        else :
+            size_sample = st.session_state.mols
+        individuals = st.slider('Select the size of your sample. Default size of sample = 200', 0, 500, size_sample,
+                                help='If you want to change this setting during the program, make sure the box below is unchecked!')
 
-    Proportion = st.slider('Minimum size of the sample defining a conformation. Default proportion = 0.10',
-                         0.0, 1.0, 0.10,
-                           help=('This setting define the minimum proportion (value between 0 and 1) of individuals'
-                                 ' in a group within the sample to consider that group large enough to be'
-                                 ' representative of a full conformation.'))
+        #SECOND BOX
+        second_checkbox = st.checkbox('Get the sample heatmap')
+        if second_checkbox :
+            try:
+                st.pyplot(st.session_state.heatmap)
+            except:
+                pass
 
-###############################################
-#--   CHECKBOX "GET THE SORTED HEATMAP"     --#                                                     
-############################################### 
-    
-    third_checkbox = st.checkbox('Get the sorted heatmap')
-    if third_checkbox :
-        try:
-            st.warning(
-                f"Attention. The sorting process discarded {st.session_state.indviduals_deleted} individuals")
-            
-            st.pyplot(st.session_state.sorted_heatmap)
-            with open("Sorted_Heatmap.jpeg", "rb") as file:
-                 btn = st.download_button(
-                         label="Download PLOT sorted heatmap",
-                         data=file,
-                         file_name="Sorted_Heatmap.jpeg",
-                         mime="image/jpeg")
-            st.info(f"There is (are) {st.session_state.numbers_conformation} predominant pose(s) among all poses.\n")
-            
-            if 'pdb' in st.session_state :
-                style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
-                #bcolor = st.color_picker('Pick A Color', '#ffffff')
-                pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
-                best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
-                for i, mol in enumerate(best_mols) :
-                    merged = Chem.CombineMols(pdb_file, mol)
-                    Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
-                    xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
-                    pdb = xyz_pdb.read().strip()
-                    xyz_pdb.close()
-                    xyzview = py3Dmol.view(width=700,height=500)
-                    xyzview.addModel(pdb, 'pdb')
-                    xyzview.setStyle({style:{'color':'spectrum'}})
-                    #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
-                    xyzview.setStyle({'resn':'UNL'},{'stick':{}})
-                    xyzview.zoomTo({'resn':'UNL'})
-                    showmol(xyzview, height = 500,width=1000)
-                    os.remove(f'Conformation n°{i+1}.pdb')
-                    st.write(f'Conformation n°{i+1}')
-                    with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
-                         btn = st.download_button(
-                                    label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
-                                    data=file,
-                                     file_name=f"Sample_Conformation{i+1}.sdf")
-            
-            with open("Best_PLPScore_Poses.sdf", "rb") as file:
-                 btn = st.download_button(
-                            label="Download the SDF file including each of the representatives of a conformation",
-                            data=file,
-                            file_name="Best_Score_Poses.sdf")
-                    
-            for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
-                st.write(
-                    f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
-                    f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
-            
-            st.write("\nIn order to check that each group is different from each other, a table taking " 
-                      "the first individual from each group and calculating the RMSD between each was constructed :\n")
-            
-            st.dataframe(st.session_state.df1)
-            
-            st.write("RMSD value between each representative of each conformation.")
-            
-            st.pyplot(st.session_state.histplot)
-            
-            st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
-             " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
-            
-            with open("Histograms_Best_Score.jpeg", "rb") as file:
-                 btn = st.download_button(
-                            label="Download PLOT Histograms",
-                            data=file,
-                             file_name="Histograms_Best_Score.jpeg",
+            if 'heatmap' not in st.session_state :
+                st.session_state.ConformationClass.get_heatmap_sample(individuals)
+
+        else:
+            if 'heatmap' in st.session_state:
+                del st.session_state.heatmap
+
+        RMSD_Target = st.slider('RMSD threshold: Select the maximum RMSD threshold that should constitute a conformation.'
+                                ' Default RMSD threshold = 2 A',
+                                 0.0, 15.0, 2.0,
+                                help='If you want to change this setting during the program, make sure the box below'
+                                ' is unchecked!')
+
+        Proportion = st.slider('Minimum size of the sample defining a conformation. Default proportion = 0.10',
+                             0.0, 1.0, 0.10,
+                               help=('This setting define the minimum proportion (value between 0 and 1) of individuals'
+                                     ' in a group within the sample to consider that group large enough to be'
+                                     ' representative of a full conformation.'))
+
+    ###############################################
+    #--   CHECKBOX "GET THE SORTED HEATMAP"     --#                                                     
+    ############################################### 
+
+        third_checkbox = st.checkbox('Get the sorted heatmap')
+        if third_checkbox :
+            try:
+                st.warning(
+                    f"Attention. The sorting process discarded {st.session_state.indviduals_deleted} individuals")
+
+                st.pyplot(st.session_state.sorted_heatmap)
+                with open("Sorted_Heatmap.jpeg", "rb") as file:
+                     btn = st.download_button(
+                             label="Download PLOT sorted heatmap",
+                             data=file,
+                             file_name="Sorted_Heatmap.jpeg",
                              mime="image/jpeg")
-            
-            ###############################################
-            #--    BUTTON "PREPARE YOUR SDF FILE"       --#                                                     
-            ###############################################
+                st.info(f"There is (are) {st.session_state.numbers_conformation} predominant pose(s) among all poses.\n")
 
-            if st.session_state.numbers_conformation != 1 :
-                temp_options = range(1, st.session_state.numbers_conformation + 1)
-                st.session_state.temp = st.select_slider("You want a sdf file or a barplot including molecules in the conformation n°",
-                                                         options=temp_options)
-                st.write(f"The Conformation selected is {st.session_state.temp}")
-                
-                st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
-                st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-                
-                settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
-                                                help=st.session_state.help_paragraph)
-                if settings_checkbox :
-                    st.session_state.aspect_plot = st.slider(
-                        'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
-                        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
-                    
-                    st.session_state.height_plot = st.slider(
-                        'Configure the height of the barplot and boxplot', 0, 50, 18,
-                        help="Height (in inches) of each facet.")
-                    
-                    st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
-                    st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
-                    
-                else :
-                    pass
-                
-                
-                if st.button('Prepare your sdf file and build plots'):             
-                    st.session_state.ConformationClass.get_sdf_conformations(
-                        st.session_state.temp,
-                        st.session_state.RMSD_Target_conformation
-                        )
-                        
-                    with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
-                         btn = st.download_button(
-                                    label="Download your sdf file",
-                                    data=file,
-                                     file_name=f"Conformation n°{st.session_state.temp}.sdf")
-                                     
-                    if "barplot" in st.session_state :
-                        del st.session_state.barplot
-                    if "box2_plot" in st.session_state :
-                        del st.session_state.box2_plot
-                    if "scatterplot" in st.session_state :
-                        del st.session_state.scatterplot 
+                if 'pdb' in st.session_state :
+                    style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
+                    #bcolor = st.color_picker('Pick A Color', '#ffffff')
+                    pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
+                    best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
+                    for i, mol in enumerate(best_mols) :
+                        merged = Chem.CombineMols(pdb_file, mol)
+                        Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
+                        xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
+                        pdb = xyz_pdb.read().strip()
+                        xyz_pdb.close()
+                        xyzview = py3Dmol.view(width=700,height=500)
+                        xyzview.addModel(pdb, 'pdb')
+                        xyzview.setStyle({style:{'color':'spectrum'}})
+                        #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
+                        xyzview.setStyle({'resn':'UNL'},{'stick':{}})
+                        xyzview.zoomTo({'resn':'UNL'})
+                        showmol(xyzview, height = 500,width=1000)
+                        os.remove(f'Conformation n°{i+1}.pdb')
+                        st.write(f'Conformation n°{i+1}')
+                        with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                             btn = st.download_button(
+                                        label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                        data=file,
+                                         file_name=f"Sample_Conformation{i+1}.sdf")
 
-                    st.session_state.ConformationClass.get_plots(
-                        st.session_state.temp,
-                        st.session_state.molecule_name,
-                        aspect_plot = st.session_state.aspect_plot,
-                        height_plot = st.session_state.height_plot,
-                        size_xlabels = st.session_state.size_xlabels,
-                        size_ylabels = st.session_state.size_ylabels)
+                with open("Best_PLPScore_Poses.sdf", "rb") as file:
+                     btn = st.download_button(
+                                label="Download the SDF file including each of the representatives of a conformation",
+                                data=file,
+                                file_name="Best_Score_Poses.sdf")
 
-                    st.pyplot(st.session_state.barplot)
-                    st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+                for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
+                    st.write(
+                        f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                        f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
 
-                    with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
-                         btn = st.download_button(
-                                 label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
-                                 data=file,
-                                 file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                st.write("\nIn order to check that each group is different from each other, a table taking " 
+                          "the first individual from each group and calculating the RMSD between each was constructed :\n")
+
+                st.dataframe(st.session_state.df1)
+
+                st.write("RMSD value between each representative of each conformation.")
+
+                st.pyplot(st.session_state.histplot)
+
+                st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
+                 " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
+
+                with open("Histograms_Best_Score.jpeg", "rb") as file:
+                     btn = st.download_button(
+                                label="Download PLOT Histograms",
+                                data=file,
+                                 file_name="Histograms_Best_Score.jpeg",
                                  mime="image/jpeg")
 
-                    st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                    st.pyplot(st.session_state.box2_plot)
-                    with open(f"Box2_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                         btn = st.download_button(
-                                 label=f"Download Box PLOT Conformation n°{st.session_state.temp} ",
-                                 data=file,
-                                 file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
-                                 mime="image/jpeg")
-                    st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score}.")
-                    st.pyplot(st.session_state.scatterplot)
-                    with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                         btn = st.download_button(
-                                 label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
-                                 data=file,
-                                 file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
-                                 mime="image/jpeg")
-                else :
-                    try :
+                ###############################################
+                #--    BUTTON "PREPARE YOUR SDF FILE"       --#                                                     
+                ###############################################
+
+                if st.session_state.numbers_conformation != 1 :
+                    temp_options = range(1, st.session_state.numbers_conformation + 1)
+                    st.session_state.temp = st.select_slider("You want a sdf file or a barplot including molecules in the conformation n°",
+                                                             options=temp_options)
+                    st.write(f"The Conformation selected is {st.session_state.temp}")
+
+                    st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
+                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+
+                    settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
+                                                    help=st.session_state.help_paragraph)
+                    if settings_checkbox :
+                        st.session_state.aspect_plot = st.slider(
+                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
+                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+
+                        st.session_state.height_plot = st.slider(
+                            'Configure the height of the barplot and boxplot', 0, 50, 18,
+                            help="Height (in inches) of each facet.")
+
+                        st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
+                        st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
+
+                    else :
+                        pass
+
+
+                    if st.button('Prepare your sdf file and build plots'):             
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            st.session_state.temp,
+                            st.session_state.RMSD_Target_conformation
+                            )
+
                         with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
                              btn = st.download_button(
                                         label="Download your sdf file",
                                         data=file,
                                          file_name=f"Conformation n°{st.session_state.temp}.sdf")
-                        
+
+                        if "barplot" in st.session_state :
+                            del st.session_state.barplot
+                        if "box2_plot" in st.session_state :
+                            del st.session_state.box2_plot
+                        if "scatterplot" in st.session_state :
+                            del st.session_state.scatterplot 
+
+                        st.session_state.ConformationClass.get_plots(
+                            st.session_state.temp,
+                            st.session_state.molecule_name,
+                            aspect_plot = st.session_state.aspect_plot,
+                            height_plot = st.session_state.height_plot,
+                            size_xlabels = st.session_state.size_xlabels,
+                            size_ylabels = st.session_state.size_ylabels)
+
                         st.pyplot(st.session_state.barplot)
-                        
                         st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+
                         with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
                              btn = st.download_button(
                                      label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
                                      data=file,
                                      file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
                                      mime="image/jpeg")
-                        
+
                         st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
                         st.pyplot(st.session_state.box2_plot)
                         with open(f"Box2_Plot{st.session_state.temp}.jpeg", "rb") as file:
                              btn = st.download_button(
-                                     label=f"Download Box Plot Conformation n°{st.session_state.temp} ",
+                                     label=f"Download Box PLOT Conformation n°{st.session_state.temp} ",
                                      data=file,
                                      file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
                                      mime="image/jpeg")
@@ -1156,99 +1123,98 @@ if first_checkbox :
                                      data=file,
                                      file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
                                      mime="image/jpeg")
-        
-                    except :
-                        pass
-                
-            else :                              
-                st.session_state.RMSD_Target_conformation = st.slider(
-                    'You want a sdf file and/or plot analysis including molecules in the unique predominant conformation with all poses under a RMSD =',
-                    0.0, 15.0, 2.0)
-                
-                st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-                
-                st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
-                
-                settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
-                                                help=st.session_state.help_paragraph)
-                if settings_checkbox :
-                    st.session_state.aspect_plot = st.slider(
-                        'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
-                        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
-                    
-                    st.session_state.height_plot = st.slider(
-                        'Configure the height of the barplot and boxplot', 0, 50, 18,
-                        help="Height (in inches) of each facet.")
-                    
-                    st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
-                    st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
-                    
-                
-                bouton = st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.')
-                if bouton :
-                    st.session_state.ConformationClass.get_sdf_conformations(
-                        1, st.session_state.RMSD_Target_conformation)
-                    
-                    with open('Conformation1.sdf', "rb") as file:
-                     btn = st.download_button(
-                                label="Download your sdf file",
-                                data=file,
-                                 file_name=f"Unique Conformation.sdf")
-                
-                    if "barplot" in st.session_state :
-                        del st.session_state.barplot
-                    if "box2_plot" in st.session_state :
-                        del st.session_state.box2_plot
-                    if "scatterplot" in st.session_state :
-                        del st.session_state.scatterplot 
+                    else :
+                        try :
+                            with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                                 btn = st.download_button(
+                                            label="Download your sdf file",
+                                            data=file,
+                                             file_name=f"Conformation n°{st.session_state.temp}.sdf")
+
+                            st.pyplot(st.session_state.barplot)
+
+                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+                            with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg")
+
+                            st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.box2_plot)
+                            with open(f"Box2_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Box Plot Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg")
+                            st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.scatterplot)
+                            with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg")
+
+                        except :
+                            pass
+
+                else :                              
+                    st.session_state.RMSD_Target_conformation = st.slider(
+                        'You want a sdf file and/or plot analysis including molecules in the unique predominant conformation with all poses under a RMSD =',
+                        0.0, 15.0, 2.0)
+
+                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+
+                    st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
+
+                    settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
+                                                    help=st.session_state.help_paragraph)
+                    if settings_checkbox :
+                        st.session_state.aspect_plot = st.slider(
+                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
+                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+
+                        st.session_state.height_plot = st.slider(
+                            'Configure the height of the barplot and boxplot', 0, 50, 18,
+                            help="Height (in inches) of each facet.")
+
+                        st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
+                        st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
 
 
-                    st.session_state.ConformationClass.get_plots(
-                        1,
-                        st.session_state.molecule_name,
-                        aspect_plot = st.session_state.aspect_plot,
-                        height_plot = st.session_state.height_plot,
-                        size_xlabels = st.session_state.size_xlabels,
-                        size_ylabels = st.session_state.size_ylabels)
+                    bouton = st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.')
+                    if bouton :
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            1, st.session_state.RMSD_Target_conformation)
 
-                    st.pyplot(st.session_state.barplot)
-                    st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-
-                    with open(f"Barplot_Conformation1.jpeg", "rb") as file:
+                        with open('Conformation1.sdf', "rb") as file:
                          btn = st.download_button(
-                                 label=f"Download Bar PLOT Conformation n°1 ",
-                                 data=file,
-                                 file_name=f"Barplot_Conformation n°1.jpeg",
-                                 mime="image/jpeg")
+                                    label="Download your sdf file",
+                                    data=file,
+                                     file_name=f"Unique Conformation.sdf")
 
-                    st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                    st.pyplot(st.session_state.box2_plot)
-                    with open(f"Box2_Plot1.jpeg", "rb") as file:
-                         btn = st.download_button(
-                                 label=f"Download Box Plot Conformation n°1 ",
-                                 data=file,
-                                 file_name=f"Boxplot2_Conformation n°1.jpeg",
-                                 mime="image/jpeg")
-                         
-                    st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score}.")
-                    st.pyplot(st.session_state.scatterplot)
-                    with open(f"Scatter_Plot1.jpeg", "rb") as file:
-                         btn = st.download_button(
-                                 label=f"Download Scatter Plot Conformation n°1 ",
-                                 data=file,
-                                 file_name=f"Scatter_Plot n°1.jpeg",
-                                 mime="image/jpeg")
-                else :
-                    try :
-                        with open(f'Conformation1.sdf', "rb") as file:
-                             btn = st.download_button(
-                                        label="Download your sdf file",
-                                        data=file,
-                                         file_name=f"Conformation n°1.sdf")
-                        
+                        if "barplot" in st.session_state :
+                            del st.session_state.barplot
+                        if "box2_plot" in st.session_state :
+                            del st.session_state.box2_plot
+                        if "scatterplot" in st.session_state :
+                            del st.session_state.scatterplot 
+
+
+                        st.session_state.ConformationClass.get_plots(
+                            1,
+                            st.session_state.molecule_name,
+                            aspect_plot = st.session_state.aspect_plot,
+                            height_plot = st.session_state.height_plot,
+                            size_xlabels = st.session_state.size_xlabels,
+                            size_ylabels = st.session_state.size_ylabels)
+
                         st.pyplot(st.session_state.barplot)
                         st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-                        
+
                         with open(f"Barplot_Conformation1.jpeg", "rb") as file:
                              btn = st.download_button(
                                      label=f"Download Bar PLOT Conformation n°1 ",
@@ -1273,133 +1239,234 @@ if first_checkbox :
                                      data=file,
                                      file_name=f"Scatter_Plot n°1.jpeg",
                                      mime="image/jpeg")
-                    except :
-                        pass
- 
-            
-        except KeyError :
-            st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
-                       f"'{st.session_state.molecule_name}'. Please correct it.")
-        except AttributeError as e :
-            #st.exception(e)
-            pass
-        
+                    else :
+                        try :
+                            with open(f'Conformation1.sdf', "rb") as file:
+                                 btn = st.download_button(
+                                            label="Download your sdf file",
+                                            data=file,
+                                             file_name=f"Conformation n°1.sdf")
 
-###############################################
-#--        BEGINNING THIRDCHECKBOX          --#                                                     
-###############################################
+                            st.pyplot(st.session_state.barplot)
+                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
 
-        if 'sorted_heatmap' not in st.session_state:
-            with st.spinner('Please wait, the sorted heatmap is coming...'):
-                st.session_state.ConformationClass.get_sorted_heatmap(
-                    individuals,
-                    RMSD_Target,
-                    loop = 1,
-                    p = Proportion)
- 
-            if st.session_state.numbers_conformation != 1:
-                temp_options = range(1, st.session_state.numbers_conformation + 1)
-                st.session_state.temp = st.select_slider("You want a sdf file and/or a anlysis plots including molecules in the conformation n°",
-                                                         options=temp_options)
-                st.write(f"The Conformation selected is {st.session_state.temp}")
-                                    
-                st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
-                st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-                
-                if "aspect_plot" not in st.session_state :
-                    st.session_state.aspect_plot = 1.75
-                if "height_plot" not in st.session_state :
-                    st.session_state.height_plot = 18
-                if "size_xlabels" not in st.session_state :
-                    st.session_state.size_xlabels = 25
-                if "size_ylabels" not in st.session_state :
-                    st.session_state.size_ylabels = 15
-                
-                st.session_state.help_paragraph = (
-                    "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
-                    "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
-                    "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
-                    " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
-                
-                settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
-                                                help=st.session_state.help_paragraph)
-                if settings_checkbox :
-                    st.session_state.aspect_plot = st.slider(
-                        'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
-                        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
-                    
-                    st.session_state.height_plot = st.slider(
-                        'Configure the height of the barplot and boxplot', 0, 50, 18,
-                        help="Height (in inches) of each facet.")
-                    
-                    st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
-                    st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
-                
-                if st.button('Prepare your sdf file and build plots'):             
-                    st.session_state.ConformationClass.get_sdf_conformations(
-                        st.session_state.temp,
-                        st.session_state.RMSD_Target_conformation
-                        )
-            else :
-                st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
-                st.session_state.RMSD_Target_conformation = st.slider('You want a sdf file and/or a analysis plots including molecules in the unique predominant conformation with all poses under a RMSD =', 0.0, 15.0, 2.0)
-                
-                if "aspect_plot" not in st.session_state :
-                    st.session_state.aspect_plot = 1.75
-                if "height_plot" not in st.session_state :
-                    st.session_state.height_plot = 18
-                if "size_xlabels" not in st.session_state :
-                    st.session_state.size_xlabels = 25
-                if "size_ylabels" not in st.session_state :
-                    st.session_state.size_ylabels = 15
-                
-                st.session_state.help_paragraph = (
-                    "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
-                    "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
-                    "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
-                    " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
-                
-                settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
-                                                help=st.session_state.help_paragraph)
-                if settings_checkbox :
-                    st.session_state.aspect_plot = st.slider(
-                        'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 2.5,
-                        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
-                    
-                    st.session_state.height_plot = st.slider(
-                        'Configure the height of the barplot and boxplot', 0, 50, 7,
-                        help="Height (in inches) of each facet.")
-                    
-                    st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
-                    st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 25)
-                    
-                
-                if st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.'):             
-                    st.session_state.ConformationClass.get_sdf_conformations(
-                        1, st.session_state.RMSD_Target_conformation)
-                
+                            with open(f"Barplot_Conformation1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Bar PLOT Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Barplot_Conformation n°1.jpeg",
+                                         mime="image/jpeg")
+
+                            st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.box2_plot)
+                            with open(f"Box2_Plot1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Box Plot Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Boxplot2_Conformation n°1.jpeg",
+                                         mime="image/jpeg")
+
+                            st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score}.")
+                            st.pyplot(st.session_state.scatterplot)
+                            with open(f"Scatter_Plot1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Scatter Plot Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Scatter_Plot n°1.jpeg",
+                                         mime="image/jpeg")
+                        except :
+                            pass
+
+
+            except KeyError :
+                st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
+                           f"'{st.session_state.molecule_name}'. Please correct it.")
+            except AttributeError as e :
+                #st.exception(e)
+                pass
+
+
+    ###############################################
+    #--        BEGINNING THIRDCHECKBOX          --#                                                     
+    ###############################################
+
+            if 'sorted_heatmap' not in st.session_state:
+                with st.spinner('Please wait, the sorted heatmap is coming...'):
+                    st.session_state.ConformationClass.get_sorted_heatmap(
+                        individuals,
+                        RMSD_Target,
+                        loop = 1,
+                        p = Proportion)
+
+                if st.session_state.numbers_conformation != 1:
+                    temp_options = range(1, st.session_state.numbers_conformation + 1)
+                    st.session_state.temp = st.select_slider("You want a sdf file and/or a anlysis plots including molecules in the conformation n°",
+                                                             options=temp_options)
+                    st.write(f"The Conformation selected is {st.session_state.temp}")
+
+                    st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
+                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+
+                    if "aspect_plot" not in st.session_state :
+                        st.session_state.aspect_plot = 1.75
+                    if "height_plot" not in st.session_state :
+                        st.session_state.height_plot = 18
+                    if "size_xlabels" not in st.session_state :
+                        st.session_state.size_xlabels = 25
+                    if "size_ylabels" not in st.session_state :
+                        st.session_state.size_ylabels = 15
+
+                    st.session_state.help_paragraph = (
+                        "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
+                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
+                        "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
+                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
+
+                    settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
+                                                    help=st.session_state.help_paragraph)
+                    if settings_checkbox :
+                        st.session_state.aspect_plot = st.slider(
+                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
+                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+
+                        st.session_state.height_plot = st.slider(
+                            'Configure the height of the barplot and boxplot', 0, 50, 18,
+                            help="Height (in inches) of each facet.")
+
+                        st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
+                        st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
+
+                    if st.button('Prepare your sdf file and build plots'):             
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            st.session_state.temp,
+                            st.session_state.RMSD_Target_conformation
+                            )
+                else :
+                    st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
+                    st.session_state.RMSD_Target_conformation = st.slider('You want a sdf file and/or a analysis plots including molecules in the unique predominant conformation with all poses under a RMSD =', 0.0, 15.0, 2.0)
+
+                    if "aspect_plot" not in st.session_state :
+                        st.session_state.aspect_plot = 1.75
+                    if "height_plot" not in st.session_state :
+                        st.session_state.height_plot = 18
+                    if "size_xlabels" not in st.session_state :
+                        st.session_state.size_xlabels = 25
+                    if "size_ylabels" not in st.session_state :
+                        st.session_state.size_ylabels = 15
+
+                    st.session_state.help_paragraph = (
+                        "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
+                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
+                        "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
+                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
+
+                    settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
+                                                    help=st.session_state.help_paragraph)
+                    if settings_checkbox :
+                        st.session_state.aspect_plot = st.slider(
+                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 2.5,
+                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+
+                        st.session_state.height_plot = st.slider(
+                            'Configure the height of the barplot and boxplot', 0, 50, 7,
+                            help="Height (in inches) of each facet.")
+
+                        st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
+                        st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 25)
+
+
+                    if st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.'):             
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            1, st.session_state.RMSD_Target_conformation)
+
+
+        else :
+            if 'numbers_conformation' in st.session_state:
+                del st.session_state.numbers_conformation
+                try :
+                    os.remove('Sorted_Heatmap.jpeg')
+                    os.remove('Histograms_Best_Score.jpeg')
+                    os.remove('Sample_Best_PLPScore_Poses.sdf')
+                    os.remove('Best_PLPScore_Poses.sdf')
+                    for i in range(st.session_state.numbers_conformation):
+                        os.remove(f'Sample_Conformation{i+1}.sdf')
+                        try :
+                            os.remove(f'Conformation{i+1}.sdf')
+                            os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                            os.remove(f'Scatter_Plot{i+1}.jpeg')
+                            os.remove(f'Box2_Plot{i+1}.jpeg')
+                            os.remove(f'Box_Plot{i+1}.jpeg')
+                        except :
+                            pass
+                except :
+                    pass        
+
+            if 'indviduals_deleted' in st.session_state:
+                del st.session_state.indviduals_deleted
+            if 'sorted_heatmap' in st.session_state:
+                del st.session_state.sorted_heatmap
+            if 'predominant_poses' in st.session_state:
+                del st.session_state.predominant_poses
+            if 'df1' in st.session_state:
+                del st.session_state.df1
+            if 'histplot' in st.session_state:
+                del st.session_state.histplot
+            if 'output_liste' in st.session_state:
+                del st.session_state.output_liste 
+            if 'sample_predominant_poses' in st.session_state:
+                del st.session_state.sample_predominant_poses
+            if 'sample_indice_best_score' in st.session_state:
+                del st.session_state.sample_indice_best_score
+            if 'best_PLP_poses' in st.session_state:
+                del st.session_state.best_PLP_poses
+            if 'barplot' in st.session_state:
+                del st.session_state.barplot
+            if 'box2_plot' in st.session_state:
+                del st.session_state.box2_plot
+            if 'scatterplot' in st.session_state:
+                del st.session_state.scatterplot
+
+
 
     else :
+        if 'ConformationClass' in st.session_state:
+            del st.session_state.ConformationClass
+        if 'pdb' in st.session_state:
+            del st.session_state.pdb
+        if 'error_mols' in st.session_state:
+            del st.session_state.error_mols
+        if 'output_name_prefix' in st.session_state:
+            del st.session_state.output_name_prefix        
+        if 'sdf_file' in st.session_state:
+            del st.session_state.sdf_file
+        if 'mols_brut' in st.session_state:
+            del st.session_state.mols_brut
+        if 'molref_stock' in st.session_state:
+            del st.session_state.molref_stock
+        if 'mols' in st.session_state:
+            del st.session_state.mols
+        if 'barplot' in st.session_state:
+            del st.session_state.barplot
         if 'numbers_conformation' in st.session_state:
-            del st.session_state.numbers_conformation
-            try :
-                os.remove('Sorted_Heatmap.jpeg')
-                os.remove('Histograms_Best_Score.jpeg')
-                os.remove('Sample_Best_PLPScore_Poses.sdf')
-                os.remove('Best_PLPScore_Poses.sdf')
-                for i in range(st.session_state.numbers_conformation):
-                    os.remove(f'Sample_Conformation{i+1}.sdf')
-                    try :
-                        os.remove(f'Conformation{i+1}.sdf')
-                        os.remove(f'Barplot_Conformation{i+1}.jpeg')
-                        os.remove(f'Scatter_Plot{i+1}.jpeg')
-                        os.remove(f'Box2_Plot{i+1}.jpeg')
-                        os.remove(f'Box_Plot{i+1}.jpeg')
-                    except :
-                        pass
+            os.remove('Sorted_Heatmap.jpeg')
+            os.remove('Histograms_Best_Score.jpeg')
+            try : 
+                os.remove('pdb_file.pdb')
             except :
-                pass        
-            
+                pass
+            os.remove('Best_PLPScore_Poses.sdf')
+            for i in range(st.session_state.numbers_conformation):
+                os.remove(f'Sample_Conformation{i+1}.sdf')
+                try :
+                    os.remove(f'Conformation{i+1}.sdf')
+                    os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                    os.remove(f'Scatter_Plot{i+1}.jpeg')
+                    os.remove(f'Box2_Plot{i+1}.jpeg')
+                    os.remove(f'Box_Plot{i+1}.jpeg')
+                except :
+                    pass
+
+            del st.session_state.numbers_conformation
         if 'indviduals_deleted' in st.session_state:
             del st.session_state.indviduals_deleted
         if 'sorted_heatmap' in st.session_state:
@@ -1424,69 +1491,3 @@ if first_checkbox :
             del st.session_state.box2_plot
         if 'scatterplot' in st.session_state:
             del st.session_state.scatterplot
-
-
-
-else :
-    if 'ConformationClass' in st.session_state:
-        del st.session_state.ConformationClass
-    if 'pdb' in st.session_state:
-        del st.session_state.pdb
-    if 'error_mols' in st.session_state:
-        del st.session_state.error_mols
-    if 'output_name_prefix' in st.session_state:
-        del st.session_state.output_name_prefix        
-    if 'sdf_file' in st.session_state:
-        del st.session_state.sdf_file
-    if 'mols_brut' in st.session_state:
-        del st.session_state.mols_brut
-    if 'molref_stock' in st.session_state:
-        del st.session_state.molref_stock
-    if 'mols' in st.session_state:
-        del st.session_state.mols
-    if 'barplot' in st.session_state:
-        del st.session_state.barplot
-    if 'numbers_conformation' in st.session_state:
-        os.remove('Sorted_Heatmap.jpeg')
-        os.remove('Histograms_Best_Score.jpeg')
-        try : 
-            os.remove('pdb_file.pdb')
-        except :
-            pass
-        os.remove('Best_PLPScore_Poses.sdf')
-        for i in range(st.session_state.numbers_conformation):
-            os.remove(f'Sample_Conformation{i+1}.sdf')
-            try :
-                os.remove(f'Conformation{i+1}.sdf')
-                os.remove(f'Barplot_Conformation{i+1}.jpeg')
-                os.remove(f'Scatter_Plot{i+1}.jpeg')
-                os.remove(f'Box2_Plot{i+1}.jpeg')
-                os.remove(f'Box_Plot{i+1}.jpeg')
-            except :
-                pass
-                
-        del st.session_state.numbers_conformation
-    if 'indviduals_deleted' in st.session_state:
-        del st.session_state.indviduals_deleted
-    if 'sorted_heatmap' in st.session_state:
-        del st.session_state.sorted_heatmap
-    if 'predominant_poses' in st.session_state:
-        del st.session_state.predominant_poses
-    if 'df1' in st.session_state:
-        del st.session_state.df1
-    if 'histplot' in st.session_state:
-        del st.session_state.histplot
-    if 'output_liste' in st.session_state:
-        del st.session_state.output_liste 
-    if 'sample_predominant_poses' in st.session_state:
-        del st.session_state.sample_predominant_poses
-    if 'sample_indice_best_score' in st.session_state:
-        del st.session_state.sample_indice_best_score
-    if 'best_PLP_poses' in st.session_state:
-        del st.session_state.best_PLP_poses
-    if 'barplot' in st.session_state:
-        del st.session_state.barplot
-    if 'box2_plot' in st.session_state:
-        del st.session_state.box2_plot
-    if 'scatterplot' in st.session_state:
-        del st.session_state.scatterplot
