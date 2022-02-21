@@ -349,7 +349,9 @@ def get_barsplot(k) :
 
 
 #################################################################################################################
-    
+
+def main():
+
 st.header('Chemotools ! V1.0')
 
 st.markdown('Welcome to Chemotools first version ! This version is compatible with the docking results files from the GOLD software'
