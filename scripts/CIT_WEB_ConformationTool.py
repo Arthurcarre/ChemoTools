@@ -12,7 +12,6 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
-#from pymol import cmd
 from stmol import showmol
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw 
