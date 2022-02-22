@@ -59,7 +59,7 @@ class ConformationTool :
         error_mols = []
         for mol in self.mols_brut :
             try :
-                CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(mol_benchmark))
+                CalcRMS(GetScaffoldForMol(mol_benchmark), GetScaffoldForMol(mol))
                 mols.append(mol)
             except RuntimeError as e :
                 error_mols.append(mol)
