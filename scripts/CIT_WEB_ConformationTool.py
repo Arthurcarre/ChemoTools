@@ -958,8 +958,8 @@ def main():
                                 help='If you want to change this setting during the program, make sure the box below'
                                 ' is unchecked!')
 
-        Proportion = st.slider('Minimum size of the sample defining a conformation. Default proportion = 0.10',
-                             0.0, 1.0, 0.10,
+        Proportion = st.slider('Minimum size of the sample defining a conformation. Default proportion = 0.05',
+                             0.0, 1.0, 0.05,
                                help=('This setting define the minimum proportion (value between 0 and 1) of individuals'
                                      ' in a group within the sample to consider that group large enough to be'
                                      ' representative of a full conformation.'))
