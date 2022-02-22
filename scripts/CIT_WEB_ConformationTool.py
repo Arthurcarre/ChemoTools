@@ -476,7 +476,7 @@ class ConformationTool :
                     if RMSD < 4 :
                         c += 1
                 ax.hist(sdf_to_hist, bins =100, label = "Conformation n°1") #Create an histogram to see the distribution of the RMSD of the sample
-                ax[z].set(xlim(-0.3, 15)
+                ax.set(xlim(-0.3, 15))
                 ax.axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
                 ax.annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
                 ax.axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
@@ -498,7 +498,7 @@ class ConformationTool :
                         if i < 4 :
                             c += 1
                     ax[z].hist(group, bins =100, label =f"Conformation n°{z+1}") #Create an histogram to see the distribution of the RMSD of the sample
-                    ax[z].set(xlim(-0.3, 15)
+                    ax[z].set(xlim(-0.3, 15))
                     ax[z].axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
                     ax[z].annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
                     ax[z].axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
