@@ -695,7 +695,7 @@ class ConformationTool :
         g.fig.savefig(f"Barplot_Conformation{k}.jpeg", dpi=300)
         st.session_state.barplot = g
         
-        # BOX PLOT
+        # Preparation
         file_synt = (mol for name in list(table.index) for mol in file_in if mol.GetProp(molecule_name) == name)
         
         index2 = []
@@ -732,8 +732,8 @@ class ConformationTool :
         g.set_axis_labels(self.score, "")
         g.set_yticklabels(fontsize = size_ylabels)
         g.set_xticklabels(fontsize = size_xlabels)
-        g.fig.savefig(f"Box2_Plot{k}.jpeg", dpi=300)
-        st.session_state.box2_plot = g
+        g.fig.savefig(f"Box_Plot{k}.jpeg", dpi=300)
+        st.session_state.box_plot = g
 
         #SCATTERPLOT
         
@@ -1086,8 +1086,8 @@ def main():
 
                         if "barplot" in st.session_state :
                             del st.session_state.barplot
-                        if "box2_plot" in st.session_state :
-                            del st.session_state.box2_plot
+                        if "box_plot" in st.session_state :
+                            del st.session_state.box_plot
                         if "scatterplot" in st.session_state :
                             del st.session_state.scatterplot 
 
@@ -1110,8 +1110,8 @@ def main():
                                      mime="image/jpeg")
 
                         st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                        st.pyplot(st.session_state.box2_plot)
-                        with open(f"Box2_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                        st.pyplot(st.session_state.box_plot)
+                        with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
                              btn = st.download_button(
                                      label=f"Download Box PLOT Conformation n°{st.session_state.temp} ",
                                      data=file,
@@ -1144,8 +1144,8 @@ def main():
                                          mime="image/jpeg")
 
                             st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                            st.pyplot(st.session_state.box2_plot)
-                            with open(f"Box2_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                            st.pyplot(st.session_state.box_plot)
+                            with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
                                  btn = st.download_button(
                                          label=f"Download Box Plot Conformation n°{st.session_state.temp} ",
                                          data=file,
@@ -1200,8 +1200,8 @@ def main():
 
                         if "barplot" in st.session_state :
                             del st.session_state.barplot
-                        if "box2_plot" in st.session_state :
-                            del st.session_state.box2_plot
+                        if "box_plot" in st.session_state :
+                            del st.session_state.box_plot
                         if "scatterplot" in st.session_state :
                             del st.session_state.scatterplot 
 
@@ -1225,8 +1225,8 @@ def main():
                                      mime="image/jpeg")
 
                         st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                        st.pyplot(st.session_state.box2_plot)
-                        with open(f"Box2_Plot1.jpeg", "rb") as file:
+                        st.pyplot(st.session_state.box_plot)
+                        with open(f"Box_Plot1.jpeg", "rb") as file:
                              btn = st.download_button(
                                      label=f"Download Box Plot Conformation n°1 ",
                                      data=file,
@@ -1260,8 +1260,8 @@ def main():
                                          mime="image/jpeg")
 
                             st.write(f"Boxplot built following the descending order of the {st.session_state.score}.")
-                            st.pyplot(st.session_state.box2_plot)
-                            with open(f"Box2_Plot1.jpeg", "rb") as file:
+                            st.pyplot(st.session_state.box_plot)
+                            with open(f"Box_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
                                          label=f"Download Box Plot Conformation n°1 ",
                                          data=file,
@@ -1396,7 +1396,6 @@ def main():
                             os.remove(f'Conformation{i+1}.sdf')
                             os.remove(f'Barplot_Conformation{i+1}.jpeg')
                             os.remove(f'Scatter_Plot{i+1}.jpeg')
-                            os.remove(f'Box2_Plot{i+1}.jpeg')
                             os.remove(f'Box_Plot{i+1}.jpeg')
                         except :
                             pass
@@ -1423,8 +1422,8 @@ def main():
                 del st.session_state.best_PLP_poses
             if 'barplot' in st.session_state:
                 del st.session_state.barplot
-            if 'box2_plot' in st.session_state:
-                del st.session_state.box2_plot
+            if 'box_plot' in st.session_state:
+                del st.session_state.box_plot
             if 'scatterplot' in st.session_state:
                 del st.session_state.scatterplot
 
@@ -1463,7 +1462,6 @@ def main():
                     os.remove(f'Conformation{i+1}.sdf')
                     os.remove(f'Barplot_Conformation{i+1}.jpeg')
                     os.remove(f'Scatter_Plot{i+1}.jpeg')
-                    os.remove(f'Box2_Plot{i+1}.jpeg')
                     os.remove(f'Box_Plot{i+1}.jpeg')
                 except :
                     pass
@@ -1489,7 +1487,7 @@ def main():
             del st.session_state.best_PLP_poses
         if 'barplot' in st.session_state:
             del st.session_state.barplot
-        if 'box2_plot' in st.session_state:
-            del st.session_state.box2_plot
+        if 'box_plot' in st.session_state:
+            del st.session_state.box_plot
         if 'scatterplot' in st.session_state:
             del st.session_state.scatterplot
