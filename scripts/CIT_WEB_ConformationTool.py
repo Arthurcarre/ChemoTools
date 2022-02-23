@@ -1047,7 +1047,7 @@ def main():
                 if st.session_state.numbers_conformation != 1 :
                     temp_options = range(1, st.session_state.numbers_conformation + 1)
                     st.session_state.temp = st.select_slider("You want a sdf file or a barplot including molecules in the conformation n°",
-                                                             options=temp_options)
+                                                             options=temp_options, value = st.session_state.temp)
                     st.write(f"The Conformation selected is {st.session_state.temp}")
 
                     st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
