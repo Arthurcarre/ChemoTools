@@ -60,6 +60,7 @@ class ConformationTool :
         for mol in self.mols_brut :
             try :
                 CalcRMS(GetScaffoldForMol(mol_benchmark), GetScaffoldForMol(mol))
+                CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(mol_benchmark))
                 mols.append(mol)
             except RuntimeError as e :
                 error_mols.append(mol)
@@ -1046,7 +1047,7 @@ def main():
 
                 if st.session_state.numbers_conformation != 1 :
                     temp_options = range(1, st.session_state.numbers_conformation + 1)
-                    st.session_state.temp = st.select_slider("You want a sdf file or a barplot including molecules in the conformation n°",
+                    st.session_state.temp = st.select_slider("You want a sdf file or plots including molecules in the conformation n°",
                                                              options=temp_options, value = st.session_state.temp)
                     st.write(f"The Conformation selected is {st.session_state.temp}")
 
@@ -1057,11 +1058,11 @@ def main():
                                                     help=st.session_state.help_paragraph)
                     if settings_checkbox :
                         st.session_state.aspect_plot = st.slider(
-                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
+                            'Configure the aspect ratio of the plots', 0.0, 10.0, 1.75,
                             help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
 
                         st.session_state.height_plot = st.slider(
-                            'Configure the height of the barplot and boxplot', 0, 50, 18,
+                            'Configure the height of the plots', 0, 50, 18,
                             help="Height (in inches) of each facet.")
 
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
@@ -1175,11 +1176,11 @@ def main():
                                                     help=st.session_state.help_paragraph)
                     if settings_checkbox :
                         st.session_state.aspect_plot = st.slider(
-                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
+                            'Configure the aspect ratio of the plts', 0.0, 10.0, 1.75,
                             help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
 
                         st.session_state.height_plot = st.slider(
-                            'Configure the height of the barplot and boxplot', 0, 50, 18,
+                            'Configure the height of the plots', 0, 50, 18,
                             help="Height (in inches) of each facet.")
 
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
@@ -1327,11 +1328,11 @@ def main():
                                                     help=st.session_state.help_paragraph)
                     if settings_checkbox :
                         st.session_state.aspect_plot = st.slider(
-                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 1.75,
+                            'Configure the aspect ratio of the plots', 0.0, 10.0, 1.75,
                             help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
 
                         st.session_state.height_plot = st.slider(
-                            'Configure the height of the barplot and boxplot', 0, 50, 18,
+                            'Configure the height of the plots', 0, 50, 18,
                             help="Height (in inches) of each facet.")
 
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
@@ -1365,11 +1366,11 @@ def main():
                                                     help=st.session_state.help_paragraph)
                     if settings_checkbox :
                         st.session_state.aspect_plot = st.slider(
-                            'Configure the aspect ratio of the barplot and boxplot', 0.0, 10.0, 2.5,
+                            'Configure the aspect ratio of the plots', 0.0, 10.0, 2.5,
                             help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
 
                         st.session_state.height_plot = st.slider(
-                            'Configure the height of the barplot and boxplot', 0, 50, 7,
+                            'Configure the height of the plots', 0, 50, 7,
                             help="Height (in inches) of each facet.")
 
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
