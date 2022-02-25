@@ -102,7 +102,7 @@ class ConformationTool :
         st.pyplot(fig)
         st.session_state.heatmap = fig
     
-    def get_sorted_heatmap(self, individuals = 200, RMSDthreshold = 2.0, loop = 1, p = 0.10) :
+    def get_sorted_heatmap(self, individuals = 200, RMSDthreshold = 2.0, loop = 3, p = 0.10) :
         """
         -- DESCRIPTION --
         This function aims to build a heatmap where the individuals constituting the sample have been previously sorted
