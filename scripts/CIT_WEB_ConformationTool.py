@@ -430,7 +430,7 @@ class ConformationTool :
             
             columns = list(range(len(input_list)))
             for i in columns :
-                columns[i] = f"Pose n°{i+1}"
+                columns[i] = f"Conformation n°{i+1}"
 
             index = list(range(len(input_list)))
             for i in index :
