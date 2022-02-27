@@ -785,7 +785,7 @@ def main():
     st.header('ConformationTool !')
 
     st.markdown('Welcome to ConformationTool ! A demonstration of the use of this application is available on the following link:'
-                'https://www.youtube.com/watch?v=4XDvFw_R3Eo \n')
+                ' https://www.youtube.com/watch?v=4XDvFw_R3Eo \n')
 
     #SDF FILE SECTION#
     sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
