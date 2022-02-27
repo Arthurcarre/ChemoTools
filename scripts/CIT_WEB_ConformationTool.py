@@ -784,8 +784,8 @@ def main():
     
     st.header('ConformationTool !')
 
-    st.markdown('Welcome to ConformationTool ! This version is compatible with the docking results files from the GOLD software'
-                ' using the scoring functions: ChemPLP Score and GoldScore.\n')
+    st.markdown('Welcome to ConformationTool ! A demonstration of the use of this application is available on the following link:'
+                'https://www.youtube.com/watch?v=4XDvFw_R3Eo \n')
 
     #SDF FILE SECTION#
     sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
@@ -794,9 +794,9 @@ def main():
         molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
                           " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
         st.session_state.molecule_name = molecule_name
-        score = st.selectbox(
+        score = st.text_input(
              'What is the scoring function used in your sdf file ?',
-             ('Gold.PLP.Fitness', 'Gold.Goldscore.Fitness'))
+             'Gold.PLP.Fitness')
         st.session_state.score = score
         if 'sdf_file_stock' not in st.session_state :
             st.session_state.sdf_file_stock = sdf
