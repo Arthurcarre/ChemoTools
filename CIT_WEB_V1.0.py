@@ -27,7 +27,7 @@ def main():
 
     logo = st.sidebar.image("img/pmu_logo.jpg",
                             caption = "CIT was developed in cooperation with the Institute of Pharmacy of the Paracelsus Medical"
-                            " Private University Salzburg (Austria) and the the Institute of Pharmacy of the University of Angers"
+                            " Private University Salzburg (Austria) and the Institute of Pharmacy of the University of Angers"
                             " (France).")
 
     page = st.sidebar.selectbox(label = "Select a ChemoInfoTool:",
