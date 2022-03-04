@@ -2,5 +2,5 @@ name: ConformationTool
 channels:
   - conda-forge
 dependencies:
-  - streamlit=1.2.0
+  - streamlit >= 0.73
 prefix: /opt/anaconda3/envs/ConformationTool
