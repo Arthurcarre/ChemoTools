@@ -3,6 +3,4 @@ channels:
   - conda-forge
 dependencies:
   - streamlit=1.2.0
-  - pip:
-    - stmol==0.0.7
 prefix: /opt/anaconda3/envs/ConformationTool
