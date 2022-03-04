@@ -2,14 +2,6 @@ name: ConformationTool
 channels:
   - conda-forge
 dependencies:
-  - numpy=1.20.1
-  - matplotlib=3.3.4
-  - pandas=1.2.4
-  - pip=22.0.3
-  - py3dmol=1.8.0
-  - python=3.7.12
-  - rdkit=2021.09.4
-  - seaborn=0.11.1
   - streamlit=1.2.0
   - pip:
     - stmol==0.0.7
