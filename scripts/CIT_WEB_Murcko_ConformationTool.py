@@ -782,7 +782,7 @@ def render_mol(xyz):
 
 def main():
     
-    st.header('ConformationTool !')
+    st.header('Murcko ConformationTool !')
 
     st.markdown('Welcome to ConformationTool ! This version is compatible with the docking results files from the GOLD software'
                 ' using the scoring functions: ChemPLP Score and GoldScore.\n')
