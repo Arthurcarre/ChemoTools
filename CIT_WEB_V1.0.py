@@ -50,9 +50,9 @@ def main():
     
     logo2 = st.sidebar.image("img/ua_logo.jpg")
     
-    if page == "CIT: ConformationTool":
+    if page == "CIT: MCS ConformationTool":
         CIT_WEB_MCS_ConformationTool.main()
-    elif page == "CIT: Coming Soon":
+    elif page == "CIT: Murcko ConformationTool":
         CIT_WEB_Murcko_ConformationTool.main()
     elif page == "CIT: Coming Soon":
         Coming_Soon.main()
