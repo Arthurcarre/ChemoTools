@@ -7,7 +7,7 @@
 """
 
 import streamlit as st
-from scripts import CIT_WEB_ConformationTool, Coming_Soon
+from scripts import CIT_WEB_MCS_ConformationTool, CIT_WEB_Murcko_ConformationTool, Coming_Soon
 
 def main():
 
@@ -27,8 +27,8 @@ def main():
 
     logo = st.sidebar.image("img/pmu_logo.jpg",
                             caption = "CIT was developed in cooperation with the Institute of Pharmacy of the Paracelsus Medical"
-                            " Private University Salzburg (Austria) and the Institute of Pharmacy of the University of Angers"
-                            " (France).")
+                            " Private University Salzburg (Austria) and the the Institute of Pharmacy of the University of Angers"
+                            "(France).")
 
     page = st.sidebar.selectbox(label = "Select a ChemoInfoTool:",
                                 options = pages,
@@ -38,8 +38,8 @@ def main():
 
     doc_str = "**CIT** - short for **Chemo-Informatic Tools** - is a set of tools for chemo-informatics in order to manipulate or"
     doc_str += "analyse chemo-informatics data. To get started make sure to read the documentation in the [PIA Wiki](https://github.com/Arthurcarre/ChemoTools/wiki)."
-    doc_str += " For general help, questions, suggestions or any other feedback please refer "
-    doc_str += "to the [GitHub repository](https://github.com/Arthurcarre/ChemoTools) or contact me directly!"
+    doc_str += "For general help, questions, suggestions or any other feedback please refer "
+    doc_str += "to the [GitHub repository](https://github.com/Arthurcarre/ChemoTools/discussions) or contact us directly!"
     doc = st.sidebar.markdown(doc_str)
 
     contact_str = "**Contact:** [Arthur Carré](mailto:arthur.carre@icloud.com)"
@@ -51,11 +51,14 @@ def main():
     logo2 = st.sidebar.image("img/ua_logo.jpg")
     
     if page == "CIT: ConformationTool":
-        CIT_WEB_ConformationTool.main()
+        CIT_WEB_MCS_ConformationTool.main()
+    elif page == "CIT: Coming Soon":
+        CIT_WEB_Murcko_ConformationTool.main()
     elif page == "CIT: Coming Soon":
         Coming_Soon.main()
     else:
-        CIT_WEB_ConformationTool.main()
+        CIT_WEB_MCS_ConformationTool.main()
 
 if __name__ == "__main__":
     main()
+
