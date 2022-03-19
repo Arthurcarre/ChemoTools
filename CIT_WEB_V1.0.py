@@ -20,7 +20,7 @@ def main():
                                      "Report a bug": "https://github.com/Arthurcarre/ChemoTools/issues"}
                        )
 
-    pages = ("CIT: ConformationTool", "CIT: Coming Soon")
+    pages = ("CIT: MCS ConformationTool", "CIT: Murcko ConformationTool", "CIT: Coming Soon")
 
     title = st.sidebar.title("ChemoInfoTools !")
 
