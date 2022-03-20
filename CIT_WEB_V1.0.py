@@ -27,8 +27,9 @@ def main():
 
     logo = st.sidebar.image("img/pmu_logo.jpg",
                             caption = "CIT was developed in cooperation with the Institute of Pharmacy of the Paracelsus Medical"
-                            " Private University Salzburg (Austria) and the the Institute of Pharmacy of the University of Angers"
-                            "(France).")
+                            " Private University Salzburg (Austria) and the Institute of Pharmacy of the University of Angers"
+                            " (France).")
+    logo2 = st.sidebar.image("img/ua_logo.jpg")
 
     page = st.sidebar.selectbox(label = "Select a ChemoInfoTool:",
                                 options = pages,
@@ -48,8 +49,6 @@ def main():
     license_str = "**License:** [MIT License](https://github.com/Arthurcarre/ChemoTools/blob/main/LICENSE.md)"
     license = st.sidebar.markdown(license_str)
     
-    logo2 = st.sidebar.image("img/ua_logo.jpg")
-    
     if page == "CIT: MCS ConformationTool":
         CIT_WEB_MCS_ConformationTool.main()
     elif page == "CIT: Murcko ConformationTool":
@@ -61,4 +60,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
