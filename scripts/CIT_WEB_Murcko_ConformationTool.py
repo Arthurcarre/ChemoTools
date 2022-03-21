@@ -783,9 +783,9 @@ def render_mol(xyz):
 def main():
     
     st.header('Murcko ConformationTool !')
-
-    st.markdown('Welcome to ConformationTool ! This version is compatible with the docking results files from the GOLD software'
-                ' using the scoring functions: ChemPLP Score and GoldScore.\n')
+    
+    st.markdown('Welcome to Murcko ConformationTool ! Here, the processing and analysis of the docking simulation'
+                ' results is done through the Murcko Scaffold [DOI: 10.1021/jm9602928].')
 
     #SDF FILE SECTION#
     sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
