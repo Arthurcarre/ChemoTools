@@ -90,7 +90,7 @@ class ConformationTool :
         del smiles_unique_molecules
         self.unique_molecules = unique_molecules
 
-    def get_MCS_SDF(self, completeRingsOnly=False, percentage=100):
+    def get_MCS_SDF(self, ringMatchesRingOnly=False, percentage=100):
         """
         -- DESCRIPTION --
         This function allows to check, from a reference molecule (whose pathway will be provided),
@@ -101,7 +101,7 @@ class ConformationTool :
         """
         
         mcs = FindMCS(self.unique_molecules, 
-                      completeRingsOnly=completeRingsOnly, 
+                      ringMatchesRingOnly=ringMatchesRingOnly, 
                       threshold=percentage / 100.0)
         del self.unique_molecules
         fusion = Chem.MolFromSmarts(mcs.smartsString)
@@ -155,8 +155,14 @@ class ConformationTool :
         array = np.ones(shape=(len(sample),len(sample)))
         for i, indivduali in enumerate(sample) :
             for j, indivdualj in enumerate(sample) :
-                array[i, j] = CalcRMS(self.MCS_mols[indivduali],
-                                      self.MCS_mols[indivdualj])
+                try :
+                    array[i, j] = CalcRMS(self.MCS_mols[indivduali],
+                                          self.MCS_mols[indivdualj])
+        
+                except RuntimeError :
+                    array[i, j] = CalcRMS(self.MCS_mols[indivdualj],
+                                          self.MCS_mols[indivduali])
+                    
 
         df = pd.DataFrame(
             array, index=list(range(len(sample))), columns=list(range(len(sample))))
@@ -206,8 +212,13 @@ class ConformationTool :
             for individual in sample :
                 subliste = []
                 for i in remove_list :
-                    if CalcRMS(self.MCS_mols[individual],
-                               self.MCS_mols[sample[i]]) <  RMSDthreshold :
+                    try :
+                        result = CalcRMS(self.MCS_mols[individual],
+                                         self.MCS_mols[sample[i]])
+                    except RuntimeError:
+                        result = CalcRMS(self.MCS_mols[sample[i]],
+                                         self.MCS_mols[individual])                       
+                    if result <  RMSDthreshold :
                         subliste.append(i)
                         remove_list.remove(i)
                 output_lists.append(subliste[:])
@@ -242,13 +253,21 @@ class ConformationTool :
                         if len(groupej) <= len(groupei):
                             for k in groupej :
                                 n += 1
-                                RMSD.append(CalcRMS(self.MCS_mols[self.sample[k]],
-                                                    self.MCS_mols[self.sample[input_list[i][n]]]))
+                                try:
+                                    RMSD.append(CalcRMS(self.MCS_mols[self.sample[k]],
+                                                        self.MCS_mols[self.sample[input_list[i][n]]]))
+                                except RuntimeError:
+                                    RMSD.append(CalcRMS(self.MCS_mols[self.sample[input_list[i][n]]],
+                                                        self.MCS_mols[self.sample[k]]))
                         if len(groupej) > len(groupei):
                             for k in groupei :
                                 n += 1
-                                RMSD.append(CalcRMS(self.MCS_mols[self.sample[k]],
-                                                    self.MCS_mols[self.sample[input_list[j][n]]]))
+                                try:
+                                    RMSD.append(CalcRMS(self.MCS_mols[self.sample[k]],
+                                                        self.MCS_mols[self.sample[input_list[j][n]]]))
+                                except RuntimeError:
+                                    RMSD.append(CalcRMS(self.MCS_mols[self.sample[input_list[j][n]]],
+                                                        self.MCS_mols[self.sample[k]]))
                     if i != j :
                         #print(f"La moyenne des RMSD entre le groupe {i} et le groupe {j} est de {np.mean(RMSD)}")
                         if np.mean(RMSD) < RMSDthreshold :
@@ -331,6 +350,9 @@ class ConformationTool :
                 try :
                     r = CalcRMS(self.MCS_mols[self.sample[n]],
                                 self.MCS_mols[self.sample[liste1[i+1]]])
+                except RuntimeError :
+                    r = CalcRMS(self.MCS_mols[self.sample[liste1[i+1]]],
+                                self.MCS_mols[self.sample[n]])
                 except IndexError :
                     pass
                 if r > 3 :
@@ -384,7 +406,7 @@ class ConformationTool :
             st.session_state.predominant_poses = predominant_poses
 
             for i, predominant_pose in enumerate(predominant_poses) :
-                print(f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(self.sample)*100:.1f}", 
+                print(f"The predominant conformation n°{i+1} represents {len(predominant_pose)/len(self.sample)*100:.1f}", 
                       f"% of the sample, i.e. {len(predominant_pose)} on {len(self.sample)} poses in total.")
             return predominant_poses
 
@@ -456,8 +478,11 @@ class ConformationTool :
                 subliste = []
                 with Chem.SDWriter(f"À_supprimer{i+1}.sdf") as w:
                     for j, mol in enumerate(self.MCS_mols) :
-                        if CalcRMS(self.MCS_mols[self.sample[sample_predominant_poses[i][indice]]],
-                                   mol) < 2 :
+                        try:
+                            result = CalcRMS(self.MCS_mols[self.sample[sample_predominant_poses[i][indice]]], mol)
+                        except RuntimeError:
+                            result = CalcRMS(mol, self.MCS_mols[self.sample[sample_predominant_poses[i][indice]]])
+                        if result < 2 :
                             subliste.append(self.mols[j])
                             w.write(self.mols[j]) 
                     copy1 = copy.deepcopy(subliste)
@@ -507,16 +532,20 @@ class ConformationTool :
                     return moledit.GetMol()
                 mcsmol1 = subfunction(mol1)
                 mcsmol2 = subfunction(mol2)
-                return CalcRMS(mcsmol1, mcsmol2)
+                try :
+                    result = CalcRMS(mcsmol1, mcsmol2)
+                except RuntimeError:
+                    result = CalcRMS(mcsmol2, mcsmol1)
+                return result
             
             preprocess_list = preprocess(input_list)
             columns = list(range(len(preprocess_list)))
             for i in columns :
-                columns[i] = f"Pose n°{i+1}"
+                columns[i] = f"Conformation n°{i+1}"
 
             index = list(range(len(preprocess_list)))
             for i in index :
-                index[i] = f"Pose n°{i+1}"
+                index[i] = f"Conformation n°{i+1}"
             
             array = np.ones(shape=(len(preprocess_list),len(preprocess_list)))
 
@@ -546,7 +575,11 @@ class ConformationTool :
             sns.set_context('paper')
             
             if len(input_list) == 1 :
-                sdf_to_hist = [CalcRMS(Get_MCS_Fusion(self, input_list[0]), (mol)) for mol in self.MCS_mols]
+                try :
+                    sdf_to_hist = [CalcRMS(Get_MCS_Fusion(self, input_list[0]), mol) for mol in self.MCS_mols]
+                except RuntimeError:
+                    sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
+                
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(input_list)*9))
                 a, b, c = 0, 0, 0
                 for RMSD in sdf_to_hist : 
@@ -565,8 +598,12 @@ class ConformationTool :
                 ax.annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
                 ax.legend(loc='upper left', shadow=True, markerfirst = False)
             else :
-                sdf_to_hist = ([CalcRMS(Get_MCS_Fusion(self, representative_conf),
-                                        mol) for mol in self.MCS_mols] for representative_conf in input_list)
+                try:
+                    sdf_to_hist = ([CalcRMS(Get_MCS_Fusion(self, representative_conf),
+                                            mol) for mol in self.MCS_mols] for representative_conf in input_list)
+                except RuntimeError:
+                    sdf_to_hist = ([CalcRMS(mol,Get_MCS_Fusion(self, representative_conf)) for mol in self.MCS_mols] for representative_conf in input_list)
+                
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(best_PLP_poses)*9))
                 for z, group in enumerate(sdf_to_hist) :
                     a, b, c = 0, 0, 0
@@ -577,7 +614,7 @@ class ConformationTool :
                             b += 1
                         if i < 4 :
                             c += 1
-                    ax[z].hist(group, bins =100, label =f"Conformation n°{z+1}") #Create an histogram to see the distribution of the RMSD of the sample
+                    ax[z].hist(group, bins =100, label =f"Conformation n°{z+1}")
                     ax[z].axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
                     ax[z].annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
                     ax[z].axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
@@ -606,8 +643,13 @@ class ConformationTool :
         
         for i, indivduali in enumerate(finallyliste) :
             for j, indivdualj in enumerate(finallyliste) :
-                array[i, j] = CalcRMS(self.MCS_mols[self.sample[indivduali]],
-                                      self.MCS_mols[self.sample[indivdualj]])
+                try:
+                    array[i, j] = CalcRMS(self.MCS_mols[self.sample[indivduali]],
+                                          self.MCS_mols[self.sample[indivdualj]])
+                except RuntimeError:
+                    array[i, j] = CalcRMS(self.MCS_mols[self.sample[indivdualj]],
+                                          self.MCS_mols[self.sample[indivduali]])
+
 
         data_frame = pd.DataFrame(array, index=finallyliste,
                                   columns=finallyliste)
@@ -694,8 +736,11 @@ class ConformationTool :
         """
         with Chem.SDWriter(f'Conformation{k}.sdf') as w:
             for j, mol in enumerate(self.MCS_mols) :
-                if CalcRMS(Get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]),
-                           mol) < float(RMSDtarget) :
+                try:
+                    result = CalcRMS(Get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]), mol)
+                except RuntimeError:
+                    result = CalcRMS(mol, Get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]))
+                if result < float(RMSDtarget) :
                     w.write(self.mols[j])
         w.close()
     
@@ -854,8 +899,8 @@ def main():
 
     st.header('MCS ConformationTool !')
 
-    st.markdown('Welcome to ConformationTool ! A demonstration of the use of this application is available on the following link:'
-                ' https://www.youtube.com/watch?v=4XDvFw_R3Eo \n')
+    st.markdown('Welcome to MCS ConformationTool ! Here, the processing and analysis of the docking simulation'
+                ' results is done through the Maximum Common Substructure (MCS).')
 
     #SDF FILE SECTION#
     sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
@@ -893,6 +938,20 @@ def main():
             pdb_file.write(pdb.getbuffer())
 
     #PERCENTAGE PARAMETER SECTION#
+
+    help_ringMatchesRingOnly = ('If "no", depending on the molecules used, it is possible that the RMSD cannot be'
+                                ' calculated afterwards. Yes" may solve this problem in return for having a less'
+                                ' relevant RMSD.')
+
+    ringMatchesRingOnly = st.radio(
+         "Should the Maximum Common Substructure take into account uniquely complete rings ?",
+         ('No', 'Yes'), help=help_ringMatchesRingOnly)
+
+    if  ringMatchesRingOnly == "Yes":
+        st.session_state.ringMatchesRingOnly = True
+    else:
+        st.session_state.ringMatchesRingOnly = False
+
     help_percentage = ('In case you consider that the maximum common substructure is not enough to be effective,'
                        ' you can lower this parameter. This will result in removing from your sdf those molecules'
                        ' that share THE LEAST common substructure with the other molecules.')
@@ -919,7 +978,8 @@ def main():
                     st.session_state.ConformationClass = ConformationTool(st.session_state.sdf_file,
                                                                           st.session_state.score)
                 if 'error_mols' not in st.session_state:
-                    st.session_state.ConformationClass.get_MCS_SDF(percentage = st.session_state.percentage)
+                    st.session_state.ConformationClass.get_MCS_SDF(percentage = st.session_state.percentage,
+                                                                   ringMatchesRingOnly=st.session_state.ringMatchesRingOnly)
 
             except AttributeError:
                 st.error("OOPS ! Did you forget to upload your SDF file ?")
@@ -1057,7 +1117,7 @@ def main():
 
                 for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
                     st.write(
-                        f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                        f"The predominant conformation n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
                         f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
 
                 st.write("\nIn order to check that each group is different from each other, a table taking " 
