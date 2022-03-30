@@ -16,7 +16,7 @@ def main():
                        page_icon = ":test_tube:",
                        layout = "centered",
                        initial_sidebar_state = "expanded",
-                       menu_items = {"Get Help": "https://github.com/Arthurcarre/ChemoTools/discussions",
+                       menu_items = {"Get Help": "https://github.com/Arthurcarre/ChemoTools",
                                      "Report a bug": "https://github.com/Arthurcarre/ChemoTools/issues"}
                        )
 
