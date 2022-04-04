@@ -707,7 +707,7 @@ class ConformationTool :
                             data=file,
                             file_name="Best_Score_Poses.sdf")
             
-            get_data_frame_best_poses(best_PLP_poses)
+            get_data_frame_best_poses(best_PLP_poses_preprocessed)
             
             get_histogramme_sample_bestPLP(best_PLP_poses_preprocessed)
             self.best_PLP_poses = best_PLP_poses
