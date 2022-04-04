@@ -29,7 +29,7 @@ def Get_MCS_Fusion(self, mol):
     return moledit.GetMol() 
 
 def preprocess(liste_mols):
-    mol_withoutHs = (Chem.AddHs(mol) for mol in liste_mols)
+    mol_withoutHs = (Chem.RemoveHs(mol) for mol in liste_mols)
     with Chem.SDWriter('out.sdf') as w:
         for mol in mol_withoutHs:
             w.write(mol)
