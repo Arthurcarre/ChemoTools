@@ -40,7 +40,7 @@ def main():
     doc_str = "**CIT** - short for **Chemo-Informatic Tools** - is a set of tools for chemo-informatics in order to manipulate or"
     doc_str += "analyse chemo-informatics data. To get started make sure to read the documentation in the [PIA Wiki](https://github.com/Arthurcarre/ChemoTools/wiki)."
     doc_str += "For general help, questions, suggestions or any other feedback please refer "
-    doc_str += "to the [GitHub repository](https://github.com/Arthurcarre/ChemoTools/discussions) or contact us directly!"
+    doc_str += "to the [GitHub repository](https://github.com/Arthurcarre/ChemoTools) or contact us directly!"
     doc = st.sidebar.markdown(doc_str)
 
     contact_str = "**Contact:** [Arthur Carré](mailto:arthur.carre@icloud.com)"
