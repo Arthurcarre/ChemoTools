@@ -519,7 +519,7 @@ class ConformationTool :
             """
             
             def MCS_RMSD(mol1, mol2):
-                mcs = FindMCS([mol1, mol2], completeRingsOnly=False)
+                mcs = FindMCS([mol1, mol2], completeRingsOnly=True)
                 fusion = Chem.MolFromSmarts(mcs.smartsString)
                 def subfunction(mol):
                     moledit = Chem.EditableMol(mol)
