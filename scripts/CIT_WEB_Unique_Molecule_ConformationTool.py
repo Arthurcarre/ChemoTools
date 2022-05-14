@@ -694,10 +694,10 @@ def main():
         except :
             pass
 
-        if st.session_state.mols > 200 :
+        if st.session_state.mols_brut > 200 :
             size_sample = 200
         else :
-            size_sample = st.session_state.mols
+            size_sample = st.session_state.mols_brut
         individuals = st.slider('Select the size of your sample. Default size of sample = 200', 0, 500, size_sample,
                                 help='If you want to change this setting during the program, make sure the box below is unchecked!')
 
