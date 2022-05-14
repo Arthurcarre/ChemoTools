@@ -818,9 +818,6 @@ def main():
                     st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
                     st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
 
-                    else :
-                        pass
-
                     if st.button('Prepare your sdf file and build plots'):             
                         st.session_state.ConformationClass.get_sdf_conformations(
                             st.session_state.temp,
