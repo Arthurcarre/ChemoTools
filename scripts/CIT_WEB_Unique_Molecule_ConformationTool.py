@@ -16,6 +16,7 @@ from stmol import showmol
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw 
 from rdkit.Chem.rdMolAlign import CalcRMS
+from rdkit.Chem.Scaffolds.MurckoScaffold import GetScaffoldForMol
 
 class ConformationTool :
     """
@@ -434,7 +435,7 @@ class ConformationTool :
             sns.set_context('paper')
             
             if len(input_list) == 1 :
-                sdf_to_hist = [CalcRMS(input_list[0], mol) for mol in self.mols]
+                sdf_to_hist = [CalcRMS(GetScaffoldForMol(input_list[0]), GetScaffoldForMol(mol)) for mol in self.mols]
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(input_list)*9))
                 a, b, c = 0, 0, 0
                 for RMSD in sdf_to_hist : 
@@ -454,8 +455,8 @@ class ConformationTool :
                 ax.annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
                 ax.legend(loc='upper left', shadow=True, markerfirst = False)
             else :
-                sdf_to_hist = ([CalcRMS(representative_conf,
-                                        mol) for mol in self.mols] for representative_conf in input_list)
+                sdf_to_hist = ([CalcRMS(GetScaffoldForMol(representative_conf),
+                                        GetScaffoldForMol(mol)) for mol in self.mols] for representative_conf in input_list)
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(best_PLP_poses)*9))
                 for z, group in enumerate(sdf_to_hist) :
                     a, b, c = 0, 0, 0
