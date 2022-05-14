@@ -16,7 +16,6 @@ from stmol import showmol
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw 
 from rdkit.Chem.rdMolAlign import CalcRMS
-from rdkit.Chem.Scaffolds.MurckoScaffold import GetScaffoldForMol
 
 class ConformationTool :
     """
@@ -361,8 +360,8 @@ class ConformationTool :
                 subliste = []
                 with Chem.SDWriter(f"À_supprimer{i+1}.sdf") as w:
                     for j, mol in enumerate(self.mols) :
-                        if CalcRMS(GetScaffoldForMol(self.mols[self.sample[sample_predominant_poses[i][indice]]]),
-                                   GetScaffoldForMol(mol)) < 2 :
+                        if CalcRMS(self.mols[self.sample[sample_predominant_poses[i][indice]]],
+                                   mol) < 2 :
                             subliste.append(self.mols[j])
                             w.write(self.mols[j]) 
                     copy1 = copy.deepcopy(subliste)
@@ -410,8 +409,8 @@ class ConformationTool :
 
             for i, moli in enumerate(input_list) :
                 for j, molj in enumerate(input_list) :
-                    array[i, j] = CalcRMS(GetScaffoldForMol(moli),
-                                          GetScaffoldForMol(molj))
+                    array[i, j] = CalcRMS(moli,
+                                          molj)
 
             data_frame = pd.DataFrame(array, index=index, columns=columns)
             st.write("\nIn order to check that each group is different from each other, a table taking " 
@@ -435,7 +434,7 @@ class ConformationTool :
             sns.set_context('paper')
             
             if len(input_list) == 1 :
-                sdf_to_hist = [CalcRMS(GetScaffoldForMol(input_list[0]), GetScaffoldForMol(mol)) for mol in self.mols]
+                sdf_to_hist = [CalcRMS(input_list[0], mol) for mol in self.mols]
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(input_list)*9))
                 a, b, c = 0, 0, 0
                 for RMSD in sdf_to_hist : 
@@ -455,8 +454,8 @@ class ConformationTool :
                 ax.annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
                 ax.legend(loc='upper left', shadow=True, markerfirst = False)
             else :
-                sdf_to_hist = ([CalcRMS(GetScaffoldForMol(representative_conf),
-                                        GetScaffoldForMol(mol)) for mol in self.mols] for representative_conf in input_list)
+                sdf_to_hist = ([CalcRMS(representative_conf,
+                                        mol) for mol in self.mols] for representative_conf in input_list)
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(best_PLP_poses)*9))
                 for z, group in enumerate(sdf_to_hist) :
                     a, b, c = 0, 0, 0
@@ -500,8 +499,8 @@ class ConformationTool :
         
         for i, indivduali in enumerate(finallyliste) :
             for j, indivdualj in enumerate(finallyliste) :
-                array[i, j] = CalcRMS(GetScaffoldForMol(self.mols[self.sample[indivduali]]),
-                                      GetScaffoldForMol(self.mols[self.sample[indivdualj]]))
+                array[i, j] = CalcRMS(self.mols[self.sample[indivduali]],
+                                      self.mols[self.sample[indivdualj]])
 
         data_frame = pd.DataFrame(array, index=finallyliste,
                                   columns=finallyliste)
@@ -523,7 +522,7 @@ class ConformationTool :
             sample_predominant_poses = get_predominant_poses(output_liste, p)
             sample_indice_best_score = get_sample_indice_best_score(sample_predominant_poses)
             get_SDF_Sample_and_Best_Score_Poses(sample_predominant_poses, sample_indice_best_score)
-            best_PLP_poses = [GetScaffoldForMol(x) for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
+            best_PLP_poses = [x for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
             
             if 'pdb' in st.session_state :
                 style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
@@ -587,8 +586,8 @@ class ConformationTool :
         """
         with Chem.SDWriter(f'Conformation{k}.sdf') as w: 
             for j, mol in enumerate(self.mols) :
-                if CalcRMS(GetScaffoldForMol(self.best_PLP_poses[k-1]),
-                           GetScaffoldForMol(mol)) < float(RMSDtarget) :
+                if CalcRMS(self.best_PLP_poses[k-1],
+                           mol) < float(RMSDtarget) :
                     w.write(self.mols[j])
         w.close()
 
