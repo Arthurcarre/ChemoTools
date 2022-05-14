@@ -587,8 +587,8 @@ class ConformationTool :
         """
         with Chem.SDWriter(f'Conformation{k}.sdf') as w: 
             for j, mol in enumerate(self.mols) :
-                if CalcRMS(self.best_PLP_poses[k-1],
-                           mol) < float(RMSDtarget) :
+                if CalcRMS(GetScaffoldForMol(self.best_PLP_poses[k-1]),
+                           GetScaffoldForMol(mol)) < float(RMSDtarget) :
                     w.write(self.mols[j])
         w.close()
 
