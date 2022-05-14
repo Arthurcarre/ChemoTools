@@ -615,7 +615,7 @@ def render_mol(xyz):
 
 def main():
     
-    st.header('Murcko ConformationTool !')
+    st.header('Unique Molecule ConformationTool !')
     
     st.markdown('Welcome to Unique Molecule ConformationTool ! Here, the processing and analysis of the docking simulation'
                 ' results when your sdf file include ONLY ONE molecule (in many different 3D positions).')
