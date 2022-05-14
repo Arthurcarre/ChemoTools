@@ -647,9 +647,7 @@ def main():
     
     if 'molref_stock' not in st.session_state:
         if 'mol1' in st.session_state :
-            code_smiles = Chem.MolToSmiles(st.session_state.mol1)
-            smiles = st.text_input('Upload the benchmark molecule SMILES code',
-                                                      code_smiles)
+            smiles = Chem.MolToSmiles(st.session_state.mol1)
             st.session_state.molref_stock = smiles
             blk=makeblock(st.session_state.molref_stock)
             render_mol(blk)
