@@ -794,9 +794,9 @@ def main():
         molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
                           " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
         st.session_state.molecule_name = molecule_name
-        score = st.selectbox(
-             'What is the scoring function used in your sdf file ?',
-             ('Gold.PLP.Fitness', 'Gold.Goldscore.Fitness'))
+        score = st.text_input(
+                     'What is the scoring function used in your sdf file ?',
+                     'Gold.PLP.Fitness')
         st.session_state.score = score
         if 'sdf_file_stock' not in st.session_state :
             st.session_state.sdf_file_stock = sdf
