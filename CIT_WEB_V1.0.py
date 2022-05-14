@@ -7,7 +7,7 @@
 """
 
 import streamlit as st
-from scripts import CIT_WEB_ConformationTool, CIT_WEB_Murcko_ConformationTool, Coming_Soon
+from scripts import CIT_WEB_ConformationTool, CIT_WEB_Murcko_ConformationTool, CIT_WEB_Unique_Molecule_ConformationTool, Coming_Soon
 
 def main():
 
@@ -20,7 +20,7 @@ def main():
                                      "Report a bug": "https://github.com/Arthurcarre/ChemoTools/issues"}
                        )
 
-    pages = ("CIT: MCS ConformationTool", "CIT: Murcko ConformationTool", "CIT: Coming Soon")
+    pages = ("CIT: MCS ConformationTool", "CIT: Murcko ConformationTool", "CIT: Unique Molecule ConformationTool", "CIT: Coming Soon")
 
     title = st.sidebar.title("ChemoInfoTools !")
 
@@ -53,6 +53,8 @@ def main():
         CIT_WEB_ConformationTool.main()
     elif page == "CIT: Murcko ConformationTool":
         CIT_WEB_Murcko_ConformationTool.main()
+    elif page == "CIT: Unique Molecule ConformationTool":
+        CIT_WEB_Unique_Molecule_ConformationTool.main()    
     elif page == "CIT: Coming Soon":
         Coming_Soon.main()
     else:
