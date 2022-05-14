@@ -59,8 +59,8 @@ class ConformationTool :
         array = np.ones(shape=(len(sample),len(sample)))
         for i, indivduali in enumerate(sample) :
             for j, indivdualj in enumerate(sample) :
-                array[i, j] = CalcRMS(GetScaffoldForMol(self.mols[indivduali]),
-                                      GetScaffoldForMol(self.mols[indivdualj]))
+                array[i, j] = CalcRMS(self.mols[indivduali],
+                                      self.mols[indivdualj])
 
         df = pd.DataFrame(
             array, index=list(range(len(sample))), columns=list(range(len(sample))))
@@ -110,8 +110,8 @@ class ConformationTool :
             for individual in sample :
                 subliste = []
                 for i in remove_list :
-                    if CalcRMS(GetScaffoldForMol(self.mols[individual]),
-                               GetScaffoldForMol(self.mols[sample[i]])) <  RMSDthreshold :
+                    if CalcRMS(self.mols[individual],
+                               self.mols[sample[i]]) <  RMSDthreshold :
                         subliste.append(i)
                         remove_list.remove(i)
                 output_lists.append(subliste[:])
@@ -146,13 +146,13 @@ class ConformationTool :
                         if len(groupej) <= len(groupei):
                             for k in groupej :
                                 n += 1
-                                RMSD.append(CalcRMS(GetScaffoldForMol(self.mols[self.sample[k]]),
-                                                    GetScaffoldForMol(self.mols[self.sample[input_list[i][n]]])))
+                                RMSD.append(CalcRMS(self.mols[self.sample[k]],
+                                                    self.mols[self.sample[input_list[i][n]]]))
                         if len(groupej) > len(groupei):
                             for k in groupei :
                                 n += 1
-                                RMSD.append(CalcRMS(GetScaffoldForMol(self.mols[self.sample[k]]),
-                                                    GetScaffoldForMol(self.mols[self.sample[input_list[j][n]]])))
+                                RMSD.append(CalcRMS(self.mols[self.sample[k]],
+                                                    self.mols[self.sample[input_list[j][n]]]))
                     if i != j :
                         #print(f"La moyenne des RMSD entre le groupe {i} et le groupe {j} est de {np.mean(RMSD)}")
                         if np.mean(RMSD) < RMSDthreshold :
@@ -233,8 +233,8 @@ class ConformationTool :
             output_list = []
             for i, n in enumerate(liste1) :
                 try :
-                    r = CalcRMS(GetScaffoldForMol(self.mols[self.sample[n]]),
-                                GetScaffoldForMol(self.mols[self.sample[liste1[i+1]]]))
+                    r = CalcRMS(self.mols[self.sample[n]],
+                                self.mols[self.sample[liste1[i+1]]])
                 except IndexError :
                     pass
                 if r > 3 :
