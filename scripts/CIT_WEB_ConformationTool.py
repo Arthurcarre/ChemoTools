@@ -113,15 +113,17 @@ class ConformationTool :
         -- DESCRIPTION --
         This function allows to build the MCS from a proportion of the molecules in the sdf file. If the proportion is not 1,
         the algorithm will choose the molecules for which the MCS is the most larger. 
-
             PARAMS:
                 - ringMatchesRingOnly (bool): If True, the MCS take into account the rings.
                 - percentage (int) : Set the proportion of molecules for which the algorithm will build the MCS.
         """
         
-        mcs = FindMCS(self.unique_molecules, 
+        try :
+            mcs = FindMCS(self.unique_molecules, 
                       ringMatchesRingOnly=ringMatchesRingOnly, 
                       threshold=percentage / 100.0)
+        except RuntimeError :
+            st.error('ERROR : Your sdf file contains only one unique molecule (in many different poses). In this case, please, use "CIT: Unique Molecule ConformationTool"')
         del self.unique_molecules
         fusion = Chem.MolFromSmarts(mcs.smartsString)
         st.session_state.fusion = fusion
@@ -646,7 +648,7 @@ class ConformationTool :
             st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
              " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")
             st.session_state.histplot = fig
-            fig.savefig("Histograms_Best_Score.jpeg", dpi=300)
+            fig.savefig("Histograms_Best_Score.jpeg", dpi=300, bbox_inches='tight')
         
         
         #OUT THE FUNCTIUN "get_histogramme_sample_bestPLP".
@@ -678,7 +680,7 @@ class ConformationTool :
             sns.set_context('talk')
             g = sns.heatmap(data_frame, fmt='d', ax= ax, cmap = "rocket")
             fig = g.get_figure()
-            fig.savefig("Sorted_Heatmap.jpeg", dpi=300)
+            fig.savefig("Sorted_Heatmap.jpeg", dpi=300, bbox_inches='tight')
             st.pyplot(fig)
             st.session_state.sorted_heatmap = fig
             with open("Sorted_Heatmap.jpeg", "rb") as file:
@@ -833,7 +835,7 @@ class ConformationTool :
         g.set_axis_labels("Ratio", "", fontsize = 25)
         g.set_yticklabels(fontsize = size_ylabels)
         g.set_xticklabels(fontsize = size_xlabels)
-        g.fig.savefig(f"Barplot_Conformation{k}.jpeg", dpi=300)
+        g.fig.savefig(f"Barplot_Conformation{k}.jpeg", dpi=300, bbox_inches='tight')
         st.session_state.barplot = g
 
         
@@ -874,7 +876,7 @@ class ConformationTool :
         g.set_axis_labels(self.score, "")
         g.set_yticklabels(fontsize = size_ylabels)
         g.set_xticklabels(fontsize = size_xlabels)
-        g.fig.savefig(f"Box_Plot{k}.jpeg", dpi=300)
+        g.fig.savefig(f"Box_Plot{k}.jpeg", dpi=300, bbox_inches='tight')
         st.session_state.box_plot = g
 
         #SCATTERPLOT
@@ -897,7 +899,7 @@ class ConformationTool :
         label_point(df5.Median, df5.Ratio, df5.Name, plt.gca())
         g.set_axis_labels(self.score, "Ratio")
         g.set(ylim=(0, 1), yticks=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-        g.fig.savefig(f"Scatter_Plot{k}.jpeg", dpi=300)
+        g.fig.savefig(f"Scatter_Plot{k}.jpeg", dpi=300, bbox_inches='tight')
         st.session_state.scatterplot = g
 
 ###############################################
@@ -959,7 +961,7 @@ def main():
     #PERCENTAGE PARAMETER SECTION#
 
     help_ringMatchesRingOnly = ('If "no", depending on the molecules used, it is possible that the RMSD cannot be'
-                                ' calculated afterwards. Yes" may solve this problem in return for having a less'
+                                ' calculated afterwards. "Yes" may solve this problem in return for having a less'
                                 ' relevant RMSD.')
 
     ringMatchesRingOnly = st.radio(
