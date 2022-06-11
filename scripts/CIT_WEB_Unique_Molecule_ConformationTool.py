@@ -445,8 +445,7 @@ class ConformationTool :
                         b += 1
                     if RMSD < 4 :
                         c += 1
-                ax.hist(sdf_to_hist, bins =100, label = "Conformation n°1") #Create an histogram to see the distribution of the RMSD of the sample
-                ax.set(xlim = (-0.3, 15))
+                ax.hist(sdf_to_hist, bins =100, label = "Conformation n°1")
                 ax.axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
                 ax.annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
                 ax.axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
@@ -468,7 +467,6 @@ class ConformationTool :
                         if i < 4 :
                             c += 1
                     ax[z].hist(group, bins =100, label =f"Conformation n°{z+1}") #Create an histogram to see the distribution of the RMSD of the sample
-                    ax[z].set(xlim = (-0.3, 15))
                     ax[z].axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
                     ax[z].annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
                     ax[z].axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
@@ -481,7 +479,7 @@ class ConformationTool :
             st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
              " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")
             st.session_state.histplot = fig
-            fig.savefig("Histograms_Best_Score.jpeg", dpi=300)
+            fig.savefig("Histograms_Best_Score.jpeg", dpi=300, bbox_inches='tight')
             #st.write("RMSD distribution between all docking solutions", 
             #      " and the pose with the highest score of all solutions for a given conformation.")
         
@@ -511,7 +509,7 @@ class ConformationTool :
             sns.set_context('talk')
             g = sns.heatmap(data_frame, fmt='d', ax= ax, cmap = "rocket")
             fig = g.get_figure()
-            fig.savefig("Sorted_Heatmap.jpeg", dpi=300)
+            fig.savefig("Sorted_Heatmap.jpeg", dpi=300, bbox_inches='tight')
             st.pyplot(fig)
             st.session_state.sorted_heatmap = fig
             with open("Sorted_Heatmap.jpeg", "rb") as file:
@@ -891,7 +889,7 @@ def main():
                     st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0)
                     st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
 
-                    if st.button('Prepare your sdf file and build plots'):             
+                    if st.button('Prepare your sdf file'):             
                         st.session_state.ConformationClass.get_sdf_conformations(
                             st.session_state.temp,
                             st.session_state.RMSD_Target_conformation
@@ -900,7 +898,7 @@ def main():
                     st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
                     st.session_state.RMSD_Target_conformation = st.slider('You want a sdf file and/or a analysis plots including molecules in the unique predominant conformation with all poses under a RMSD =', 0.0, 15.0, 2.0)
 
-                    if st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.'):             
+                    if st.button('I want to have the sdf file of poses in this conformation.'):             
                         st.session_state.ConformationClass.get_sdf_conformations(
                             1, st.session_state.RMSD_Target_conformation)
         else :
