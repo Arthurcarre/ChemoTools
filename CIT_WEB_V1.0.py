@@ -13,7 +13,7 @@ def main():
 
 
     st.set_page_config(page_title = "CIT : ChemoInfoTools !",
-                       page_icon = ":test_tube:",
+                       page_icon = ":computer:",
                        layout = "centered",
                        initial_sidebar_state = "expanded",
                        menu_items = {"Get Help": "https://github.com/Arthurcarre/ChemoTools",
