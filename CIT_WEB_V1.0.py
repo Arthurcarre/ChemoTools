@@ -7,7 +7,7 @@
 """
 
 import streamlit as st
-from scripts import CIT_WEB_ConformationTool, CIT_WEB_Murcko_ConformationTool, CIT_WEB_Unique_Molecule_ConformationTool, Coming_Soon
+from scripts import CIT_WEB_MCS_ConformationTool, CIT_WEB_Murcko_ConformationTool, CIT_WEB_Unique_Molecule_ConformationTool, Coming_Soon
 
 def main():
 
@@ -50,7 +50,7 @@ def main():
     license = st.sidebar.markdown(license_str)
     
     if page == "CIT: MCS ConformationTool":
-        CIT_WEB_ConformationTool.main()
+        CIT_WEB_MCS_ConformationTool.main()
     elif page == "CIT: Murcko ConformationTool":
         CIT_WEB_Murcko_ConformationTool.main()
     elif page == "CIT: Unique Molecule ConformationTool":
