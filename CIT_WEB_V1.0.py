@@ -25,11 +25,11 @@ def main():
     title = st.sidebar.title("ChemoInfoTools Application")
 
 
-    logo = st.sidebar.image("img/pmu_logo.jpg",
+    logo = st.sidebar.image("img/logo_pmu.png",
                             caption = "CIT was developed in cooperation with the Institute of Pharmacy of the Paracelsus Medical"
                             " Private University Salzburg (Austria) and the Institute of Pharmacy of the University of Angers"
                             " (France).")
-    logo2 = st.sidebar.image("img/ua_logo.jpg")
+    logo2 = st.sidebar.image("img/ua_h_noir_ecran.png")
 
     page = st.sidebar.selectbox(label = "Select a ChemoInfoTool:",
                                 options = pages,
