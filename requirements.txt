@@ -5,5 +5,5 @@ pip==22.0.4
 py3dmol==1.8.0
 rdkit-pypi
 seaborn==0.11.1
-streamlit==1.2.0
+streamlit==1.11.0
 stmol==0.0.7
