@@ -782,19 +782,20 @@ def main():
     
     st.header('Murcko ConformationTool !')
     
-    st.markdown('Welcome to Murcko ConformationTool ! Here, the processing and analysis of the docking simulation'
-                ' results is done through the Murcko Scaffold [DOI: 10.1021/jm9602928].')
+    st.markdown('Welcome to **Murcko ConformationTool !** Here, the processing and analysis of the docking simulation'
+                ' results is done through the **Murcko Scaffold** [DOI: 10.1021/jm9602928].')
 
     #SDF FILE SECTION#
     sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
-                                        type = ["sdf"])
+                                        type = ["sdf"],  key = 'CIT_WEB_Murcko_ConformationTool')
     if sdf:
         molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
-                          " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
+                          " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name',
+                                      key = 'CIT_WEB_Murcko_ConformationTool')
         st.session_state.molecule_name = molecule_name
         score = st.text_input(
                      'What is the scoring function used in your sdf file ?',
-                     'Gold.PLP.Fitness')
+                     'Gold.PLP.Fitness', key = 'CIT_WEB_Murcko_ConformationTool')
         st.session_state.score = score
         if 'sdf_file_stock' not in st.session_state :
             st.session_state.sdf_file_stock = sdf
@@ -818,13 +819,13 @@ def main():
         if 'mol1' in st.session_state :
             code_smiles = Chem.MolToSmiles(st.session_state.mol1)
             smiles = st.text_input('Upload the benchmark molecule SMILES code',
-                                                      code_smiles)
+                                                      code_smiles, key = 'CIT_WEB_Murcko_ConformationTool')
         else :
             smiles = st.text_input('Upload the benchmark molecule SMILES code',
-                                                      'OC(COC1=C2C=CC=CC2=CC=C1)CNC(C)C')
+                                                      'OC(COC1=C2C=CC=CC2=CC=C1)CNC(C)C', key = 'CIT_WEB_Murcko_ConformationTool')
 
     with col2 :
-        molref = st.file_uploader("OR Upload your benchmark molecule (mol file in 2D or 3D) here.")
+        molref = st.file_uploader("OR Upload your benchmark molecule (mol file in 2D or 3D) here.", key = 'CIT_WEB_Murcko_ConformationTool')
 
     if molref :
         with open("mol_ref.mol", "wb") as molref_file:
@@ -845,7 +846,7 @@ def main():
     #PDB PROTEIN SECTION#
 
     pdb = st.file_uploader("Upload a pdb file for viewing purposes. (FACULTATIVE)",
-                                        type = ["pdb"])
+                                        type = ["pdb"], key = 'CIT_WEB_Murcko_ConformationTool')
     if pdb :
         st.session_state.pdb = pdb
         with open("pdb_file.pdb", "wb") as pdb_file:
@@ -857,7 +858,7 @@ def main():
     ###############################################
 
     first_checkbox = st.checkbox(
-        'Check your sdf (Attention ! Before closing this app, please, UNCHECK THIS BOX)')
+        'Check your sdf (Attention ! Before closing this app, please, UNCHECK THIS BOX)', key = 'CIT_WEB_Murcko_ConformationTool')
     if first_checkbox :
         try : 
             if 'ConformationClass' not in st.session_state :
@@ -885,7 +886,7 @@ def main():
             im = Draw.MolToImage(scaff_mol_bench)
             st.image(im, caption='Chemical structure of the scaffold of the benchmark molecule')    
 
-        show_molecules = st.checkbox('Show molecules name which will be not included in the algorithm')
+        show_molecules = st.checkbox('Show molecules name which will be not included in the algorithm', key = 'CIT_WEB_Murcko_ConformationTool')
         if show_molecules:
             if st.session_state.error_mols == None :
                 st.write('All molecules are good !')
@@ -956,19 +957,19 @@ def main():
                                 ' Default RMSD threshold = 2 A',
                                  0.0, 15.0, 2.0,
                                 help='If you want to change this setting during the program, make sure the box below'
-                                ' is unchecked!')
+                                ' is unchecked!', key = 'CIT_WEB_Murcko_ConformationTool')
 
         Proportion = st.slider('Minimum size of the sample defining a conformation. Default proportion = 0.05',
                              0.0, 1.0, 0.05,
                                help=('This setting define the minimum proportion (value between 0 and 1) of individuals'
                                      ' in a group within the sample to consider that group large enough to be'
-                                     ' representative of a full conformation.'))
+                                     ' representative of a full conformation.'), key = 'CIT_WEB_Murcko_ConformationTool')
 
     ###############################################
     #--   CHECKBOX "GET THE SORTED HEATMAP"     --#                                                     
     ############################################### 
 
-        third_checkbox = st.checkbox('Get the sorted heatmap')
+        third_checkbox = st.checkbox('Get the sorted heatmap', key = 'CIT_WEB_Murcko_ConformationTool')
         if third_checkbox :
             try:
                 st.warning(
