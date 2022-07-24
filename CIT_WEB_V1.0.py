@@ -1,7 +1,7 @@
 """
 #####################################################
 ##                                                 ##
-##      -- STREAMLIT CHEMOINFOTOOLS V1.1 --        ##
+##      -- STREAMLIT CHEMOINFOTOOLS V2.0 --        ##
 ##                                                 ##
 #####################################################
 """
@@ -59,7 +59,7 @@ def main():
     This tool aims to isolate, within the results of docking simulations, the different consensus conformations and
     to quantify the consistency of the poses for each molecule of the same family.
     """)
-        tab1, tab2, tab3 = st.tabs(["CIT : MCS", "CIT : Murcko Scaffold", "CIT : Unique Molecule"])
+        tab1, tab2, tab3 = st.tabs(["CIT : Maximum Common Substructure", "CIT : Murcko Scaffold", "CIT : Unique Molecule"])
         with tab1:
             CIT_WEB_MCS_ConformationTool.main()
         with tab2:
