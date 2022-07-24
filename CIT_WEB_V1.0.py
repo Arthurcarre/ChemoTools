@@ -14,15 +14,15 @@ def main():
 
     st.set_page_config(page_title = "CIT : ChemoInfoTools !",
                        page_icon = ":computer:",
-                       layout = "centered",
+                       layout = "wide",
                        initial_sidebar_state = "expanded",
                        menu_items = {"Get Help": "https://github.com/Arthurcarre/ChemoTools",
                                      "Report a bug": "https://github.com/Arthurcarre/ChemoTools/issues"}
                        )
 
-    pages = ("CIT: MCS ConformationTool", "CIT: Murcko ConformationTool", "CIT: Unique Molecule ConformationTool", "CIT: Coming Soon")
+    pages = ("CIT: ConformationTool", "CIT: Coming Soon")
 
-    title = st.sidebar.title("ChemoInfoTools !")
+    title = st.sidebar.title("ChemoInfoTools Application")
 
 
     logo = st.sidebar.image("img/pmu_logo.jpg",
@@ -49,16 +49,28 @@ def main():
     license_str = "**License:** [MIT License](https://github.com/Arthurcarre/ChemoTools/blob/main/LICENSE.md)"
     license = st.sidebar.markdown(license_str)
     
-    if page == "CIT: MCS ConformationTool":
-        CIT_WEB_MCS_ConformationTool.main()
-    elif page == "CIT: Murcko ConformationTool":
-        CIT_WEB_Murcko_ConformationTool.main()
-    elif page == "CIT: Unique Molecule ConformationTool":
-        CIT_WEB_Unique_Molecule_ConformationTool.main()    
+    st.sidebar.info('''
+        Made by [Arthur Carré](mailto:arthur.carre@icloud.com) with **_Streamlit_**.
+    ''')
+    
+    if page == "CIT: ConformationTool":
+        st.header("CIT : ConformationTool !")
+        st.write("""
+    This tool aims to isolate, within the results of docking simulations, the different consensus conformations and
+    to quantify the consistency of the poses for each molecule of the same family.
+    """)
+        tab1, tab2, tab3 = st.tabs(["CIT : MCS", "CIT : Murcko Scaffold", "CIT : Unique Molecule"])
+        with tab1:
+            CIT_WEB_MCS_ConformationTool.main()
+        with tab2:
+            CIT_WEB_Murcko_ConformationTool.main()
+        with tab3:
+            CIT_WEB_Unique_Molecule_ConformationTool.main()
     elif page == "CIT: Coming Soon":
         Coming_Soon.main()
-    else:
-        CIT_WEB_MCS_ConformationTool.main()
+
+
 
 if __name__ == "__main__":
     main()
+    
