@@ -76,7 +76,7 @@ def preprocess(liste_mols):
 class ConformationTool :
     """
     -- DESCRIPTION --
-    This class aims to to isolate, within the results of docking simulations, the different consensus conformations and
+    This class aims to isolate, within the results of docking simulations, the different consensus conformations and
     to quantify the consistency of the poses for each molecule of the same family.
     """
     def __init__(self, 
@@ -920,19 +920,20 @@ def main():
 
     st.header('MCS ConformationTool !')
 
-    st.markdown('Welcome to MCS ConformationTool ! Here, the processing and analysis of the docking simulation'
-                ' results is done through the Maximum Common Substructure (MCS).')
+    st.markdown('Welcome to **MCS ConformationTool** ! Here, the processing and analysis of the docking simulation'
+                ' results is done through the **Maximum Common Substructure** (MCS).')
 
     #SDF FILE SECTION#
     sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
-                                        type = ["sdf"])
+                                        type = ["sdf"], key = 'CIT_WEB_MCS_ConformationTool')
     if sdf:
         molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
-                          " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name')
+                          " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name',
+                                       key = 'CIT_WEB_MCS_ConformationTool')
         st.session_state.molecule_name = molecule_name
         score = st.text_input(
              'What is the scoring function used in your sdf file ?',
-             'Gold.PLP.Fitness')
+             'Gold.PLP.Fitness', key = 'CIT_WEB_MCS_ConformationTool')
         st.session_state.score = score
         if 'sdf_file_stock' not in st.session_state :
             st.session_state.sdf_file_stock = sdf
@@ -952,7 +953,7 @@ def main():
     #PDB PROTEIN SECTION#
 
     pdb = st.file_uploader("Upload a pdb file for viewing purposes. (FACULTATIVE)",
-                                        type = ["pdb"])
+                                        type = ["pdb"],  key = 'CIT_WEB_MCS_ConformationTool')
     if pdb :
         st.session_state.pdb = pdb
         with open("pdb_file.pdb", "wb") as pdb_file:
@@ -979,7 +980,7 @@ def main():
 
     st.session_state.percentage = st.slider('Selects the percentage of molecules (not poses) for which a maximum'
                                             ' common substructure will be determined.', 0, 100, 100,
-                                            help=help_percentage)
+                                            help=help_percentage,  key = 'CIT_WEB_MCS_ConformationTool')
 
     ###############################################
     #--         CHECKBOX "GET MCS SDF"          --#                                                     
@@ -987,7 +988,7 @@ def main():
 
     first_checkbox = st.checkbox(
         'Get the Maximum Common Substructure between molecules of your SDF file (Attention ! Before closing this app,'
-        ' please, UNCHECK THIS BOX)')
+        ' please, UNCHECK THIS BOX)',  key = 'CIT_WEB_MCS_ConformationTool')
 
     if first_checkbox :
         with st.spinner('Please wait, the maximum common substructure is coming...'):
@@ -1056,10 +1057,11 @@ def main():
         else :
             size_sample = st.session_state.mols
         individuals = st.slider('Select the size of your sample. Default size of sample = 200', 0, 500, size_sample,
-                                help='If you want to change this setting during the program, make sure the box below is unchecked!')
+                                help='If you want to change this setting during the program, make sure the box below is unchecked!',
+                                key = 'CIT_WEB_MCS_ConformationTool')
 
         #SECOND BOX
-        second_checkbox = st.checkbox('Get the sample heatmap')
+        second_checkbox = st.checkbox('Get the sample heatmap',  key = 'CIT_WEB_MCS_ConformationTool')
         if second_checkbox :
             try:
                 st.pyplot(st.session_state.heatmap)
@@ -1077,19 +1079,19 @@ def main():
                                 ' Default RMSD threshold = 2 A',
                                  0.0, 15.0, 2.0,
                                 help='If you want to change this setting during the program, make sure the box below'
-                                ' is unchecked!')
+                                ' is unchecked!',  key = 'CIT_WEB_MCS_ConformationTool')
 
         Proportion = st.slider('Minimum size of the sample defining a conformation. Default proportion = 0.05',
                              0.0, 1.0, 0.05,
                                help=('This setting define the minimum proportion (value between 0 and 1) of individuals'
                                      ' in a group within the sample to consider that group large enough to be'
-                                     ' representative of a full conformation.'))
+                                     ' representative of a full conformation.'),  key = 'CIT_WEB_MCS_ConformationTool')
 
     ###############################################
     #--   CHECKBOX "GET THE SORTED HEATMAP"     --#                                                     
     ############################################### 
 
-        third_checkbox = st.checkbox('Get the sorted heatmap')
+        third_checkbox = st.checkbox('Get the sorted heatmap',  key = 'CIT_WEB_MCS_ConformationTool')
         if third_checkbox :
             try:
                 st.warning(
