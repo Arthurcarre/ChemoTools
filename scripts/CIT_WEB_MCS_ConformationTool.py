@@ -95,7 +95,6 @@ class ConformationTool :
         self.mols_brut = [x for x in Chem.SDMolSupplier(sdf_file)]
         st.session_state.mols_brut = len(self.mols_brut)
         sdf_preprocessed = preprocess(self.mols_brut)
-        function_test()
         self.sdf_preprocessed = sdf_preprocessed
         self.score = score
         unique_molecules = []
@@ -108,9 +107,6 @@ class ConformationTool :
               " poses in your sdf file.")
         del smiles_unique_molecules
         self.unique_molecules = unique_molecules
-
-    def function_test(self):
-        st.write("Test réussi !!")
             
     def get_MCS_SDF(self, ringMatchesRingOnly=False, percentage=100):
         """
