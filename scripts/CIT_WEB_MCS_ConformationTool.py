@@ -18,7 +18,7 @@ from rdkit.Chem import AllChem, Draw
 from rdkit.Chem.rdFMCS import FindMCS
 from rdkit.Chem.rdMolAlign import CalcRMS
 
-def Get_MCS_Fusion(self, mol):
+def get_MCS_Fusion(self, mol):
     """
     -- DESCRIPTION --
     This function is used to obtain the MCS between a selected molecule and the MCS (called "fusion") from the sdf file
@@ -95,6 +95,7 @@ class ConformationTool :
         self.mols_brut = [x for x in Chem.SDMolSupplier(sdf_file)]
         st.session_state.mols_brut = len(self.mols_brut)
         sdf_preprocessed = preprocess(self.mols_brut)
+        function_test()
         self.sdf_preprocessed = sdf_preprocessed
         self.score = score
         unique_molecules = []
@@ -108,6 +109,9 @@ class ConformationTool :
         del smiles_unique_molecules
         self.unique_molecules = unique_molecules
 
+    def function_test(self):
+        st.write("Test réussi !!")
+            
     def get_MCS_SDF(self, ringMatchesRingOnly=False, percentage=100):
         """
         -- DESCRIPTION --
@@ -597,9 +601,9 @@ class ConformationTool :
             
             if len(input_list) == 1 :
                 try :
-                    sdf_to_hist = [CalcRMS(Get_MCS_Fusion(self, input_list[0]), mol) for mol in self.MCS_mols]
+                    sdf_to_hist = [CalcRMS(get_MCS_Fusion(self, input_list[0]), mol) for mol in self.MCS_mols]
                 except RuntimeError:
-                    sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
+                    sdf_to_hist = [CalcRMS(mol, get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
                 
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(input_list)*9))
                 a, b, c = 0, 0, 0
@@ -620,10 +624,10 @@ class ConformationTool :
                 ax.legend(loc='upper left', shadow=True, markerfirst = False)
             else :
                 try:
-                    sdf_to_hist = ([CalcRMS(Get_MCS_Fusion(self, representative_conf),
+                    sdf_to_hist = ([CalcRMS(get_MCS_Fusion(self, representative_conf),
                                             mol) for mol in self.MCS_mols] for representative_conf in input_list)
                 except RuntimeError:
-                    sdf_to_hist = ([CalcRMS(mol,Get_MCS_Fusion(self, representative_conf)) for mol in self.MCS_mols] for representative_conf in input_list)
+                    sdf_to_hist = ([CalcRMS(mol,get_MCS_Fusion(self, representative_conf)) for mol in self.MCS_mols] for representative_conf in input_list)
                 
                 fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(best_PLP_poses)*9))
                 for z, group in enumerate(sdf_to_hist) :
@@ -758,9 +762,9 @@ class ConformationTool :
         with Chem.SDWriter(f'Conformation{k}.sdf') as w:
             for j, mol in enumerate(self.MCS_mols) :
                 try:
-                    result = CalcRMS(Get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]), mol)
+                    result = CalcRMS(get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]), mol)
                 except RuntimeError:
-                    result = CalcRMS(mol, Get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]))
+                    result = CalcRMS(mol, get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]))
                 if result < float(RMSDtarget) :
                     w.write(self.mols[j])
         w.close()
