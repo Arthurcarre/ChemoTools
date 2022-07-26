@@ -1189,9 +1189,6 @@ def main():
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
                         st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
 
-                    else :
-                        pass
-
 
                     if st.button('Prepare your sdf file and build plots'):             
                         st.session_state.ConformationClass.get_sdf_conformations(
