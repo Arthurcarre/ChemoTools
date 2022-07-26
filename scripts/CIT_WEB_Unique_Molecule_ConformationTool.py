@@ -865,8 +865,8 @@ def main():
                             pass
                         
             except AttributeError as e :
-                #st.exception(e)
-                pass
+                st.exception(e)
+                #pass
 
     ###############################################
     #--        BEGINNING THIRDCHECKBOX          --#                                                     
