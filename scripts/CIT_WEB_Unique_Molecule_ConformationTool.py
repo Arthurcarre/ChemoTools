@@ -17,7 +17,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem 
 from scipy.cluster import hierarchy
 from ChemoInfoTool import ConformationTool
-
+#azertyuiop
 
 ###############################################
 #                                             #
