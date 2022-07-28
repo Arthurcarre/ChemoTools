@@ -17,13 +17,6 @@ from rdkit import Chem
 from rdkit.Chem import AllChem 
 from scipy.cluster import hierarchy
 from ChemoInfoTool import ConformationTool
-#azertyuiop
-
-###############################################
-#                                             #
-#            APPLICATION SECTION              #
-#                                             #                                                      
-###############################################
 
 def makeblock(smi):
     mol = Chem.MolFromSmiles(smi)
@@ -39,6 +32,12 @@ def render_mol(xyz):
     xyzview.setBackgroundColor('white')
     xyzview.zoomTo()
     showmol(xyzview, height=500, width=1000)
+
+###############################################
+#                                             #
+#            APPLICATION SECTION              #
+#                                             #                                                      
+###############################################
 
 def main():
     
@@ -168,44 +167,19 @@ def main():
         with tab1:
             third_checkbox = st.checkbox('Get the sorted heatmap')
             if third_checkbox :
-                if 'indviduals_deleted' not in st.session_state:
+                
+                if 'sorted_heatmap' not in st.session_state:
                     with st.spinner('Please wait, the sorted heatmap is coming...'):
                         st.session_state.ConformationClass.get_sorted_heatmap(
                             individuals,
                             RMSD_Target,
                             loop = 1,
                             p = Proportion)
-
-                    if st.session_state.n_conformations != 1:
-                        temp_options = range(1, st.session_state.n_conformations + 1)
-                        st.session_state.temp = st.select_slider("You want a sdf file and/or a anlysis plots including molecules in the conformation n°",
-                                                                 options=temp_options, key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                        st.write(f"The Conformation selected is {st.session_state.temp}")
-
-                        st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
-                                                                              key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                        st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-                   
-                        if st.button('Prepare your sdf file', key = 'CIT_WEB_Unique_Molecule_ConformationTool'):
-                            st.session_state.ConformationClass.get_sdf_conformations(
-                                st.session_state.temp,
-                                st.session_state.RMSD_Target_conformation)
-                    else :
-                        st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
-                        st.session_state.RMSD_Target_conformation = st.slider(
-                            'You want a sdf file and/or a analysis plots including molecules in the unique predominant conformation'
-                            ' with all poses under a RMSD =', 0.0, 15.0, 2.0, key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-
-                        st.write("Je passe par là 2")
-                        
-                        if st.button('Prepare your sdf file', key = 'CIT_WEB_Unique_Molecule_ConformationTool'):             
-                            st.session_state.ConformationClass.get_sdf_conformations(
-                                1, st.session_state.RMSD_Target_conformation)
-                                     
+                
                 else :
-                    st.warning(
-                        f"Attention. The sorting process discarded {st.session_state.indviduals_deleted} individuals")
-
+                    if 'indviduals_deleted' in st.session_state:
+                        st.warning(
+                            f"Attention. The sorting process discarded {st.session_state.indviduals_deleted} individuals")
                     st.pyplot(st.session_state.sorted_heatmap)
                     with open("Sorted_Heatmap.jpeg", "rb") as file:
                          btn = st.download_button(
@@ -273,79 +247,71 @@ def main():
                                     file_name="Histograms_Best_Score.jpeg",
                                     mime="image/jpeg", key = 'CIT_WEB_Unique_Molecule_ConformationTool')
 
-                    ###############################################
-                    #--    BUTTON "PREPARE YOUR SDF FILE"       --#                                                     
-                    ###############################################
+                if st.session_state.n_conformations != 1:
+                    temp_options = range(1, st.session_state.n_conformations + 1)
+                    if "temp" not in st.session_state :
+                        st.session_state.temp = 1
+                    st.session_state.temp = st.select_slider("You want a sdf file and/or a anlysis plots including molecules in the conformation n°",
+                                                             options=temp_options,
+                                                             value = st.session_state.temp,
+                                                             key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                    
+                    st.write(f"The Conformation selected is {st.session_state.temp}")
 
-                    if st.session_state.n_conformations != 1 :
-                        temp_options = range(1, st.session_state.n_conformations + 1)
-                        st.session_state.temp = st.select_slider("You want a sdf file or plots including molecules in the conformation n°",
-                                                                 options=temp_options,
-                                                                 value = st.session_state.temp,
-                                                                 key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                    st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
+                                                                          key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+               
+                    if st.button('Prepare your sdf file', key = 'CIT_WEB_Unique_Molecule_ConformationTool'):
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            st.session_state.temp,
+                            st.session_state.RMSD_Target_conformation)
                         
-                        st.write(f"The Conformation selected is {st.session_state.temp}")
-
-                        st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
-                                                                              key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                        st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-
-                        if st.button('Prepare your sdf file and build plots', key = 'CIT_WEB_Unique_Molecule_ConformationTool'):             
-                            st.session_state.ConformationClass.get_sdf_conformations(
-                                st.session_state.temp,
-                                st.session_state.RMSD_Target_conformation
-                                )
-
+                        with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                             btn = st.download_button(
+                                        label="Download your sdf file",
+                                        data=file,
+                                        file_name=f"Conformation n°{st.session_state.temp}.sdf",
+                                        key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                    else :
+                        try :
                             with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
                                  btn = st.download_button(
                                             label="Download your sdf file",
                                             data=file,
                                             file_name=f"Conformation n°{st.session_state.temp}.sdf",
                                             key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                        else :
-                            try :
-                                with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
-                                     btn = st.download_button(
-                                                label="Download your sdf file",
-                                                data=file,
-                                                file_name=f"Conformation n°{st.session_state.temp}.sdf",
-                                                key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                            except :
-                                pass
-
-                    else :                              
-                        st.session_state.RMSD_Target_conformation = st.slider(
-                            'You want a sdf file and/or plot analysis including molecules in the unique predominant conformation with all poses under a RMSD =',
-                            0.0, 15.0, 2.0, key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-
-                        st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-
-                        st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
-
-                        bouton = st.button('I want to have the sdf file of poses in this conformation AND/OR the plots.',
-                                           key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                        if bouton :
-                            st.session_state.ConformationClass.get_sdf_conformations(
-                                1, st.session_state.RMSD_Target_conformation)
-
-                            with open('Conformation1.sdf', "rb") as file:
-                             btn = st.download_button(
-                                        label="Download your sdf file",
-                                        data=file,
-                                        file_name=f"Unique Conformation.sdf",
-                                        key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                        else :
-                            try :
-                                with open(f'Conformation1.sdf', "rb") as file:
-                                     btn = st.download_button(
-                                                label="Download your sdf file",
-                                                data=file,
-                                                file_name=f"Conformation n°1.sdf",
-                                                key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-                            except :
-                                pass
-                            
+                        except :
+                            pass
                 
+                
+                else :
+                    st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
+                    st.session_state.RMSD_Target_conformation = st.slider(
+                        'You want a sdf file and/or a analysis plots including molecules in the unique predominant conformation'
+                        ' with all poses under a RMSD =', 0.0, 15.0, 2.0, key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                    
+                    if st.button('Prepare your sdf file', key = 'CIT_WEB_Unique_Molecule_ConformationTool'):             
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            1, st.session_state.RMSD_Target_conformation)
+                        
+                        with open('Conformation1.sdf', "rb") as file:
+                         btn = st.download_button(
+                                    label="Download your sdf file",
+                                    data=file,
+                                    file_name=f"Unique Conformation.sdf",
+                                    key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                    else :
+                        try :
+                            with open(f'Conformation1.sdf', "rb") as file:
+                                 btn = st.download_button(
+                                            label="Download your sdf file",
+                                            data=file,
+                                            file_name=f"Conformation n°1.sdf",
+                                            key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                        except :
+                            pass
+            
             else :
                 if 'premier_passage' in st.session_state:
                     del st.session_state.premier_passage
@@ -389,7 +355,8 @@ def main():
         with tab2:
             third_checkbox = st.checkbox('Get the cluster hierarchy heatmap')
             if third_checkbox :
-                
+                st.write("Coming soon")
+                """
                 if 'cluster_hierarchy_heatmap' not in st.session_state :
                     sns.set_context('talk')
                     col1, col2 = st.columns(2)
@@ -459,9 +426,9 @@ def main():
                     clusters = []
                     for i in range(st.session_state.n_clusters) :
                         clusters.append([j for j, mol in enumerate(dataframe.loc[:, 'Poses'])
-                                         if dataframe.loc[dataframe.index[j], 'Clusters'] == i])
-                    
-                     
+                                         if dataframe.loc[dataframe.index[j], 'Clusters'] == i])   
+                """
+                
     else :
         if 'uniquemol_delete_activated' in st.session_state:
             if 'n_conformations' in st.session_state:
@@ -479,7 +446,7 @@ def main():
                     except :
                         pass
 
-                del st.session_state.n_conformations
+                #del st.session_state.n_conformations
             
             for key in st.session_state.keys():
                 del st.session_state[key]
