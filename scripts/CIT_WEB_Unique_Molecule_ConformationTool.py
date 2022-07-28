@@ -63,11 +63,10 @@ def main():
             del mols
             os.remove("sdf_file.sdf")
     else:
-        try : 
+        if "sdf_file_stock_unique" in st.session_state :
             del st.session_state.sdf_file_stock_unique
+        if "mol1_unique" in st.session_state :
             del st.session_state.mol1_unique
-        except :
-            pass
 
     #BENCHMARK MOLECULE SECTION#
     
