@@ -39,7 +39,7 @@ def main():
 
     doc_str = "**CIT** - short for **Chemo-Informatic Tools** - is a set of tools for chemo-informatics in order to manipulate or "
     doc_str += "analyse chemo-informatics data. To get started make sure to read the documentation in the [PIA Wiki](https://github.com/Arthurcarre/ChemoTools/wiki)."
-    doc_str += "For general help, questions, suggestions or any other feedback please refer "
+    doc_str += " For general help, questions, suggestions or any other feedback please refer "
     doc_str += "to the [GitHub repository](https://github.com/Arthurcarre/ChemoTools) or contact us directly!"
     doc = st.sidebar.markdown(doc_str)
 
@@ -56,7 +56,7 @@ def main():
     if page == "CIT: ConformationTool":
         st.header("CIT : ConformationTool !")
         st.write("""
-    This tool aims to isolate, within the results of docking simulations, the different consensus conformations and
+    This tool aims to isolate, within the results of docking simulations, the different consensual conformations and
     to quantify the consistency of the poses for each molecule of the same family.
     """)
         tab1, tab2, tab3 = st.tabs(["CIT : Maximum Common Substructure", "CIT : Murcko Scaffold", "CIT : Unique Molecule"])
