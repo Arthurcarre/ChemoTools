@@ -210,164 +210,315 @@ def main():
     #--   CHECKBOX "GET THE SORTED HEATMAP"     --#                                                     
     ############################################### 
 
-        third_checkbox = st.checkbox('Get the sorted heatmap',  key = 'CIT_WEB_MCS_ConformationTool')
-        if third_checkbox :
-            if 'sorted_heatmap' not in st.session_state:
-                with st.spinner('Please wait, the sorted heatmap is coming...'):
-                    st.session_state.ConformationClass.get_sorted_heatmap(
-                        individuals,
-                        RMSD_Target,
-                        loop = 1,
-                        p = Proportion)
-            else:
-                if 'indviduals_deleted' in st.session_state:
-                    st.warning(
-                        f"Attention. The sorting process discarded {st.session_state.indviduals_deleted} individuals")
+        tab1, tab2 = st.tabs(["Sorting Process", "Cluster Hierarchy"])
+        
+        with tab1:
+            third_checkbox = st.checkbox('Get the sorted heatmap',  key = 'CIT_WEB_MCS_ConformationTool')
+            if third_checkbox :
+                if 'sorted_heatmap' not in st.session_state:
+                    with st.spinner('Please wait, the sorted heatmap is coming...'):
+                        st.session_state.ConformationClass.get_sorted_heatmap(
+                            individuals,
+                            RMSD_Target,
+                            loop = 1,
+                            p = Proportion)
+                else:
+                    if 'indviduals_deleted' in st.session_state:
+                        st.warning(
+                            f"Attention. The sorting process discarded {st.session_state.indviduals_deleted} individuals")
 
-                st.pyplot(st.session_state.sorted_heatmap)
-                with open("Sorted_Heatmap.jpeg", "rb") as file:
-                     btn = st.download_button(
-                             label="Download PLOT sorted heatmap",
-                             data=file,
-                             file_name="Sorted_Heatmap.jpeg",
-                             mime="image/jpeg",
-                             key = 'CIT_WEB_MCS_ConformationTool')
-                     
-                st.info(f"There is (are) {st.session_state.n_conformations} predominant pose(s) among all poses.\n")
+                    st.pyplot(st.session_state.sorted_heatmap)
+                    with open("Sorted_Heatmap.jpeg", "rb") as file:
+                         btn = st.download_button(
+                                 label="Download PLOT sorted heatmap",
+                                 data=file,
+                                 file_name="Sorted_Heatmap.jpeg",
+                                 mime="image/jpeg",
+                                 key = 'CIT_WEB_MCS_ConformationTool')
+                         
+                    st.info(f"There is (are) {st.session_state.n_conformations} predominant pose(s) among all poses.\n")
 
-                if 'pdb' in st.session_state :
-                    style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
-                    #bcolor = st.color_picker('Pick A Color', '#ffffff')
-                    pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
-                    best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
-                    for i, mol in enumerate(best_mols) :
-                        merged = Chem.CombineMols(pdb_file, mol)
-                        Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
-                        xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
-                        pdb = xyz_pdb.read().strip()
-                        xyz_pdb.close()
-                        xyzview = py3Dmol.view(width=700,height=500)
-                        xyzview.addModel(pdb, 'pdb')
-                        xyzview.setStyle({style:{'color':'spectrum'}})
-                        #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
-                        xyzview.setStyle({'resn':'UNL'},{'stick':{}})
-                        xyzview.zoomTo({'resn':'UNL'})
-                        showmol(xyzview, height = 500,width=1000)
-                        os.remove(f'Conformation n°{i+1}.pdb')
-                        st.write(f'Conformation n°{i+1}')
-                        with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                    if 'pdb' in st.session_state :
+                        style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
+                        #bcolor = st.color_picker('Pick A Color', '#ffffff')
+                        pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
+                        best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
+                        for i, mol in enumerate(best_mols) :
+                            merged = Chem.CombineMols(pdb_file, mol)
+                            Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
+                            xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
+                            pdb = xyz_pdb.read().strip()
+                            xyz_pdb.close()
+                            xyzview = py3Dmol.view(width=700,height=500)
+                            xyzview.addModel(pdb, 'pdb')
+                            xyzview.setStyle({style:{'color':'spectrum'}})
+                            #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
+                            xyzview.setStyle({'resn':'UNL'},{'stick':{}})
+                            xyzview.zoomTo({'resn':'UNL'})
+                            showmol(xyzview, height = 500,width=1000)
+                            os.remove(f'Conformation n°{i+1}.pdb')
+                            st.write(f'Conformation n°{i+1}')
+                            with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                                 btn = st.download_button(
+                                            label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                            data=file,
+                                             file_name=f"Sample_Conformation{i+1}.sdf")
+
+                    with open("Best_PLPScore_Poses.sdf", "rb") as file:
+                         btn = st.download_button(
+                                    label="Download the SDF file including each of the representatives of a conformation",
+                                    data=file,
+                                    file_name="Best_Score_Poses.sdf")
+
+                    for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
+                        st.write(
+                            f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                            f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
+
+                    st.write("\nIn order to check that each group is different from each other, a table taking " 
+                              "the first individual from each group and calculating the RMSD between each was constructed :\n")
+
+                    st.dataframe(st.session_state.df1)
+
+                    st.write("RMSD value between each representative of each conformation.")
+
+                    st.pyplot(st.session_state.histplot)
+
+                    st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
+                     " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
+
+                    with open("Histograms_Best_Score.jpeg", "rb") as file:
+                         btn = st.download_button(
+                                    label="Download PLOT Histograms",
+                                    data=file,
+                                    file_name="Histograms_Best_Score.jpeg",
+                                    mime="image/jpeg",
+                                    key = 'CIT_WEB_MCS_ConformationTool')
+
+                    ###############################################
+                    #--    BUTTON "PREPARE YOUR SDF FILE"       --#                                                     
+                    ###############################################
+
+                if st.session_state.n_conformations != 1 :
+                    temp_options = range(1, st.session_state.n_conformations + 1)
+                    
+                    if "temp" not in st.session_state :
+                        st.session_state.temp = 1
+                    
+                    st.session_state.temp = st.select_slider("You want a sdf file or plots including molecules in the conformation n°",
+                                                             options=temp_options, value = st.session_state.temp,
+                                                             key = 'CIT_WEB_MCS_ConformationTool')
+                    st.write(f"The Conformation selected is {st.session_state.temp}")
+
+                    st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
+                                                                          key = 'CIT_WEB_MCS_ConformationTool')
+                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+
+                    st.session_state.help_paragraph = (
+                        "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
+                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
+                        "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
+                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
+                    
+                    settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
+                                                    help=st.session_state.help_paragraph, key = 'CIT_WEB_MCS_ConformationTool')
+                    if settings_checkbox :
+                        st.session_state.aspect_plot = st.slider(
+                            'Configure the aspect ratio of the plots', 0.0, 10.0, 1.75,
+                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.",
+                            key = 'CIT_WEB_MCS_ConformationTool')
+
+                        st.session_state.height_plot = st.slider(
+                            'Configure the height of the plots', 0, 50, 18,
+                            help="Height (in inches) of each facet.",
+                            key = 'CIT_WEB_MCS_ConformationTool')
+
+                        st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25,
+                                                                  key = 'CIT_WEB_MCS_ConformationTool')
+                        st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15,
+                                                                  key = 'CIT_WEB_MCS_ConformationTool')
+
+
+                    if st.button('Prepare your sdf file and build plots', key = 'CIT_WEB_MCS_ConformationTool'):             
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            st.session_state.temp,
+                            st.session_state.RMSD_Target_conformation
+                            )
+                        with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
                              btn = st.download_button(
-                                        label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                        label="Download your sdf file",
                                         data=file,
-                                         file_name=f"Sample_Conformation{i+1}.sdf")
+                                        file_name=f"Conformation n°{st.session_state.temp}.sdf",
+                                        key = 'CIT_WEB_MCS_ConformationTool')
 
-                with open("Best_PLPScore_Poses.sdf", "rb") as file:
-                     btn = st.download_button(
-                                label="Download the SDF file including each of the representatives of a conformation",
-                                data=file,
-                                file_name="Best_Score_Poses.sdf")
+                        if "barplot" in st.session_state :
+                            del st.session_state.barplot
+                        if "box_plot" in st.session_state :
+                            del st.session_state.box_plot
+                        if "scatterplot" in st.session_state :
+                            del st.session_state.scatterplot
+                        
+                        if "aspect_plot" not in st.session_state :
+                            st.session_state.aspect_plot = 1.75
+                        if "height_plot" not in st.session_state :
+                            st.session_state.height_plot = 18
+                        if "size_xlabels" not in st.session_state :
+                            st.session_state.size_xlabels = 25
+                        if "size_ylabels" not in st.session_state :
+                            st.session_state.size_ylabels = 15
 
-                for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
-                    st.write(
-                        f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
-                        f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
+                        with st.spinner('Plots are coming. Please wait...'):
+                            try :
+                                st.session_state.ConformationClass.get_plots(
+                                    st.session_state.temp,
+                                    st.session_state.molecule_name_MCS,
+                                    aspect_plot = st.session_state.aspect_plot,
+                                    height_plot = st.session_state.height_plot,
+                                    size_xlabels = st.session_state.size_xlabels,
+                                    size_ylabels = st.session_state.size_ylabels)
 
-                st.write("\nIn order to check that each group is different from each other, a table taking " 
-                          "the first individual from each group and calculating the RMSD between each was constructed :\n")
+                                st.pyplot(st.session_state.barplot)
+                                st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
 
-                st.dataframe(st.session_state.df1)
+                                with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                     btn = st.download_button(
+                                             label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                             data=file,
+                                             file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                             mime="image/jpeg",
+                                             key = 'CIT_WEB_MCS_ConformationTool')
 
-                st.write("RMSD value between each representative of each conformation.")
+                                st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
+                                st.pyplot(st.session_state.box_plot)
+                                with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                     btn = st.download_button(
+                                             label=f"Download Box PLOT Conformation n°{st.session_state.temp} ",
+                                             data=file,
+                                             file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                             mime="image/jpeg",
+                                             key = 'CIT_WEB_MCS_ConformationTool')
+                                     
+                                st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_MCS}.")
+                                st.pyplot(st.session_state.scatterplot)
+                                with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                     btn = st.download_button(
+                                             label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                             data=file,
+                                             file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
+                                             mime="image/jpeg",
+                                             key = 'CIT_WEB_MCS_ConformationTool')
+                            except KeyError :
+                                st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
+                                     f"'{st.session_state.molecule_name_MCS}'. Please correct it.") 
+                    else :
+                        if os.path.exists(f'Conformation{st.session_state.temp}.sdf') == True :
+                            with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                                 btn = st.download_button(
+                                            label="Download your sdf file",
+                                            data=file,
+                                            file_name=f"Conformation n°{st.session_state.temp}.sdf",
+                                            key = 'CIT_WEB_MCS_ConformationTool')
 
-                st.pyplot(st.session_state.histplot)
+                        if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                            st.pyplot(st.session_state.barplot)
 
-                st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
-                 " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
+                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+                            with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg",
+                                         key = 'CIT_WEB_MCS_ConformationTool')
 
-                with open("Histograms_Best_Score.jpeg", "rb") as file:
-                     btn = st.download_button(
-                                label="Download PLOT Histograms",
-                                data=file,
-                                file_name="Histograms_Best_Score.jpeg",
-                                mime="image/jpeg",
-                                key = 'CIT_WEB_MCS_ConformationTool')
+                        if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                            st.pyplot(st.session_state.box_plot)
+                            
+                            st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
+                            with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Box Plot Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg",
+                                         key = 'CIT_WEB_MCS_ConformationTool')
+                        
+                        if os.path.exists(f'Scatter_Plot{st.session_state.temp}.jpeg') == True :    
+                            st.pyplot(st.session_state.scatterplot)
+                            
+                            st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_MCS}.")
+                            with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                         data=file,
+                                         file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
+                                         mime="image/jpeg",
+                                         key = 'CIT_WEB_MCS_ConformationTool')
 
-                ###############################################
-                #--    BUTTON "PREPARE YOUR SDF FILE"       --#                                                     
-                ###############################################
+                else :                              
+                    st.session_state.RMSD_Target_conformation = st.slider(
+                        'You want a sdf file and/or plot analysis including molecules in the unique predominant conformation with all poses under a RMSD =',
+                        0.0, 15.0, 2.0, key = 'CIT_WEB_MCS_ConformationTool')
 
-            if st.session_state.n_conformations != 1 :
-                temp_options = range(1, st.session_state.n_conformations + 1)
-                
-                if "temp" not in st.session_state :
-                    st.session_state.temp = 1
-                
-                st.session_state.temp = st.select_slider("You want a sdf file or plots including molecules in the conformation n°",
-                                                         options=temp_options, value = st.session_state.temp,
-                                                         key = 'CIT_WEB_MCS_ConformationTool')
-                st.write(f"The Conformation selected is {st.session_state.temp}")
+                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
 
-                st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
-                                                                      key = 'CIT_WEB_MCS_ConformationTool')
-                st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+                    st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
 
-                st.session_state.help_paragraph = (
-                    "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
-                    "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
-                    "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
-                    " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
-                
-                settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
-                                                help=st.session_state.help_paragraph, key = 'CIT_WEB_MCS_ConformationTool')
-                if settings_checkbox :
-                    st.session_state.aspect_plot = st.slider(
-                        'Configure the aspect ratio of the plots', 0.0, 10.0, 1.75,
-                        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.",
-                        key = 'CIT_WEB_MCS_ConformationTool')
+                    st.session_state.help_paragraph = (
+                        "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
+                        "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
+                        "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
+                        " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
+                    
+                    settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
+                                                    help=st.session_state.help_paragraph, key = 'CIT_WEB_MCS_ConformationTool')
+                    if settings_checkbox :
+                        st.session_state.aspect_plot = st.slider(
+                            'Configure the aspect ratio of the plts', 0.0, 10.0, 1.75,
+                            help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.",
+                            key = 'CIT_WEB_MCS_ConformationTool')
 
-                    st.session_state.height_plot = st.slider(
-                        'Configure the height of the plots', 0, 50, 18,
-                        help="Height (in inches) of each facet.",
-                        key = 'CIT_WEB_MCS_ConformationTool')
+                        st.session_state.height_plot = st.slider(
+                            'Configure the height of the plots', 0, 50, 18,
+                            help="Height (in inches) of each facet.", key = 'CIT_WEB_MCS_ConformationTool')
 
-                    st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25,
-                                                              key = 'CIT_WEB_MCS_ConformationTool')
-                    st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15,
-                                                              key = 'CIT_WEB_MCS_ConformationTool')
+                        st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25,
+                                                                  key = 'CIT_WEB_MCS_ConformationTool')
+                        st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15,
+                                                                  key = 'CIT_WEB_MCS_ConformationTool')
 
 
-                if st.button('Prepare your sdf file and build plots', key = 'CIT_WEB_MCS_ConformationTool'):             
-                    st.session_state.ConformationClass.get_sdf_conformations(
-                        st.session_state.temp,
-                        st.session_state.RMSD_Target_conformation
-                        )
-                    with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                    bouton = st.button('Prepare your sdf file of poses in this conformation.', key = 'CIT_WEB_MCS_ConformationTool')
+                    if bouton :
+                        st.session_state.ConformationClass.get_sdf_conformations(
+                            1, st.session_state.RMSD_Target_conformation)
+
+                        with open('Conformation1.sdf', "rb") as file:
                          btn = st.download_button(
                                     label="Download your sdf file",
                                     data=file,
-                                    file_name=f"Conformation n°{st.session_state.temp}.sdf",
+                                    file_name=f"Unique Conformation.sdf",
                                     key = 'CIT_WEB_MCS_ConformationTool')
 
-                    if "barplot" in st.session_state :
-                        del st.session_state.barplot
-                    if "box_plot" in st.session_state :
-                        del st.session_state.box_plot
-                    if "scatterplot" in st.session_state :
-                        del st.session_state.scatterplot
-                    
-                    if "aspect_plot" not in st.session_state :
-                        st.session_state.aspect_plot = 1.75
-                    if "height_plot" not in st.session_state :
-                        st.session_state.height_plot = 18
-                    if "size_xlabels" not in st.session_state :
-                        st.session_state.size_xlabels = 25
-                    if "size_ylabels" not in st.session_state :
-                        st.session_state.size_ylabels = 15
-
-                    with st.spinner('Plots are coming. Please wait...'):
+                        if "barplot" in st.session_state :
+                            del st.session_state.barplot
+                        if "box_plot" in st.session_state :
+                            del st.session_state.box_plot
+                        if "scatterplot" in st.session_state :
+                            del st.session_state.scatterplot 
+                        
+                        if "aspect_plot" not in st.session_state :
+                            st.session_state.aspect_plot = 1.75
+                        if "height_plot" not in st.session_state :
+                            st.session_state.height_plot = 18
+                        if "size_xlabels" not in st.session_state :
+                            st.session_state.size_xlabels = 25
+                        if "size_ylabels" not in st.session_state :
+                            st.session_state.size_ylabels = 15
+                        
                         try :
                             st.session_state.ConformationClass.get_plots(
-                                st.session_state.temp,
+                                1,
                                 st.session_state.molecule_name_MCS,
                                 aspect_plot = st.session_state.aspect_plot,
                                 height_plot = st.session_state.height_plot,
@@ -377,260 +528,401 @@ def main():
                             st.pyplot(st.session_state.barplot)
                             st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
 
-                            with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                            with open(f"Barplot_Conformation1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                         label=f"Download Bar PLOT Conformation n°1 ",
                                          data=file,
-                                         file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                         file_name=f"Barplot_Conformation n°1.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
 
                             st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
                             st.pyplot(st.session_state.box_plot)
-                            with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                            with open(f"Box_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Box PLOT Conformation n°{st.session_state.temp} ",
+                                         label=f"Download Box Plot Conformation n°1 ",
                                          data=file,
-                                         file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                         file_name=f"Boxplot2_Conformation n°1.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
-                                 
-                            st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_MCS}.")
+
+                            st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score_MCS}.")
                             st.pyplot(st.session_state.scatterplot)
-                            with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                            with open(f"Scatter_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                         label=f"Download Scatter Plot Conformation n°1 ",
                                          data=file,
-                                         file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
+                                         file_name=f"Scatter_Plot n°1.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
                         except KeyError :
                             st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
-                                 f"'{st.session_state.molecule_name_MCS}'. Please correct it.") 
-                else :
-                    if os.path.exists(f'Conformation{st.session_state.temp}.sdf') == True :
-                        with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
-                             btn = st.download_button(
-                                        label="Download your sdf file",
-                                        data=file,
-                                        file_name=f"Conformation n°{st.session_state.temp}.sdf",
-                                        key = 'CIT_WEB_MCS_ConformationTool')
-
-                    if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
-                        st.pyplot(st.session_state.barplot)
-
-                        st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-                        with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
-                                     data=file,
-                                     file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-
-                    if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
-                        st.pyplot(st.session_state.box_plot)
+                                     f"'{st.session_state.molecule_name_MCS}'. Please correct it.")         
+                    else :
+                        if os.path.exists(f'Conformation1.sdf') == True :
+                            with open(f'Conformation1.sdf', "rb") as file:
+                                 btn = st.download_button(
+                                            label="Download your sdf file",
+                                            data=file,
+                                            file_name=f"Conformation n°1.sdf",
+                                            key = 'CIT_WEB_MCS_ConformationTool')
                         
-                        st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
-                        with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Box Plot Conformation n°{st.session_state.temp} ",
-                                     data=file,
-                                     file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-                    
-                    if os.path.exists(f'Scatter_Plot{st.session_state.temp}.jpeg') == True :    
-                        st.pyplot(st.session_state.scatterplot)
+                        if os.path.exists(f'Barplot_Conformation1.jpeg') == True :
+                            st.pyplot(st.session_state.barplot)
+                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+
+                            with open(f"Barplot_Conformation1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Bar PLOT Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Barplot_Conformation n°1.jpeg",
+                                         mime="image/jpeg",
+                                         key = 'CIT_WEB_MCS_ConformationTool')
                         
-                        st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_MCS}.")
-                        with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
-                                     data=file,
-                                     file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
+                        if os.path.exists('Box_Plot1.jpeg') == True :
+                            st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
+                            st.pyplot(st.session_state.box_plot)
+                            with open(f"Box_Plot1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Box Plot Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Boxplot2_Conformation n°1.jpeg",
+                                         mime="image/jpeg",
+                                         key = 'CIT_WEB_MCS_ConformationTool')
+                        
+                        if os.path.exists('Scatter_Plot1.jpeg') == True :
+                            st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score_MCS}.")
+                            st.pyplot(st.session_state.scatterplot)
+                            with open(f"Scatter_Plot1.jpeg", "rb") as file:
+                                 btn = st.download_button(
+                                         label=f"Download Scatter Plot Conformation n°1 ",
+                                         data=file,
+                                         file_name=f"Scatter_Plot n°1.jpeg",
+                                         mime="image/jpeg",
+                                         key = 'CIT_WEB_MCS_ConformationTool')
+                    
+            else :
+                if 'sorted_heatmap' in st.session_state:
+                    del st.session_state.sorted_heatmap
+                    if 'temp' in st.session_state:
+                        del st.session_state.temp
+                    if 'RMSD_Target_conformation' in st.session_state:
+                        del st.session_state.RMSD_Target_conformation
+                    if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
+                        os.remove('Sorted_Heatmap.jpeg')
+                    if os.path.exists(f'Histograms_Best_Score.jpeg') == True :
+                        os.remove('Histograms_Best_Score.jpeg')
+                    if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
+                        os.remove('Sample_Best_PLPScore_Poses.sdf')
+                    if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
+                        os.remove('Best_PLPScore_Poses.sdf')
 
-            else :                              
-                st.session_state.RMSD_Target_conformation = st.slider(
-                    'You want a sdf file and/or plot analysis including molecules in the unique predominant conformation with all poses under a RMSD =',
-                    0.0, 15.0, 2.0, key = 'CIT_WEB_MCS_ConformationTool')
-
-                st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
-
-                st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
-
-                st.session_state.help_paragraph = (
-                    "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
-                    "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
-                    "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
-                    " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
+                    if "n_conformations" in st.session_state :
+                        for i in range(st.session_state.n_conformations):
+                            if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
+                                os.remove(f'Sample_Conformation{i+1}.sdf')
+                            if os.path.exists(f'Conformation{i+1}.sdf') == True :
+                                os.remove(f'Conformation{i+1}.sdf')
+                            if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
+                                os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                            if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
+                                os.remove(f'Box_Plot{i+1}.jpeg')
+                            if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
+                                os.remove(f'Scatter_Plot{i+1}.jpeg')
+        with tab2:
+            col1, col2 = st.columns(2)
+            with col1 :                
+                metric = st.selectbox('Which metric do you want to use to compute the pairwise distances between observations in n-dimensional space ?',
+                                      ('canberra', 'euclidean', 'hamming', 'braycurtis','chebyshev', 'cityblock', 'correlation',
+                                       'cosine', 'dice', 'hamming', 'jaccard', 'jensenshannon', 'kulsinski', 'mahalanobis',
+                                       'matching', 'minkowski', 'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener',
+                                       'sokalsneath', 'sqeuclidean', 'yule'), key = 'CIT_WEB_MCS_ConformationTool',
+                                       help = "Before changing this setting, make sure the following checkbox is unchecked")
+                st.session_state.metric = metric
                 
-                settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
-                                                help=st.session_state.help_paragraph, key = 'CIT_WEB_MCS_ConformationTool')
-                if settings_checkbox :
-                    st.session_state.aspect_plot = st.slider(
-                        'Configure the aspect ratio of the plts', 0.0, 10.0, 1.75,
-                        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.",
-                        key = 'CIT_WEB_MCS_ConformationTool')
-
-                    st.session_state.height_plot = st.slider(
-                        'Configure the height of the plots', 0, 50, 18,
-                        help="Height (in inches) of each facet.", key = 'CIT_WEB_MCS_ConformationTool')
-
-                    st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25,
-                                                              key = 'CIT_WEB_MCS_ConformationTool')
-                    st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15,
-                                                              key = 'CIT_WEB_MCS_ConformationTool')
-
-
-                bouton = st.button('Prepare your sdf file of poses in this conformation.', key = 'CIT_WEB_MCS_ConformationTool')
-                if bouton :
-                    st.session_state.ConformationClass.get_sdf_conformations(
-                        1, st.session_state.RMSD_Target_conformation)
-
-                    with open('Conformation1.sdf', "rb") as file:
-                     btn = st.download_button(
-                                label="Download your sdf file",
-                                data=file,
-                                file_name=f"Unique Conformation.sdf",
-                                key = 'CIT_WEB_MCS_ConformationTool')
-
-                    if "barplot" in st.session_state :
-                        del st.session_state.barplot
-                    if "box_plot" in st.session_state :
-                        del st.session_state.box_plot
-                    if "scatterplot" in st.session_state :
-                        del st.session_state.scatterplot 
+            with col2 :
+                method = st.selectbox('Which method do you want to use to compute the distance  between two clusters ?',
+                                        ('average', 'single', 'complete', 'weighted', 'centroid', 'median', 'ward'),
+                                       key = 'CIT_WEB_MCS_ConformationTool',
+                                       help = "Before changing this setting, make sure the following checkbox is unchecked")
+                st.session_state.method = method
+            third_checkbox_2 = st.checkbox('Get the cluster hierarchy heatmap', key = 'CIT_WEB_MCS_ConformationTool')
+            if third_checkbox_2 :
+                if "cluster_hierarchy_heatmap" not in st.session_state :
+                    st.session_state.ConformationClass.get_cluster_heatmap(individuals,
+                                                                           method = st.session_state.method,
+                                                                           metric = st.session_state.metric)
                     
-                    if "aspect_plot" not in st.session_state :
-                        st.session_state.aspect_plot = 1.75
-                    if "height_plot" not in st.session_state :
-                        st.session_state.height_plot = 18
-                    if "size_xlabels" not in st.session_state :
-                        st.session_state.size_xlabels = 25
-                    if "size_ylabels" not in st.session_state :
-                        st.session_state.size_ylabels = 15
+                    if "n_clusters" not in st.session_state :
+                        st.session_state.n_clusters = 2
+                        
+                    n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 30, st.session_state.n_clusters,
+                                            key = 'CIT_WEB_MCS_ConformationTool')
+                    st.session_state.n_clusters = n_clusters
+                    st.session_state.n_clusters_selected = n_clusters
                     
-                    try :
-                        st.session_state.ConformationClass.get_plots(
-                            1,
-                            st.session_state.molecule_name_MCS,
-                            aspect_plot = st.session_state.aspect_plot,
-                            height_plot = st.session_state.height_plot,
-                            size_xlabels = st.session_state.size_xlabels,
-                            size_ylabels = st.session_state.size_ylabels)
-
-                        st.pyplot(st.session_state.barplot)
-                        st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-
-                        with open(f"Barplot_Conformation1.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Bar PLOT Conformation n°1 ",
-                                     data=file,
-                                     file_name=f"Barplot_Conformation n°1.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-
-                        st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
-                        st.pyplot(st.session_state.box_plot)
-                        with open(f"Box_Plot1.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Box Plot Conformation n°1 ",
-                                     data=file,
-                                     file_name=f"Boxplot2_Conformation n°1.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-
-                        st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score_MCS}.")
-                        st.pyplot(st.session_state.scatterplot)
-                        with open(f"Scatter_Plot1.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Scatter Plot Conformation n°1 ",
-                                     data=file,
-                                     file_name=f"Scatter_Plot n°1.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-                    except KeyError :
-                        st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
-                                 f"'{st.session_state.molecule_name_MCS}'. Please correct it.")         
+                    if st.button('Get analysis', key = 'CIT_WEB_MCS_ConformationTool'):
+                        st.session_state.ConformationClass.analyze_cluster_heatmap(st.session_state.n_clusters, p = Proportion)
                 else :
-                    if os.path.exists(f'Conformation1.sdf') == True :
-                        with open(f'Conformation1.sdf', "rb") as file:
-                             btn = st.download_button(
-                                        label="Download your sdf file",
-                                        data=file,
-                                        file_name=f"Conformation n°1.sdf",
-                                        key = 'CIT_WEB_MCS_ConformationTool')
-                    
-                    if os.path.exists(f'Barplot_Conformation1.jpeg') == True :
-                        st.pyplot(st.session_state.barplot)
-                        st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-
-                        with open(f"Barplot_Conformation1.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Bar PLOT Conformation n°1 ",
+                    if "cluster_hierarchy_heatmap" in st.session_state :
+                        st.pyplot(st.session_state.cluster_hierarchy_heatmap)
+                        with open("Cluster_Hierarchy_Heatmap.jpeg", "rb") as file:
+                            btn = st.download_button(
+                                     label="Download PLOT : Cluster Hierarchy Heatmap",
                                      data=file,
-                                     file_name=f"Barplot_Conformation n°1.jpeg",
+                                     file_name="Cluster_Hierarchy_Heatmap.jpeg",
                                      mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-                    
-                    if os.path.exists('Box_Plot1.jpeg') == True :
-                        st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
-                        st.pyplot(st.session_state.box_plot)
-                        with open(f"Box_Plot1.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Box Plot Conformation n°1 ",
-                                     data=file,
-                                     file_name=f"Boxplot2_Conformation n°1.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-                    
-                    if os.path.exists('Scatter_Plot1.jpeg') == True :
-                        st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score_MCS}.")
-                        st.pyplot(st.session_state.scatterplot)
-                        with open(f"Scatter_Plot1.jpeg", "rb") as file:
-                             btn = st.download_button(
-                                     label=f"Download Scatter Plot Conformation n°1 ",
-                                     data=file,
-                                     file_name=f"Scatter_Plot n°1.jpeg",
-                                     mime="image/jpeg",
-                                     key = 'CIT_WEB_MCS_ConformationTool')
-                
-        else :
-            if 'sorted_heatmap' in st.session_state:
-                del st.session_state.sorted_heatmap
-            if 'temp' in st.session_state:
-                del st.session_state.temp
-            if 'RMSD_Target_conformation' in st.session_state:
-                del st.session_state.RMSD_Target_conformation
-            if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
-                os.remove('Sorted_Heatmap.jpeg')
-            if os.path.exists(f'Histograms_Best_Score.jpeg') == True :
-                os.remove('Histograms_Best_Score.jpeg')
-            if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
-                os.remove('Sample_Best_PLPScore_Poses.sdf')
-            if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
-                os.remove('Best_PLPScore_Poses.sdf')
+                                     key = 'CIT_WEB_MCS_ConformationTool')                       
+                            
+                        n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 30,
+                                               st.session_state.n_clusters, key = 'CIT_WEB_MCS_ConformationTool')
+                        st.session_state.n_clusters = n_clusters
+                        
+                        if st.button('Get analysis', key = 'CIT_WEB_MCS_ConformationTool'):
+                            st.session_state.n_clusters_selected = st.session_state.n_clusters
+                            st.session_state.ConformationClass.analyze_cluster_heatmap(st.session_state.n_clusters, p = Proportion)
+                            if st.button('Continue', key = 'CIT_WEB_MCS_ConformationTool'):
+                                "Rerun"
+                            
+                        else :
+                            if "n_conformations" in st.session_state and st.session_state.n_clusters_selected == st.session_state.n_clusters:
+                                if 'pdb' in st.session_state :
+                                    style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
+                                    #bcolor = st.color_picker('Pick A Color', '#ffffff')
+                                    pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
+                                    best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
+                                    for i, mol in enumerate(best_mols) :
+                                        merged = Chem.CombineMols(pdb_file, mol)
+                                        Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
+                                        xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
+                                        pdb = xyz_pdb.read().strip()
+                                        xyz_pdb.close()
+                                        xyzview = py3Dmol.view(width=700,height=500)
+                                        xyzview.addModel(pdb, 'pdb')
+                                        xyzview.setStyle({style:{'color':'spectrum'}})
+                                        #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
+                                        xyzview.setStyle({'resn':'UNL'},{'stick':{}})
+                                        xyzview.zoomTo({'resn':'UNL'})
+                                        showmol(xyzview, height = 500,width=1000)
+                                        os.remove(f'Conformation n°{i+1}.pdb')
+                                        st.write(f'Conformation n°{i+1}')
+                                        with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                                             btn = st.download_button(
+                                                 label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                                 data=file,
+                                                 file_name=f"Sample_Conformation{i+1}.sdf",
+                                                 key = 'CIT_WEB_MCS_ConformationTool')
 
-            if "n_conformations" in st.session_state :
-                for i in range(st.session_state.n_conformations):
-                    if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
-                        os.remove(f'Sample_Conformation{i+1}.sdf')
-                    if os.path.exists(f'Conformation{i+1}.sdf') == True :
-                        os.remove(f'Conformation{i+1}.sdf')
-                    if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
-                        os.remove(f'Barplot_Conformation{i+1}.jpeg')
-                    if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
-                        os.remove(f'Box_Plot{i+1}.jpeg')
-                    if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
-                        os.remove(f'Scatter_Plot{i+1}.jpeg')
+                                with open("Best_PLPScore_Poses.sdf", "rb") as file:
+                                     btn = st.download_button(
+                                                label="Download the SDF file including each of the representatives of a conformation",
+                                                data=file,
+                                                file_name="Best_Score_Poses.sdf",
+                                                key = 'CIT_WEB_MCS_ConformationTool')
 
+                                st.info(f"There is (are) {st.session_state.n_conformations} predominant pose(s) among all poses.\n")
+                                for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
+                                    st.write(
+                                        f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                                        f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
+
+                                st.write("\nIn order to check that each group is different from each other, a table taking " 
+                                          "the **with the best score** from each group and calculating the RMSD between each was constructed :\n")
+
+                                st.dataframe(st.session_state.df1)
+
+                                st.write("RMSD value between each representative of each conformation.")
+
+                                st.pyplot(st.session_state.histplot)
+
+                                st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
+                                 " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
+
+                                with open("Histograms_Best_Score.jpeg", "rb") as file:
+                                     btn = st.download_button(
+                                                label="Download PLOT Histograms",
+                                                data=file,
+                                                file_name="Histograms_Best_Score.jpeg",
+                                                mime="image/jpeg", key = 'CIT_WEB_MCS_ConformationTool')
+                                
+                                temp_options = range(1, st.session_state.n_conformations + 1)
+                                if "temp" not in st.session_state :
+                                    st.session_state.temp = 1
+                                st.session_state.temp = st.select_slider("You want a sdf file and/or a analysis plots including molecules in the conformation n°",
+                                                                         options=temp_options,
+                                                                         value = st.session_state.temp,
+                                                                         key = 'CIT_WEB_MCS_ConformationTool')
+                                
+                                st.write(f"The Conformation selected is {st.session_state.temp}")
+
+                                st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
+                                                                                      key = 'CIT_WEB_MCS_ConformationTool')
+                                st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+                           
+                                st.session_state.help_paragraph = (
+                                    "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
+                                    "- Aspect ratio = 3, Height = 5, Xlabels Size = 25, Ylabels Size = 30\n "
+                                    "\nif your number of molecules (not number of poses) = 75 :\n - Aspect ratio = 1.75,"
+                                    " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
+                                
+                                settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
+                                                                help=st.session_state.help_paragraph)
+                                if settings_checkbox :
+                                    st.session_state.aspect_plot = st.slider(
+                                        'Configure the aspect ratio of the plts', 0.0, 10.0, 1.75,
+                                        help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.")
+
+                                    st.session_state.height_plot = st.slider(
+                                        'Configure the height of the plots', 0, 50, 18,
+                                        help="Height (in inches) of each facet.")
+
+                                    st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
+                                    st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
+                                
+                                if st.button('Prepare your sdf file', key = 'CIT_WEB_MCS_ConformationTool'):
+                                    st.session_state.ConformationClass.get_sdf_conformations(
+                                        st.session_state.temp,
+                                        st.session_state.RMSD_Target_conformation)
+                                    
+                                    with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                                         btn = st.download_button(
+                                                    label="Download your sdf file",
+                                                    data=file,
+                                                     file_name=f"Conformation n°{st.session_state.temp}.sdf")
+
+                                    if "barplot" in st.session_state :
+                                        del st.session_state.barplot
+                                    if "box_plot" in st.session_state :
+                                        del st.session_state.box_plot
+                                    if "scatterplot" in st.session_state :
+                                        del st.session_state.scatterplot
+                                    
+                                    if "aspect_plot" not in st.session_state :
+                                        st.session_state.aspect_plot = 1.75
+                                    if "height_plot" not in st.session_state :
+                                        st.session_state.height_plot = 18
+                                    if "size_xlabels" not in st.session_state :
+                                        st.session_state.size_xlabels = 25
+                                    if "size_ylabels" not in st.session_state :
+                                        st.session_state.size_ylabels = 15
+
+                                    with st.spinner('Plots are coming. Please wait...'):
+                                        try :
+                                            st.session_state.ConformationClass.get_plots(
+                                                st.session_state.temp,
+                                                st.session_state.molecule_name_MCS,
+                                                aspect_plot = st.session_state.aspect_plot,
+                                                height_plot = st.session_state.height_plot,
+                                                size_xlabels = st.session_state.size_xlabels,
+                                                size_ylabels = st.session_state.size_ylabels)
+
+                                            st.pyplot(st.session_state.barplot)
+                                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+
+                                            with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                                 btn = st.download_button(
+                                                         label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                                         data=file,
+                                                         file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                                         mime="image/jpeg")
+
+                                            st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
+                                            st.pyplot(st.session_state.box_plot)
+                                            with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                                 btn = st.download_button(
+                                                         label=f"Download Box PLOT Conformation n°{st.session_state.temp} ",
+                                                         data=file,
+                                                         file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                                         mime="image/jpeg")
+                                            st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_MCS}.")
+                                            st.pyplot(st.session_state.scatterplot)
+                                            with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                                 btn = st.download_button(
+                                                         label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                                         data=file,
+                                                         file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
+                                                         mime="image/jpeg")
+                                        except KeyError :
+                                            st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
+                                                 f"'{st.session_state.molecule_name_MCS}'. Please correct it.") 
+                                else :
+                                    if os.path.exists(f'Conformation{st.session_state.temp}.sdf') == True :
+                                        with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                                             btn = st.download_button(
+                                                        label="Download your sdf file",
+                                                        data=file,
+                                                         file_name=f"Conformation n°{st.session_state.temp}.sdf")
+
+                                    if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                                        st.pyplot(st.session_state.barplot)
+
+                                        st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+                                        with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                             btn = st.download_button(
+                                                     label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                                     data=file,
+                                                     file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                                     mime="image/jpeg")
+
+                                    if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                                        st.pyplot(st.session_state.box_plot)
+                                        
+                                        st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
+                                        with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                             btn = st.download_button(
+                                                     label=f"Download Box Plot Conformation n°{st.session_state.temp} ",
+                                                     data=file,
+                                                     file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                                     mime="image/jpeg")
+                                    
+                                    if os.path.exists(f'Scatter_Plot{st.session_state.temp}.jpeg') == True :    
+                                        st.pyplot(st.session_state.scatterplot)
+                                        
+                                        st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_MCS}.")
+                                        with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
+                                             btn = st.download_button(
+                                                     label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                                     data=file,
+                                                     file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
+                                                     mime="image/jpeg")
+                      
+            else:
+                if "cluster_hierarchy_heatmap" in st.session_state :
+                    del st.session_state.cluster_hierarchy_heatmap
+                    if "n_conformations" in st.session_state :
+                        del st.session_state.n_conformations
+                    if 'temp' in st.session_state:
+                        del st.session_state.temp
+                    if 'RMSD_Target_conformation' in st.session_state:
+                        del st.session_state.RMSD_Target_conformation
+                    if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
+                        os.remove('Sorted_Heatmap.jpeg')
+                    if os.path.exists(f'Histograms_Best_Score.jpeg') == True :
+                        os.remove('Histograms_Best_Score.jpeg')
+                    if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
+                        os.remove('Sample_Best_PLPScore_Poses.sdf')
+                    if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
+                        os.remove('Best_PLPScore_Poses.sdf')
+
+                    if "n_conformations" in st.session_state :
+                        for i in range(st.session_state.n_conformations):
+                            if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
+                                os.remove(f'Sample_Conformation{i+1}.sdf')
+                            if os.path.exists(f'Conformation{i+1}.sdf') == True :
+                                os.remove(f'Conformation{i+1}.sdf')
+                            if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
+                                os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                            if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
+                                os.remove(f'Box_Plot{i+1}.jpeg')
+                            if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
+                                os.remove(f'Scatter_Plot{i+1}.jpeg')
+              
     else :
         if 'MCS_delete_activated' in st.session_state:
             if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
                 os.remove('Sorted_Heatmap.jpeg')
+            if os.path.exists(f'Cluster_Hierarchy_Heatmap.jpeg.jpeg') == True :
+                os.remove('Cluster_Hierarchy_Heatmap.jpeg.jpeg')
             if os.path.exists(f'Histograms_Best_Score.jpeg') == True :
                 os.remove('Histograms_Best_Score.jpeg')
             if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
@@ -638,7 +930,7 @@ def main():
             if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
                 os.remove('Best_PLPScore_Poses.sdf')
 
-            if "n_conformations" in st.session_state :
+            if "n_conformations" in st.session_state or "n_clusters" in st.session_state :
                 for i in range(st.session_state.n_conformations):
                     if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
                         os.remove(f'Sample_Conformation{i+1}.sdf')
