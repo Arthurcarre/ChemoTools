@@ -204,24 +204,12 @@ class ConformationTool :
         
         del self.mols_brut
         
-    def get_heatmap_sample(self, individuals = 200, print_plot = True) :
-        """
-        -- DESCRIPTION --
-        This function takes as input a number that constitutes the amount of the sample of poses from the filtered sdf file
-        taken randomly and without rebate. The RMSD is then calculated between each individual and the result is reported
-        in a dataframe that forms the basis for the construction of a heatmap that is returned.
-            PARAMS:
-                - individuals (int): Amount of the sample
-        """
-        try :
-            sample = random.sample(range(len(self.mols)), individuals)
-        except ValueError as e :
-            st.error("OOPS ! You're trying to define a sample more larger than the numbers of molecules/poses in your sdf.",
-                     " This is impossible, please redefine a size of sample equal or smaller to your sdf")
+            
+    def get_RMSD_dataframe_sample(self) :
         
-        array = np.ones(shape=(len(sample),len(sample)))
-        for i, indivduali in enumerate(sample) :
-            for j, indivdualj in enumerate(sample) :
+        array = np.ones(shape=(len(self.sample),len(self.sample)))
+        for i, indivduali in enumerate(self.sample) :
+            for j, indivdualj in enumerate(self.sample) :
                 if self.conformation_tool == "Unique":
                     array[i, j] = CalcRMS(self.mols[indivduali],
                                           self.mols[indivdualj])
@@ -244,7 +232,29 @@ class ConformationTool :
                     
 
         df = pd.DataFrame(
-            array, index=list(range(len(sample))), columns=list(range(len(sample))))
+            array, index=list(range(len(self.sample))), columns=list(range(len(self.sample))))
+        
+        if self.streamlit == True:
+            st.session_state.df_sample = df
+            
+        return df
+    
+    def get_heatmap_sample(self, individuals = 200, print_plot = True) :
+        """
+        -- DESCRIPTION --
+        This function takes as input a number that constitutes the amount of the sample of poses from the filtered sdf file
+        taken randomly and without rebate. The RMSD is then calculated between each individual and the result is reported
+        in a dataframe that forms the basis for the construction of a heatmap that is returned.
+            PARAMS:
+                - individuals (int): Amount of the sample
+        """
+        try :
+            sample = random.sample(range(len(self.mols)), individuals)
+        except ValueError as e :
+            st.error("OOPS ! You're trying to define a sample more larger than the numbers of molecules/poses in your sdf.",
+                     " This is impossible, please redefine a size of sample equal or smaller to your sdf")
+                    
+        df = self.get_RMSD_dataframe_sample()
 
         if print_plot == True :  
             fig, ax = plt.subplots(figsize=(20, 10))
@@ -256,7 +266,432 @@ class ConformationTool :
             st.pyplot(fig)
             st.session_state.heatmap = fig
     
-    def get_sorted_heatmap(self, individuals = 200, RMSDthreshold = 3.0, loop = 3, p = 0.05) :
+    def get_predominant_poses(self, output_liste, p) :
+        """
+        -- DESCRIPTION --
+        This function takes as input the list from the "sorted_list_lengroups" function at the end of
+        the sorting process. Then, it retrieves in a new list the groups (lists) of individuals that
+        constitute more than p th of the total number of individuals. 
+            PARAMS:
+                - input_list (list): List resulting from the sorting process function "sorted_list_lengroups"
+                - p (float): Minimum proportion (value between 0 and 1) of individuals in a group within the
+                sample to consider that group large enough to be representative of a full conformation.
+            RETURNS:
+                - output_list (list): List including only the largest groups (lists) from the input_list
+        """
+
+        predominant_poses = [group for group in output_liste if len(group)/len(self.sample)*100 > p*len(self.sample)]
+        
+        if self.streamlit == True :
+            st.info(f"There is (are) {len(predominant_poses)} predominant pose(s) among all poses.\n")
+            st.session_state.n_conformations = len(predominant_poses)
+            st.session_state.predominant_poses = predominant_poses
+            for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
+                st.write(
+                    f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                    f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
+
+        for i, predominant_pose in enumerate(predominant_poses) :
+            print(f"The predominant conformation n°{i+1} represents {len(predominant_pose)/len(self.sample)*100:.1f}", 
+                  f"% of the sample, i.e. {len(predominant_pose)} on {len(self.sample)} poses in total.")
+        return predominant_poses
+
+    def get_sample_indice_best_score(self, predominant_poses) :
+        """
+        -- DESCRIPTION --
+        This function takes as input the list from the "get_predominant_poses" function. This function
+        determines which individuals have the best score (according to the scoring function from the Docking
+        simulations) in each predominant group and inserts in a new list that will be returned the index
+        of those individuals who have the best score and then become the representatives of their group,
+        the representatives of their conformation.
+            PARAMS:
+                - input_list (list) : List from the fonction "get_predominant_poses"
+            RETURNS:
+                - index_best_score (list) : List including the index of poses in the sample which represent
+                their conformation.
+        """
+        index_best_score = []
+        m = -1
+
+        for group in predominant_poses :
+            m += 1
+            n = -1
+            suppl = []
+            for individual in group :
+                n += 1
+                suppl.append(self.mols[self.sample[predominant_poses[m][n]]])
+            PLPscore = [x.GetProp(self.score) for x in suppl]
+            best_score = 0
+            for k in PLPscore :
+                if float(k) > float(best_score) :
+                    best_score = k
+                    indice = PLPscore.index(k)
+            index_best_score.append(indice)
+        return index_best_score
+    
+    def get_SDF_Sample_and_Best_Score_Poses(self, sample_predominant_poses, sample_indice_best_score) :
+        """
+        -- DESCRIPTION --
+        This function makes it possible to obtain the sdf file which contains the poses which have
+        the best score (according to the scoring function resulting from the docking simulation) in
+        one of the various conformations existing among the individuals of the sample BUT ALSO, in a
+        different sdf file, those among all the poses of the sdf file deposited in input of this class
+        then filtered. This function also provides a sdf file for each conformation containing all the
+        individuals from the sample within the groups that characterise these conformations.
+            PARAMS:
+                - sample_predominant_poses (list): List including all individuals of the largest groups
+                from the sorting process 
+                - sample_indice_best_score (list): List including the index of poses in the sample which
+                represent their conformation
+        """
+        conformations = (self.mols[self.sample[group[indice]]]
+                         for group, indice in zip(sample_predominant_poses, sample_indice_best_score))
+
+        with Chem.SDWriter("Sample_Best_PLPScore_Poses.sdf") as w:
+            for m in conformations:
+                w.write(m)
+        w.close()
+
+        for k, group in enumerate(sample_predominant_poses) :
+            with Chem.SDWriter(f"Sample_Conformation{k+1}.sdf") as w : 
+                for m in group :
+                    mol = self.mols[self.sample[m]]
+                    w.write(mol)
+            w.close()
+
+        a_supprimer = []
+        for i, indice in enumerate(sample_indice_best_score) :
+            subliste = []
+            with Chem.SDWriter(f"À_supprimer{i+1}.sdf") as w:
+                if self.conformation_tool == "Unique":
+                    for j, mol in enumerate(self.mols) :
+                        result = CalcRMS(self.mols[self.sample[sample_predominant_poses[i][indice]]],
+                                         mol)
+                        if result < 2 :
+                            subliste.append(self.mols[j])
+                            w.write(self.mols[j]) 
+                    copy1 = copy.deepcopy(subliste)
+                    a_supprimer.append(copy1)
+                        
+                elif self.conformation_tool == "Murcko":
+                    for j, mol in enumerate(self.mols) :
+                        try:
+                            result = CalcRMS(GetScaffoldForMol(self.mols[self.sample[sample_predominant_poses[i][indice]]]),
+                                                       GetScaffoldForMol(mol))
+                        except RuntimeError:
+                            result = CalcRMS(GetScaffoldForMol(mol),
+                                             GetScaffoldForMol(self.mols[self.sample[sample_predominant_poses[i][indice]]]))
+                        if result < 2 :
+                            subliste.append(self.mols[j])
+                            w.write(self.mols[j]) 
+                    copy1 = copy.deepcopy(subliste)
+                    a_supprimer.append(copy1)
+
+                elif self.conformation_tool == "MCS":
+                    for j, mol in enumerate(self.MCS_mols) :
+                        try:
+                            result = CalcRMS(self.MCS_mols[self.sample[sample_predominant_poses[i][indice]]], mol)
+                        except RuntimeError:
+                            result = CalcRMS(mol, self.MCS_mols[self.sample[sample_predominant_poses[i][indice]]])
+                    
+                        if result < 2 :
+                            subliste.append(self.mols[j])
+                            w.write(self.mols[j]) 
+                    copy1 = copy.deepcopy(subliste)
+                    a_supprimer.append(copy1)
+
+        indice_best_score = []
+        for group in a_supprimer : 
+            PLPscore = [mol.GetProp(self.score) for mol in group]
+            best_score = 0
+            for k in PLPscore :
+                if float(k) > float(best_score) :
+                    best_score = k
+                    indice = PLPscore.index(k)
+            indice_best_score.append(indice)
+
+        best_PLPScore_poses = (group[indice] for group, indice in zip(a_supprimer, indice_best_score))
+
+        with Chem.SDWriter(f"Best_PLPScore_Poses.sdf") as w:
+            for m in best_PLPScore_poses:
+                w.write(m)
+        w.close()
+        
+        for i, indice in enumerate(sample_indice_best_score) :
+            os.remove(f'À_supprimer{i+1}.sdf')
+
+    def get_data_frame_best_poses(self, input_list) :
+        """
+        -- DESCRIPTION --
+        This function takes as input the list of poses (structural backbone) of the representatives of
+        each conformation and outputs a table that presents the calculated RMSD between all. This table allows
+        to check that each group is different from each other.
+            PARAMS:
+                - input_list (list) : list of poses of the representatives of each conformation
+        """
+        
+        def MCS_RMSD(mol1, mol2):
+            mcs = FindMCS([mol1, mol2], completeRingsOnly=True)
+            fusion = Chem.MolFromSmarts(mcs.smartsString)
+            def subfunction(mol):
+                moledit = Chem.EditableMol(mol)
+                match = mol.GetSubstructMatch(fusion)
+                j = 0
+                for i in range(len(mol.GetAtoms())):
+                    if i not in match:
+                        moledit.RemoveAtom(i-j)
+                        j += 1
+                return moledit.GetMol()
+            mcsmol1 = subfunction(mol1)
+            mcsmol2 = subfunction(mol2)
+            try :
+                result = CalcRMS(mcsmol1, mcsmol2)
+            except RuntimeError:
+                result = CalcRMS(mcsmol2, mcsmol1)
+            return result
+        
+        preprocess_list = preprocess(input_list)
+        columns = list(range(len(preprocess_list)))
+        for i in columns :
+            columns[i] = f"Conformation n°{i+1}"
+
+        index = list(range(len(preprocess_list)))
+        for i in index :
+            index[i] = f"Conformation n°{i+1}"
+        
+        array = np.ones(shape=(len(preprocess_list),len(preprocess_list)))
+
+        for i, moli in enumerate(preprocess_list) :
+            for j, molj in enumerate(preprocess_list) :
+                
+                if self.conformation_tool == "Unique":
+                    array[i, j] = CalcRMS(moli, molj)
+                
+                elif self.conformation_tool == "Murcko":
+                    try :
+                        array[i, j] = CalcRMS(GetScaffoldForMol(moli),
+                                      GetScaffoldForMol(molj))
+                    except RuntimeError :
+                        array[i, j] = CalcRMS(GetScaffoldForMol(molj),
+                                      GetScaffoldForMol(moli))
+                
+                elif self.conformation_tool == "MCS":
+                    array[i, j] = MCS_RMSD(moli, molj)
+
+        data_frame = pd.DataFrame(array, index=index, columns=columns)
+        
+        if self.streamlit == True :
+            st.write("\nIn order to check that each group is different from each other, a table taking " 
+              "the individual **with the best score** from each group and calculating the RMSD between each was constructed :\n")
+            st.dataframe(data_frame)
+            st.write("RMSD value between each representative of each conformation.")
+            st.session_state.df1 = data_frame
+
+    def get_histogramme_sample_bestPLP(self, input_list) :
+            """
+            -- DESCRIPTION --
+            This function takes as input the list of poses (structural backbone) of the representatives of
+            each conformation and calculates the RMSD between each representative and all other poses from
+            the original sdf file deposited at the initialization of the class. Subsequently, the function
+            constructs a histogram, for each representative of a conformation, which presents the distribution
+            of the RMSD between the representative and all other poses.
+                PARAMS:
+                    - input_list (list) : list of poses of the representatives of each conformation.
+            """
+            sns.set_style('whitegrid')
+            sns.set_context('paper')
+            
+            if len(input_list) == 1 :
+                if self.conformation_tool == "Unique":
+                    sdf_to_hist = [CalcRMS(input_list[0], mol) for mol in self.mols]
+                    
+                elif self.conformation_tool == "Murcko":
+                    try :
+                        sdf_to_hist = [CalcRMS(GetScaffoldForMol(input_list[0]), GetScaffoldForMol(mol)) for mol in self.mols]
+                    except RuntimeError:
+                        sdf_to_hist = [CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(input_list[0])) for mol in self.mols]
+                        
+                elif self.conformation_tool == "MCS":
+                    try :
+                        sdf_to_hist = [CalcRMS(Get_MCS_Fusion(self, input_list[0]), mol) for mol in self.MCS_mols]
+                    except RuntimeError:
+                        sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
+                
+                fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(input_list)*9))
+                a, b, c = 0, 0, 0
+                for RMSD in sdf_to_hist : 
+                    if RMSD < 2 :
+                        a += 1
+                    if RMSD < 3 :
+                        b += 1
+                    if RMSD < 4 :
+                        c += 1
+                ax.hist(sdf_to_hist, bins =100, label = "Conformation n°1")
+                ax.axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
+                ax.annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
+                ax.axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
+                ax.annotate(b-a, (2.5, 0.05*len(self.mols)), fontsize=15)
+                ax.axvline(x=4, ymin=0, ymax=1, color="black", linestyle="--")
+                ax.annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
+                ax.legend(loc='upper left', shadow=True, markerfirst = False)
+            
+            else :
+                if self.conformation_tool == "Unique":
+                    sdf_to_hist = ([CalcRMS(representative_conf,
+                                            mol) for mol in self.mols] for representative_conf in input_list)
+                    
+                elif self.conformation_tool == "Murcko":
+                    try:
+                        sdf_to_hist = ([CalcRMS(GetScaffoldForMol(representative_conf),
+                                                GetScaffoldForMol(mol)) for mol in self.mols] for representative_conf in input_list)
+                    except RuntimeError:
+                        sdf_to_hist = ([CalcRMS(GetScaffoldForMol(mol),
+                                                GetScaffoldForMol(representative_conf)) for mol in self.mols] for representative_conf in input_list)
+                
+                elif self.conformation_tool == "MCS":
+                    try:
+                        sdf_to_hist = ([CalcRMS(Get_MCS_Fusion(self, representative_conf),
+                                                mol) for mol in self.MCS_mols] for representative_conf in input_list)
+                    except RuntimeError:
+                        sdf_to_hist = ([CalcRMS(mol, Get_MCS_Fusion(self, representative_conf)) for mol in self.MCS_mols] for representative_conf in input_list)
+                
+                fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(self.best_PLP_poses)*9))
+                for z, group in enumerate(sdf_to_hist) :
+                    a, b, c = 0, 0, 0
+                    for i in group : 
+                        if i < 2 :
+                            a += 1
+                        if i < 3 :
+                            b += 1
+                        if i < 4 :
+                            c += 1
+                    ax[z].hist(group, bins =100, label =f"Conformation n°{z+1}")
+                    ax[z].axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
+                    ax[z].annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
+                    ax[z].axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
+                    ax[z].annotate(b-a, (2.5, 0.05*len(self.mols)), fontsize=15)
+                    ax[z].axvline(x=4, ymin=0, ymax=1, color="black", linestyle="--")
+                    ax[z].annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
+                    ax[z].legend(loc='upper left', shadow=True, markerfirst = False)               
+
+            if self.streamlit == True :
+                st.pyplot(fig)
+                st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
+                 " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")
+                st.session_state.histplot = fig
+                fig.savefig("Histograms_Best_Score.jpeg", dpi=300, bbox_inches='tight')
+                
+                with open("Histograms_Best_Score.jpeg", "rb") as file:
+                     btn = st.download_button(
+                                label="Download PLOT Histograms",
+                                data=file,
+                                 file_name="Histograms_Best_Score.jpeg",
+                                 mime="image/jpeg")
+    
+    def get_cluster_heatmap(self, individuals, method = 'canberra', metric = 'average'):      
+        try :
+            sample = random.sample(range(len(self.mols)), individuals)
+            if self.streamlit == True:
+                st.session_state.sample = sample
+            self.sample = sample
+        except ValueError :
+            st.error("OOPS ! You're trying to define a sample more larger"
+                     " than the numbers of molecules/poses in your sdf."
+                     " This is impossible, please redefine a size of sample"
+                     " equal or smaller to your sdf")
+        
+        self.get_RMSD_dataframe_sample()
+        with st.spinner('Process in progress. Please wait.'):
+            sns.set_context('talk')
+            fig = sns.clustermap(st.session_state.df_sample, figsize=(20, 15),method=method,
+                                 metric=metric, dendrogram_ratio=0.3, tree_kws = {"linewidths": 1.5},
+                                 cbar_pos=(1, 0.1, .03, .5))
+            fig.savefig("Cluster_Hierarchy_Heatmap.jpeg", dpi=300, bbox_inches='tight')
+            st.pyplot(fig)
+            st.session_state.cluster_hierarchy_heatmap = fig
+        
+            with open("Cluster_Hierarchy_Heatmap.jpeg", "rb") as file:
+                 btn = st.download_button(
+                         label="Download PLOT : Cluster Hierarchy Heatmap",
+                         data=file,
+                         file_name="Cluster_Hierarchy_Heatmap.jpeg",
+                         mime="image/jpeg",
+                         key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+             
+        cluster = hierarchy.linkage(st.session_state.df_sample, metric = st.session_state.metric,
+                                    method = st.session_state.method, optimal_ordering=True)
+        st.session_state.cluster = cluster
+        
+    def analyze_cluster_heatmap(self, n_clusters, p = 0.05) :
+        
+        cutree = hierarchy.cut_tree(st.session_state.cluster, n_clusters=st.session_state.n_clusters)
+        liste = [int(x) for x in cutree]
+        tuples = list(zip(liste, self.mols))
+        dataframe = pd.DataFrame(np.array(tuples), columns=["Clusters", "Poses"])
+        clusters = []
+        for i in range(st.session_state.n_clusters) :
+            clusters.append([j for j, mol in enumerate(dataframe.loc[:, 'Poses'])
+                             if dataframe.loc[dataframe.index[j], 'Clusters'] == i])
+        
+        sample_predominant_poses = self.get_predominant_poses(clusters, p)
+        sample_indice_best_score = self.get_sample_indice_best_score(sample_predominant_poses)
+        self.get_SDF_Sample_and_Best_Score_Poses(sample_predominant_poses, sample_indice_best_score)
+        
+        if self.conformation_tool == "Unique":
+            best_PLP_poses = [x for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
+        elif self.conformation_tool == "Murcko":
+            best_PLP_poses = [GetScaffoldForMol(x) for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
+        elif self.conformation_tool == "MCS":
+            best_PLP_poses = [x for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
+            self.best_PLP_poses = best_PLP_poses
+            best_PLP_poses_preprocessed = preprocess(best_PLP_poses)
+        
+        if self.streamlit == True :
+            if 'pdb' in st.session_state :
+                style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
+                #bcolor = st.color_picker('Pick A Color', '#ffffff')
+                pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
+                best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
+                for i, mol in enumerate(best_mols) :
+                    merged = Chem.CombineMols(pdb_file, mol)
+                    Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
+                    xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
+                    pdb = xyz_pdb.read().strip()
+                    xyz_pdb.close()
+                    xyzview = py3Dmol.view(width=700,height=500)
+                    xyzview.addModel(pdb, 'pdb')
+                    xyzview.setStyle({style:{'color':'spectrum'}})
+                    #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
+                    xyzview.setStyle({'resn':'UNL'},{'stick':{}})
+                    xyzview.zoomTo({'resn':'UNL'})
+                    showmol(xyzview, height = 500,width=1000)
+                    os.remove(f'Conformation n°{i+1}.pdb')
+                    st.write(f'Conformation n°{i+1}')
+                    with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                         btn = st.download_button(
+                                    label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                    data=file,
+                                     file_name=f"Sample_Conformation{i+1}.sdf")
+        
+            os.remove(f'Sample_Best_PLPScore_Poses.sdf')
+            with open("Best_PLPScore_Poses.sdf", "rb") as file:
+                 btn = st.download_button(
+                            label="Download the SDF file including each of the representatives of a conformation",
+                            data=file,
+                            file_name="Best_Score_Poses.sdf")
+        
+        if self.conformation_tool == "Unique" or self.conformation_tool == "Murcko" :
+            self.get_data_frame_best_poses(best_PLP_poses)
+            self.best_PLP_poses = best_PLP_poses
+            self.get_histogramme_sample_bestPLP(best_PLP_poses)
+        
+        if self.conformation_tool == "MCS":
+            self.get_data_frame_best_poses(best_PLP_poses_preprocessed)
+            self.get_histogramme_sample_bestPLP(best_PLP_poses_preprocessed)
+            self.best_PLP_poses_preprocessed = best_PLP_poses_preprocessed
+            
+    
+    def get_sorted_heatmap(self, individuals = 200, RMSDthreshold = 3.0, loop = 3, p = 0.05, cluster_hierarchy_heatmap = False) :
         """
         -- DESCRIPTION --
         This function aims to build a heatmap where the individuals constituting the sample have been previously sorted
@@ -523,326 +958,12 @@ class ConformationTool :
                             get_groups_inside_list(liste))))
             return liste
         
-        def get_predominant_poses(finallyliste, p) :
-            """
-            -- DESCRIPTION --
-            This function takes as input the list from the "sorted_list_lengroups" function at the end of
-            the sorting process. Then, it retrieves in a new list the groups (lists) of individuals that
-            constitute more than p th of the total number of individuals. 
-                PARAMS:
-                    - input_list (list): List resulting from the sorting process function "sorted_list_lengroups"
-                    - p (float): Minimum proportion (value between 0 and 1) of individuals in a group within the
-                    sample to consider that group large enough to be representative of a full conformation.
-                RETURNS:
-                    - output_list (list): List including only the largest groups (lists) from the input_list
-            """
-            k = 0 
-            for i in finallyliste : 
-                if len(i)/len(self.sample)*100 > p*len(self.sample) :
-                    k += 1
-
-            predominant_poses = finallyliste[:k]
-            
-            if self.streamlit == True :
-                st.info(f"There is (are) {k} predominant pose(s) among all poses.\n")
-                st.session_state.n_conformations = k
-                st.session_state.predominant_poses = predominant_poses
-
-            for i, predominant_pose in enumerate(predominant_poses) :
-                print(f"The predominant conformation n°{i+1} represents {len(predominant_pose)/len(self.sample)*100:.1f}", 
-                      f"% of the sample, i.e. {len(predominant_pose)} on {len(self.sample)} poses in total.")
-            return predominant_poses
-
-        def get_sample_indice_best_score(predominant_poses) :
-            """
-            -- DESCRIPTION --
-            This function takes as input the list from the "get_predominant_poses" function. This function
-            determines which individuals have the best score (according to the scoring function from the Docking
-            simulations) in each predominant group and inserts in a new list that will be returned the index
-            of those individuals who have the best score and then become the representatives of their group,
-            the representatives of their conformation.
-                PARAMS:
-                    - input_list (list) : List from the fonction "get_predominant_poses"
-                RETURNS:
-                    - index_best_score (list) : List including the index of poses in the sample which represent
-                    their conformation.
-            """
-            index_best_score = []
-            m = -1
-
-            for group in predominant_poses :
-                m += 1
-                n = -1
-                suppl = []
-                for individual in group :
-                    n += 1
-                    suppl.append(self.mols[self.sample[predominant_poses[m][n]]])
-                PLPscore = [x.GetProp(self.score) for x in suppl]
-                best_score = 0
-                for k in PLPscore :
-                    if float(k) > float(best_score) :
-                        best_score = k
-                        indice = PLPscore.index(k)
-                index_best_score.append(indice)
-            return index_best_score
         
-        def get_SDF_Sample_and_Best_Score_Poses(sample_predominant_poses, sample_indice_best_score) :
-            """
-            -- DESCRIPTION --
-            This function makes it possible to obtain the sdf file which contains the poses which have
-            the best score (according to the scoring function resulting from the docking simulation) in
-            one of the various conformations existing among the individuals of the sample BUT ALSO, in a
-            different sdf file, those among all the poses of the sdf file deposited in input of this class
-            then filtered. This function also provides a sdf file for each conformation containing all the
-            individuals from the sample within the groups that characterise these conformations.
-                PARAMS:
-                    - sample_predominant_poses (list): List including all individuals of the largest groups
-                    from the sorting process 
-                    - sample_indice_best_score (list): List including the index of poses in the sample which
-                    represent their conformation
-            """
-            conformations = (self.mols[self.sample[group[indice]]]
-                             for group, indice in zip(sample_predominant_poses, sample_indice_best_score))
-
-            with Chem.SDWriter("Sample_Best_PLPScore_Poses.sdf") as w:
-                for m in conformations:
-                    w.write(m)
-            w.close()
-
-            for k, group in enumerate(sample_predominant_poses) :
-                with Chem.SDWriter(f"Sample_Conformation{k+1}.sdf") as w : 
-                    for m in group :
-                        mol = self.mols[self.sample[m]]
-                        w.write(mol)
-                w.close()
-
-            a_supprimer = []
-            for i, indice in enumerate(sample_indice_best_score) :
-                subliste = []
-                with Chem.SDWriter(f"À_supprimer{i+1}.sdf") as w:
-                    if self.conformation_tool == "Unique":
-                        for j, mol in enumerate(self.mols) :
-                            result = CalcRMS(self.mols[self.sample[sample_predominant_poses[i][indice]]],
-                                             mol)
-                            if result < 2 :
-                                subliste.append(self.mols[j])
-                                w.write(self.mols[j]) 
-                        copy1 = copy.deepcopy(subliste)
-                        a_supprimer.append(copy1)
-                            
-                    elif self.conformation_tool == "Murcko":
-                        for j, mol in enumerate(self.mols) :
-                            try:
-                                result = CalcRMS(GetScaffoldForMol(self.mols[self.sample[sample_predominant_poses[i][indice]]]),
-                                                           GetScaffoldForMol(mol))
-                            except RuntimeError:
-                                result = CalcRMS(GetScaffoldForMol(mol),
-                                                 GetScaffoldForMol(self.mols[self.sample[sample_predominant_poses[i][indice]]]))
-                            if result < 2 :
-                                subliste.append(self.mols[j])
-                                w.write(self.mols[j]) 
-                        copy1 = copy.deepcopy(subliste)
-                        a_supprimer.append(copy1)
-
-                    elif self.conformation_tool == "MCS":
-                        for j, mol in enumerate(self.MCS_mols) :
-                            try:
-                                result = CalcRMS(self.MCS_mols[self.sample[sample_predominant_poses[i][indice]]], mol)
-                            except RuntimeError:
-                                result = CalcRMS(mol, self.MCS_mols[self.sample[sample_predominant_poses[i][indice]]])
-                        
-                            if result < 2 :
-                                subliste.append(self.mols[j])
-                                w.write(self.mols[j]) 
-                        copy1 = copy.deepcopy(subliste)
-                        a_supprimer.append(copy1)
-
-            indice_best_score = []
-            for group in a_supprimer : 
-                PLPscore = [mol.GetProp(self.score) for mol in group]
-                best_score = 0
-                for k in PLPscore :
-                    if float(k) > float(best_score) :
-                        best_score = k
-                        indice = PLPscore.index(k)
-                indice_best_score.append(indice)
-
-            best_PLPScore_poses = (group[indice] for group, indice in zip(a_supprimer, indice_best_score))
-
-            with Chem.SDWriter(f"Best_PLPScore_Poses.sdf") as w:
-                for m in best_PLPScore_poses:
-                    w.write(m)
-            w.close()
-            
-            for i, indice in enumerate(sample_indice_best_score) :
-                os.remove(f'À_supprimer{i+1}.sdf')
-
-        def get_data_frame_best_poses(input_list) :
-            """
-            -- DESCRIPTION --
-            This function takes as input the list of poses (structural backbone) of the representatives of
-            each conformation and outputs a table that presents the calculated RMSD between all. This table allows
-            to check that each group is different from each other.
-                PARAMS:
-                    - input_list (list) : list of poses of the representatives of each conformation
-            """
-            
-            def MCS_RMSD(mol1, mol2):
-                mcs = FindMCS([mol1, mol2], completeRingsOnly=True)
-                fusion = Chem.MolFromSmarts(mcs.smartsString)
-                def subfunction(mol):
-                    moledit = Chem.EditableMol(mol)
-                    match = mol.GetSubstructMatch(fusion)
-                    j = 0
-                    for i in range(len(mol.GetAtoms())):
-                        if i not in match:
-                            moledit.RemoveAtom(i-j)
-                            j += 1
-                    return moledit.GetMol()
-                mcsmol1 = subfunction(mol1)
-                mcsmol2 = subfunction(mol2)
-                try :
-                    result = CalcRMS(mcsmol1, mcsmol2)
-                except RuntimeError:
-                    result = CalcRMS(mcsmol2, mcsmol1)
-                return result
-            
-            preprocess_list = preprocess(input_list)
-            columns = list(range(len(preprocess_list)))
-            for i in columns :
-                columns[i] = f"Conformation n°{i+1}"
-
-            index = list(range(len(preprocess_list)))
-            for i in index :
-                index[i] = f"Conformation n°{i+1}"
-            
-            array = np.ones(shape=(len(preprocess_list),len(preprocess_list)))
-
-            for i, moli in enumerate(preprocess_list) :
-                for j, molj in enumerate(preprocess_list) :
-                    
-                    if self.conformation_tool == "Unique":
-                        array[i, j] = CalcRMS(moli, molj)
-                    
-                    elif self.conformation_tool == "Murcko":
-                        try :
-                            array[i, j] = CalcRMS(GetScaffoldForMol(moli),
-                                          GetScaffoldForMol(molj))
-                        except RuntimeError :
-                            array[i, j] = CalcRMS(GetScaffoldForMol(molj),
-                                          GetScaffoldForMol(moli))
-                    
-                    elif self.conformation_tool == "MCS":
-                        array[i, j] = MCS_RMSD(moli, molj)
-
-            data_frame = pd.DataFrame(array, index=index, columns=columns)
-            
-            if self.streamlit == True :
-                st.write("\nIn order to check that each group is different from each other, a table taking " 
-                  "the first individual from each group and calculating the RMSD between each was constructed :\n")
-                st.dataframe(data_frame)
-                st.write("RMSD value between each representative of each conformation.")
-                st.session_state.df1 = data_frame
-        
-        def get_histogramme_sample_bestPLP(input_list) :
-            """
-            -- DESCRIPTION --
-            This function takes as input the list of poses (structural backbone) of the representatives of
-            each conformation and calculates the RMSD between each representative and all other poses from
-            the original sdf file deposited at the initialization of the class. Subsequently, the function
-            constructs a histogram, for each representative of a conformation, which presents the distribution
-            of the RMSD between the representative and all other poses.
-                PARAMS:
-                    - input_list (list) : list of poses of the representatives of each conformation.
-            """
-            sns.set_style('whitegrid')
-            sns.set_context('paper')
-            
-            if len(input_list) == 1 :
-                if self.conformation_tool == "Unique":
-                    sdf_to_hist = [CalcRMS(input_list[0], mol) for mol in self.mols]
-                    
-                elif self.conformation_tool == "Murcko":
-                    try :
-                        sdf_to_hist = [CalcRMS(GetScaffoldForMol(input_list[0]), GetScaffoldForMol(mol)) for mol in self.mols]
-                    except RuntimeError:
-                        sdf_to_hist = [CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(input_list[0])) for mol in self.mols]
-                        
-                elif self.conformation_tool == "MCS":
-                    try :
-                        sdf_to_hist = [CalcRMS(Get_MCS_Fusion(self, input_list[0]), mol) for mol in self.MCS_mols]
-                    except RuntimeError:
-                        sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
-                
-                fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(input_list)*9))
-                a, b, c = 0, 0, 0
-                for RMSD in sdf_to_hist : 
-                    if RMSD < 2 :
-                        a += 1
-                    if RMSD < 3 :
-                        b += 1
-                    if RMSD < 4 :
-                        c += 1
-                ax.hist(sdf_to_hist, bins =100, label = "Conformation n°1")
-                ax.axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
-                ax.axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(b-a, (2.5, 0.05*len(self.mols)), fontsize=15)
-                ax.axvline(x=4, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
-                ax.legend(loc='upper left', shadow=True, markerfirst = False)
-            
-            else :
-                if self.conformation_tool == "Unique":
-                    sdf_to_hist = ([CalcRMS(representative_conf,
-                                            mol) for mol in self.mols] for representative_conf in input_list)
-                    
-                elif self.conformation_tool == "Murcko":
-                    try:
-                        sdf_to_hist = ([CalcRMS(GetScaffoldForMol(representative_conf),
-                                                GetScaffoldForMol(mol)) for mol in self.mols] for representative_conf in input_list)
-                    except RuntimeError:
-                        sdf_to_hist = ([CalcRMS(GetScaffoldForMol(mol),
-                                                GetScaffoldForMol(representative_conf)) for mol in self.mols] for representative_conf in input_list)
-                
-                elif self.conformation_tool == "MCS":
-                    try:
-                        sdf_to_hist = ([CalcRMS(Get_MCS_Fusion(self, representative_conf),
-                                                mol) for mol in self.MCS_mols] for representative_conf in input_list)
-                    except RuntimeError:
-                        sdf_to_hist = ([CalcRMS(mol, Get_MCS_Fusion(self, representative_conf)) for mol in self.MCS_mols] for representative_conf in input_list)
-                
-                fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(best_PLP_poses)*9))
-                for z, group in enumerate(sdf_to_hist) :
-                    a, b, c = 0, 0, 0
-                    for i in group : 
-                        if i < 2 :
-                            a += 1
-                        if i < 3 :
-                            b += 1
-                        if i < 4 :
-                            c += 1
-                    ax[z].hist(group, bins =100, label =f"Conformation n°{z+1}")
-                    ax[z].axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
-                    ax[z].annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
-                    ax[z].axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
-                    ax[z].annotate(b-a, (2.5, 0.05*len(self.mols)), fontsize=15)
-                    ax[z].axvline(x=4, ymin=0, ymax=1, color="black", linestyle="--")
-                    ax[z].annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
-                    ax[z].legend(loc='upper left', shadow=True, markerfirst = False)               
-
-            if self.streamlit == True :
-                st.pyplot(fig)
-                st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
-                 " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")
-                st.session_state.histplot = fig
-                fig.savefig("Histograms_Best_Score.jpeg", dpi=300, bbox_inches='tight')
-        
-        
-        #OUT THE FUNCTIUN "get_histogramme_sample_bestPLP".
+        ###############################################
+        #--      Function "Get sorted Heatmap"      --#                                                     
+        ###############################################
         output_liste = sorted_list_lengroups(get_groups_inside_list(improve_sort(
             get_filtered_liste(sorted_list_lengroups(gather_groups_RMSD(RMSD_listes(self.sample)))), loop)))
-        
         finallyliste = get_filtered_liste(output_liste)
         
         if len(finallyliste) != individuals :
@@ -891,77 +1012,67 @@ class ConformationTool :
                              data=file,
                              file_name="Sorted_Heatmap.jpeg",
                              mime="image/jpeg")
-                     
-            sample_predominant_poses = get_predominant_poses(output_liste, p)
-            sample_indice_best_score = get_sample_indice_best_score(sample_predominant_poses)
-            get_SDF_Sample_and_Best_Score_Poses(sample_predominant_poses, sample_indice_best_score)
-            
-            if self.conformation_tool == "Unique":
-                get_SDF_Sample_and_Best_Score_Poses(sample_predominant_poses, sample_indice_best_score)
-                best_PLP_poses = [x for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
-            elif self.conformation_tool == "Murcko":
-                get_SDF_Sample_and_Best_Score_Poses(sample_predominant_poses, sample_indice_best_score)
-                best_PLP_poses = [GetScaffoldForMol(x) for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
-            elif self.conformation_tool == "MCS":
-                best_PLP_poses = [x for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
-                best_PLP_poses_preprocessed = preprocess(best_PLP_poses)
-            
-            if self.streamlit == True :
-                if 'pdb' in st.session_state :
-                    style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
-                    #bcolor = st.color_picker('Pick A Color', '#ffffff')
-                    pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
-                    best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
-                    for i, mol in enumerate(best_mols) :
-                        merged = Chem.CombineMols(pdb_file, mol)
-                        Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
-                        xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
-                        pdb = xyz_pdb.read().strip()
-                        xyz_pdb.close()
-                        xyzview = py3Dmol.view(width=700,height=500)
-                        xyzview.addModel(pdb, 'pdb')
-                        xyzview.setStyle({style:{'color':'spectrum'}})
-                        #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
-                        xyzview.setStyle({'resn':'UNL'},{'stick':{}})
-                        xyzview.zoomTo({'resn':'UNL'})
-                        showmol(xyzview, height = 500,width=1000)
-                        os.remove(f'Conformation n°{i+1}.pdb')
-                        st.write(f'Conformation n°{i+1}')
-                        with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
-                             btn = st.download_button(
-                                        label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
-                                        data=file,
-                                         file_name=f"Sample_Conformation{i+1}.sdf")
-            
-                os.remove(f'Sample_Best_PLPScore_Poses.sdf')
-                with open("Best_PLPScore_Poses.sdf", "rb") as file:
-                     btn = st.download_button(
-                                label="Download the SDF file including each of the representatives of a conformation",
-                                data=file,
-                                file_name="Best_Score_Poses.sdf")
-            
-            if self.conformation_tool == "Unique" or self.conformation_tool == "Murcko" :
-                get_data_frame_best_poses(best_PLP_poses)
-                get_histogramme_sample_bestPLP(best_PLP_poses)
-                self.best_PLP_poses = best_PLP_poses
-            
-            elif self.conformation_tool == "MCS":
-                get_data_frame_best_poses(best_PLP_poses_preprocessed)
-                get_histogramme_sample_bestPLP(best_PLP_poses_preprocessed)
-                self.best_PLP_poses = best_PLP_poses
-                self.best_PLP_poses_preprocessed = best_PLP_poses_preprocessed
-            
-            elif self.streamlit == True :
-                with open("Histograms_Best_Score.jpeg", "rb") as file:
-                     btn = st.download_button(
-                                label="Download PLOT Histograms",
-                                data=file,
-                                 file_name="Histograms_Best_Score.jpeg",
-                                 mime="image/jpeg")
-            
         except ValueError :
             st.error("OOPS ! The selected RMSD threshold does not allow all individuals to be grouped "
                   "into distinct groups that share a low RMSD. Please change the RMSD threshold.")
+                     
+        sample_predominant_poses = self.get_predominant_poses(output_liste, p)
+        sample_indice_best_score = self.get_sample_indice_best_score(sample_predominant_poses)
+        self.get_SDF_Sample_and_Best_Score_Poses(sample_predominant_poses, sample_indice_best_score)
+        
+        if self.conformation_tool == "Unique":
+            best_PLP_poses = [x for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
+        elif self.conformation_tool == "Murcko":
+            best_PLP_poses = [GetScaffoldForMol(x) for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
+        elif self.conformation_tool == "MCS":
+            best_PLP_poses = [x for x in Chem.SDMolSupplier("Best_PLPScore_Poses.sdf")]
+            self.best_PLP_poses = best_PLP_poses
+            best_PLP_poses_preprocessed = preprocess(best_PLP_poses)
+        
+        if self.streamlit == True :
+            if 'pdb' in st.session_state :
+                style = st.selectbox('Style',['cartoon','cross','stick','sphere','line','clicksphere'])
+                #bcolor = st.color_picker('Pick A Color', '#ffffff')
+                pdb_file = Chem.MolFromPDBFile('pdb_file.pdb')
+                best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
+                for i, mol in enumerate(best_mols) :
+                    merged = Chem.CombineMols(pdb_file, mol)
+                    Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
+                    xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
+                    pdb = xyz_pdb.read().strip()
+                    xyz_pdb.close()
+                    xyzview = py3Dmol.view(width=700,height=500)
+                    xyzview.addModel(pdb, 'pdb')
+                    xyzview.setStyle({style:{'color':'spectrum'}})
+                    #xyzview.setBackgroundColor(bcolor)#('0xeeeeee')
+                    xyzview.setStyle({'resn':'UNL'},{'stick':{}})
+                    xyzview.zoomTo({'resn':'UNL'})
+                    showmol(xyzview, height = 500,width=1000)
+                    os.remove(f'Conformation n°{i+1}.pdb')
+                    st.write(f'Conformation n°{i+1}')
+                    with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                         btn = st.download_button(
+                                    label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                    data=file,
+                                     file_name=f"Sample_Conformation{i+1}.sdf")
+        
+            os.remove(f'Sample_Best_PLPScore_Poses.sdf')
+            with open("Best_PLPScore_Poses.sdf", "rb") as file:
+                 btn = st.download_button(
+                            label="Download the SDF file including each of the representatives of a conformation",
+                            data=file,
+                            file_name="Best_Score_Poses.sdf")
+        
+        if self.conformation_tool == "Unique" or self.conformation_tool == "Murcko" :
+            self.get_data_frame_best_poses(best_PLP_poses)
+            self.best_PLP_poses = best_PLP_poses
+            self.get_histogramme_sample_bestPLP(best_PLP_poses)
+        
+        elif self.conformation_tool == "MCS":
+            self.get_data_frame_best_poses(best_PLP_poses_preprocessed)
+            self.get_histogramme_sample_bestPLP(best_PLP_poses_preprocessed)
+            self.best_PLP_poses_preprocessed = best_PLP_poses_preprocessed
+        
     
     def get_sdf_conformations(self, k, RMSDtarget) :
         """
@@ -1140,4 +1251,3 @@ class ConformationTool :
         g.fig.savefig(f"Scatter_Plot{k}.jpeg", dpi=300, bbox_inches='tight')
         if self.streamlit == True :
             st.session_state.scatterplot = g
-
