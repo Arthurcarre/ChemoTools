@@ -927,8 +927,21 @@ def main():
             if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
                 os.remove('Best_PLPScore_Poses.sdf')
 
-            if "n_conformations" in st.session_state or "n_clusters" in st.session_state :
+            if "n_conformations" in st.session_state :
                 for i in range(st.session_state.n_conformations):
+                    if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
+                        os.remove(f'Sample_Conformation{i+1}.sdf')
+                    if os.path.exists(f'Conformation{i+1}.sdf') == True :
+                        os.remove(f'Conformation{i+1}.sdf')
+                    if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
+                        os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                    if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
+                        os.remove(f'Box_Plot{i+1}.jpeg')
+                    if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
+                        os.remove(f'Scatter_Plot{i+1}.jpeg')
+            
+            if "n_clusters" in st.session_state :
+                for i in range(st.session_state.n_clusters):
                     if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
                         os.remove(f'Sample_Conformation{i+1}.sdf')
                     if os.path.exists(f'Conformation{i+1}.sdf') == True :
