@@ -101,13 +101,16 @@ class ConformationTool :
         
         if self.conformation_tool == "Unique":
             self.mols = [x for x in Chem.SDMolSupplier(sdf_file)]
-            st.session_state.mols_brut = len(self.mols)
             self.score = score
+            print(f"There are {len(self.mols)} poses in your sdf file.")
+            if self.streamlit == True:
+                st.session_state.mols_brut = len(self.mols)
             
         else :
             self.mols_brut = [x for x in Chem.SDMolSupplier(sdf_file)]
-            st.session_state.mols_brut = len(self.mols_brut)
             self.score = score
+            if self.streamlit == True:
+                st.session_state.mols_brut = len(self.mols_brut)
             
             if self.conformation_tool == "MCS" :
                 sdf_preprocessed = preprocess(self.mols_brut)
@@ -139,7 +142,7 @@ class ConformationTool :
                       threshold=percentage / 100.0)
         except RuntimeError :
             st.error('ERROR : Your sdf file contains only one unique molecule (in many different poses). In this case, please, use "CIT: Unique Molecule ConformationTool"')
-        del self.unique_molecules
+
         fusion = Chem.MolFromSmarts(mcs.smartsString)
         st.session_state.fusion = fusion
         im = Draw.MolToImage(fusion)
@@ -171,8 +174,8 @@ class ConformationTool :
         self.fusion = fusion
         
         del error_mols
-        del self.mols_brut
-        del self.sdf_preprocessed
+        
+        return fusion
     
     def check_sdf_file(self, benchmark_molecule):
         """
@@ -236,8 +239,8 @@ class ConformationTool :
         
         if self.streamlit == True:
             st.session_state.df_sample = df
-            
-        return df
+        
+        self.df_sample = df
     
     def get_heatmap_sample(self, individuals = 200, print_plot = True) :
         """
@@ -250,6 +253,7 @@ class ConformationTool :
         """
         try :
             sample = random.sample(range(len(self.mols)), individuals)
+            self.sample = sample
         except ValueError as e :
             st.error("OOPS ! You're trying to define a sample more larger than the numbers of molecules/poses in your sdf.",
                      " This is impossible, please redefine a size of sample equal or smaller to your sdf")
@@ -259,10 +263,11 @@ class ConformationTool :
         if print_plot == True :  
             fig, ax = plt.subplots(figsize=(20, 10))
             sns.set_context('talk')
-            sns.heatmap(df, fmt='d', ax= ax)
+            sns.heatmap(self.df_sample, fmt='d', ax= ax)
+            ax.set_title('Heatmap of the matrix dataset containing the RMSD calculated between each individual from the sample')
+            plt.show()
         
         if self.streamlit == True:
-            st.session_state.df_sample = df
             st.pyplot(fig)
             st.session_state.heatmap = fig
     
@@ -280,7 +285,7 @@ class ConformationTool :
                 - output_list (list): List including only the largest groups (lists) from the input_list
         """
 
-        predominant_poses = [group for group in output_liste if len(group)/len(self.sample)*100 > p*len(self.sample)]
+        predominant_poses = [group for group in output_liste if len(group)/len(self.sample)*100 > p*100]
         
         if self.streamlit == True :
             st.info(f"There is (are) {len(predominant_poses)} predominant pose(s) among all poses.\n")
@@ -288,7 +293,7 @@ class ConformationTool :
             st.session_state.predominant_poses = predominant_poses
             for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
                 st.write(
-                    f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                    f"The predominant binding mode n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
                     f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
 
         for i, predominant_pose in enumerate(predominant_poses) :
@@ -353,7 +358,7 @@ class ConformationTool :
         w.close()
 
         for k, group in enumerate(sample_predominant_poses) :
-            with Chem.SDWriter(f"Sample_Conformation{k+1}.sdf") as w : 
+            with Chem.SDWriter(f"Sample_Predominant_Binding_Mode{k+1}.sdf") as w : 
                 for m in group :
                     mol = self.mols[self.sample[m]]
                     w.write(mol)
@@ -424,10 +429,10 @@ class ConformationTool :
         """
         -- DESCRIPTION --
         This function takes as input the list of poses (structural backbone) of the representatives of
-        each conformation and outputs a table that presents the calculated RMSD between all. This table allows
+        each predominant binding mode and outputs a table that presents the calculated RMSD between all. This table allows
         to check that each group is different from each other.
             PARAMS:
-                - input_list (list) : list of poses of the representatives of each conformation
+                - input_list (list) : list of poses of the representatives of each predominant binding mode
         """
         
         def MCS_RMSD(mol1, mol2):
@@ -453,11 +458,11 @@ class ConformationTool :
         preprocess_list = preprocess(input_list)
         columns = list(range(len(preprocess_list)))
         for i in columns :
-            columns[i] = f"Conformation n°{i+1}"
+            columns[i] = f"Predominant Binding Mode n°{i+1}"
 
         index = list(range(len(preprocess_list)))
         for i in index :
-            index[i] = f"Conformation n°{i+1}"
+            index[i] = f"Predominant Binding Mode n°{i+1}"
         
         array = np.ones(shape=(len(preprocess_list),len(preprocess_list)))
 
@@ -484,8 +489,12 @@ class ConformationTool :
             st.write("\nIn order to check that each group is different from each other, a table taking " 
               "the individual **with the best score** from each group and calculating the RMSD between each was constructed :\n")
             st.dataframe(data_frame)
-            st.write("RMSD value between each representative of each conformation.")
+            st.write("RMSD value between each representative of each predominant binding mode.")
             st.session_state.df1 = data_frame
+        else:
+            print("\nIn order to check that each group is different from each other, a table taking " 
+              "the individual with the best score from each group and calculating the RMSD between each was constructed :\n")
+            display(data_frame)
 
     def get_histogramme_sample_bestPLP(self, input_list) :
             """
@@ -517,7 +526,7 @@ class ConformationTool :
                     except RuntimeError:
                         sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
                 
-                fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(input_list)*9))
+                fig, ax = plt.subplots(len(input_list), 1, figsize=(10, 0.2*len(input_list)*9))
                 a, b, c = 0, 0, 0
                 for RMSD in sdf_to_hist : 
                     if RMSD < 2 :
@@ -526,14 +535,14 @@ class ConformationTool :
                         b += 1
                     if RMSD < 4 :
                         c += 1
-                ax.hist(sdf_to_hist, bins =100, label = "Conformation n°1")
+                ax.hist(sdf_to_hist, bins =100, range=(0, 5), label = "Predominant Binding Mode n°1")
                 ax.axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
+                ax.annotate(a, (1.5, 0.01*len(self.mols)), fontsize=15)
                 ax.axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(b-a, (2.5, 0.05*len(self.mols)), fontsize=15)
+                ax.annotate(b-a, (2.5, 0.001*len(self.mols)), fontsize=15)
                 ax.axvline(x=4, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
-                ax.legend(loc='upper left', shadow=True, markerfirst = False)
+                ax.annotate(c-b, (3.5, 0.0001*len(self.mols)), fontsize=15)
+                ax.legend(loc='upper right', shadow=True, markerfirst = False)
             
             else :
                 if self.conformation_tool == "Unique":
@@ -555,40 +564,53 @@ class ConformationTool :
                     except RuntimeError:
                         sdf_to_hist = ([CalcRMS(mol, Get_MCS_Fusion(self, representative_conf)) for mol in self.MCS_mols] for representative_conf in input_list)
                 
-                fig, ax = plt.subplots(len(input_list), 1, figsize=(15, 0.2*len(self.best_PLP_poses)*9))
+                figs = []
                 for z, group in enumerate(sdf_to_hist) :
-                    a, b, c = 0, 0, 0
+                    a, b, c, d = 0, 0, 0, 0
                     for i in group : 
-                        if i < 2 :
+                        if i < 1 :
                             a += 1
-                        if i < 3 :
+                        if i < 2 :
                             b += 1
-                        if i < 4 :
+                        if i < 3 :
                             c += 1
-                    ax[z].hist(group, bins =100, label =f"Conformation n°{z+1}")
-                    ax[z].axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
-                    ax[z].annotate(a, (1.5, 0.05*len(self.mols)), fontsize=15)
-                    ax[z].axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
-                    ax[z].annotate(b-a, (2.5, 0.05*len(self.mols)), fontsize=15)
-                    ax[z].axvline(x=4, ymin=0, ymax=1, color="black", linestyle="--")
-                    ax[z].annotate(c-b, (3.5, 0.05*len(self.mols)), fontsize=15)
-                    ax[z].legend(loc='upper left', shadow=True, markerfirst = False)               
+                        if i < 4 :
+                            d += 1
+                    fig, ax = plt.subplots(figsize=(15, 2))
+                    ax.hist(group, bins=100, range=(0, 6))
+                    ax.set_title(f"Predominant Binding Mode n°{z+1}", loc="left", fontsize=15)
+                    ax.axvline(x=1, ymin=0, ymax=1, color="orange", linestyle="-", linewidth=2.5, label=f"{a} poses below 1 Å")
+                    ax.axvline(x=2, ymin=0, ymax=1, color="orange", linestyle="--", linewidth=2.5, label=f"{b} poses below 2 Å")
+                    ax.axvline(x=3, ymin=0, ymax=1, color="orange", linestyle="-.", linewidth=2.5, label=f"{c} poses below 3 Å")
+                    ax.axvline(x=4, ymin=0, ymax=1, color="orange", linestyle=":", linewidth=2.5, label=f"{d} poses below 4 Å")
+                    ax.legend(loc='upper right', fontsize = 'large', shadow=True, markerfirst = False)
+                    plt.xticks(fontsize=15)
+                    plt.yticks(fontsize=15)
+                    plt.xlabel("RMSD (Å)", fontsize=15)
+                    figs.append(fig)
+                    plt.show()
+                    
+                                  
 
             if self.streamlit == True :
-                st.pyplot(fig)
-                st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
-                 " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")
-                st.session_state.histplot = fig
-                fig.savefig("Histograms_Best_Score.jpeg", dpi=300, bbox_inches='tight')
+                for i, fig in enumerate(figs) :
+                    st.pyplot(fig)
+                    fig.savefig(f"Histograms_Best_Score n°{i+1}.jpeg", dpi=300, bbox_inches='tight')
+                    
+                    with open(f"Histograms_Best_Score n°{i+1}.jpeg", "rb") as file:
+                         btn = st.download_button(
+                                     label=f"Download PLOT Histogram n°{i+1}",
+                                     data=file,
+                                     file_name=f"Histograms_Best_Score n°{i+1}.jpeg",
+                                     mime="image/jpeg")
+                    
+                st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each predominant"
+                         " binding mode and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")
+                st.session_state.histplot = figs
                 
-                with open("Histograms_Best_Score.jpeg", "rb") as file:
-                     btn = st.download_button(
-                                label="Download PLOT Histograms",
-                                data=file,
-                                 file_name="Histograms_Best_Score.jpeg",
-                                 mime="image/jpeg")
+
     
-    def get_cluster_heatmap(self, individuals, method = 'canberra', metric = 'average'):      
+    def get_cluster_heatmap(self, individuals = 200, method = 'canberra', metric = 'average'):      
         try :
             sample = random.sample(range(len(self.mols)), individuals)
             if self.streamlit == True:
@@ -601,35 +623,47 @@ class ConformationTool :
                      " equal or smaller to your sdf")
         
         self.get_RMSD_dataframe_sample()
-        with st.spinner('Process in progress. Please wait.'):
-            sns.set_context('talk')
-            fig = sns.clustermap(st.session_state.df_sample, figsize=(20, 15),method=method,
+        sns.set_context('talk')
+        if self.streamlit == True:
+            with st.spinner('Process in progress. Please wait.'):
+                fig = sns.clustermap(st.session_state.df_sample, figsize=(20, 15),method=method,
+                                     metric=metric, dendrogram_ratio=0.3, tree_kws = {"linewidths": 1.5},
+                                     cbar_pos=(1, 0.1, .03, .5))
+                fig.savefig("Cluster_Hierarchy_Heatmap.jpeg", dpi=300, bbox_inches='tight')
+                st.pyplot(fig)
+                st.session_state.cluster_hierarchy_heatmap = fig
+            
+                with open("Cluster_Hierarchy_Heatmap.jpeg", "rb") as file:
+                     btn = st.download_button(
+                             label="Download PLOT : Cluster Hierarchy Heatmap",
+                             data=file,
+                             file_name="Cluster_Hierarchy_Heatmap.jpeg",
+                             mime="image/jpeg",
+                             key = 'CIT_WEB_Unique_Molecule_ConformationTool')
+                
+                cluster = hierarchy.linkage(st.session_state.df_sample, metric = st.session_state.metric,
+                                            method = st.session_state.method, optimal_ordering=True)
+                st.session_state.cluster = cluster
+                self.cluster = cluster
+        else :
+            fig = sns.clustermap(self.df_sample, figsize=(20, 15),method=method,
                                  metric=metric, dendrogram_ratio=0.3, tree_kws = {"linewidths": 1.5},
-                                 cbar_pos=(1, 0.1, .03, .5))
+                                     cbar_pos=(1, 0.1, .03, .5))
             fig.savefig("Cluster_Hierarchy_Heatmap.jpeg", dpi=300, bbox_inches='tight')
-            st.pyplot(fig)
-            st.session_state.cluster_hierarchy_heatmap = fig
-        
-            with open("Cluster_Hierarchy_Heatmap.jpeg", "rb") as file:
-                 btn = st.download_button(
-                         label="Download PLOT : Cluster Hierarchy Heatmap",
-                         data=file,
-                         file_name="Cluster_Hierarchy_Heatmap.jpeg",
-                         mime="image/jpeg",
-                         key = 'CIT_WEB_Unique_Molecule_ConformationTool')
-             
-        cluster = hierarchy.linkage(st.session_state.df_sample, metric = st.session_state.metric,
-                                    method = st.session_state.method, optimal_ordering=True)
-        st.session_state.cluster = cluster
+            plt.show()
+            cluster = hierarchy.linkage(self.df_sample, metric = metric,
+                                        method = method, optimal_ordering=True)
+            self.cluster = cluster
+
         
     def analyze_cluster_heatmap(self, n_clusters, p = 0.05) :
         
-        cutree = hierarchy.cut_tree(st.session_state.cluster, n_clusters=st.session_state.n_clusters)
+        cutree = hierarchy.cut_tree(self.cluster, n_clusters=n_clusters)
         liste = [int(x) for x in cutree]
         tuples = list(zip(liste, self.mols))
         dataframe = pd.DataFrame(np.array(tuples), columns=["Clusters", "Poses"])
         clusters = []
-        for i in range(st.session_state.n_clusters) :
+        for i in range(n_clusters) :
             clusters.append([j for j, mol in enumerate(dataframe.loc[:, 'Poses'])
                              if dataframe.loc[dataframe.index[j], 'Clusters'] == i])
         
@@ -654,8 +688,8 @@ class ConformationTool :
                 best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
                 for i, mol in enumerate(best_mols) :
                     merged = Chem.CombineMols(pdb_file, mol)
-                    Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
-                    xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
+                    Chem.MolToPDBFile(merged, f'Predominant Binding Mode n°{i+1}.pdb')
+                    xyz_pdb = open(f'Predominant Binding Mode n°{i+1}.pdb', 'r', encoding='utf-8')
                     pdb = xyz_pdb.read().strip()
                     xyz_pdb.close()
                     xyzview = py3Dmol.view(width=700,height=500)
@@ -665,20 +699,21 @@ class ConformationTool :
                     xyzview.setStyle({'resn':'UNL'},{'stick':{}})
                     xyzview.zoomTo({'resn':'UNL'})
                     showmol(xyzview, height = 500,width=1000)
-                    os.remove(f'Conformation n°{i+1}.pdb')
-                    st.write(f'Conformation n°{i+1}')
-                    with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                    os.remove(f'Predominant Binding Mode n°{i+1}.pdb')
+                    st.write(f'Predominant Binding Mode n°{i+1}')
+                    with open(f"Sample_Predominant_Binding_Mode{i+1}.sdf", "rb") as file:
                          btn = st.download_button(
-                                    label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                    label=f"Download all the poses of the predominant binding mode n°{i+1} from the SAMPLE",
                                     data=file,
-                                     file_name=f"Sample_Conformation{i+1}.sdf")
+                                     file_name=f"Sample_Predominant_Binding_Mode{i+1}.sdf")
         
-            os.remove(f'Sample_Best_PLPScore_Poses.sdf')
             with open("Best_PLPScore_Poses.sdf", "rb") as file:
                  btn = st.download_button(
-                            label="Download the SDF file including each of the representatives of a conformation",
+                            label="Download the SDF file including each of the representatives of a predominant binding mode",
                             data=file,
                             file_name="Best_Score_Poses.sdf")
+        
+        os.remove(f'Sample_Best_PLPScore_Poses.sdf')
         
         if self.conformation_tool == "Unique" or self.conformation_tool == "Murcko" :
             self.get_data_frame_best_poses(best_PLP_poses)
@@ -691,11 +726,11 @@ class ConformationTool :
             self.best_PLP_poses_preprocessed = best_PLP_poses_preprocessed
             
     
-    def get_sorted_heatmap(self, individuals = 200, RMSDthreshold = 3.0, loop = 3, p = 0.05, cluster_hierarchy_heatmap = False) :
+    def get_sorted_heatmap(self, individuals = 200, RMSDthreshold = 3.0, loop = 3, p = 0.05) :
         """
         -- DESCRIPTION --
         This function aims to build a heatmap where the individuals constituting the sample have been previously sorted
-        in order toreveal the different existing conformations. It takes, thus, in input the amount of this sample (by default: 200),
+        in order toreveal the different existing predominant binding modes. It takes, thus, in input the amount of this sample (by default: 200),
         and the threshold of the RMSD allowing to gather the poses in groups where each pose shares an RMSD around this threshold
         or below.
             PARAMS:
@@ -1074,22 +1109,22 @@ class ConformationTool :
             self.best_PLP_poses_preprocessed = best_PLP_poses_preprocessed
         
     
-    def get_sdf_conformations(self, k, RMSDtarget) :
+    def get_sdf_conformations(self, k, RMSDthreshold) :
         """
         -- DESCRIPTION --
         From the histograms resulting from the "get_histogram_sample_bestPLP" function, it is possible
         to observe Gaussian curves for low value RMSDs constituting the group of poses aligned to
         the conformation. Thus, this function allows to create sdf files containing for a conformation,
-        given by the integer k in input, all the poses which are below a selected RMSD value (-> RMSDtarget).
+        given by the integer k in input, all the poses which are below a selected RMSD value (-> RMSDthreshold).
             PARAMS:
                 - k (int) : Number of the selected conformation
                 - RMSDtarget (float) : Target value of the RMSD below which all poses will be written to an sdf file.
         """
-        with Chem.SDWriter(f'Conformation{k}.sdf') as w:
+        with Chem.SDWriter(f'Predominant Binding Mode n°{k}.sdf') as w:
             if self.conformation_tool == "Unique":
                 for j, mol in enumerate(self.mols) :
                     result = CalcRMS(self.best_PLP_poses[k-1], mol)
-                    if result < float(RMSDtarget) :
+                    if result < float(RMSDthreshold) :
                         w.write(self.mols[j])
                 
             elif self.conformation_tool == "Murcko":
@@ -1098,7 +1133,7 @@ class ConformationTool :
                         result = CalcRMS(GetScaffoldForMol(self.best_PLP_poses[k-1]), GetScaffoldForMol(mol))
                     except RuntimeError:
                         result = CalcRMS(GetScaffoldForMol(mol), GetScaffoldForMol(self.best_PLP_poses[k-1]))
-                    if result < float(RMSDtarget) :
+                    if result < float(RMSDthreshold) :
                         w.write(self.mols[j])
 
             elif self.conformation_tool == "MCS":
@@ -1107,7 +1142,7 @@ class ConformationTool :
                         result = CalcRMS(Get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]), mol)
                     except RuntimeError:
                         result = CalcRMS(mol, Get_MCS_Fusion(self, self.best_PLP_poses_preprocessed[k-1]))
-                    if result < float(RMSDtarget) :
+                    if result < float(RMSDthreshold) :
                         w.write(self.mols[j])
                 
         w.close()
@@ -1142,7 +1177,7 @@ class ConformationTool :
         """
             
         # BAR PLOT
-        file_in = [x for x in Chem.SDMolSupplier(f"Conformation{k}.sdf")]
+        file_in = [x for x in Chem.SDMolSupplier(f"Predominant Binding Mode n°{k}.sdf")]
         ensemble = {mol.GetProp(molecule_name) for mol in self.mols}
         
         index = list(ensemble)
@@ -1182,7 +1217,9 @@ class ConformationTool :
         g.set_axis_labels("Ratio", "", fontsize = 25)
         g.set_yticklabels(fontsize = size_ylabels)
         g.set_xticklabels(fontsize = size_xlabels)
-        g.fig.savefig(f"Barplot_Conformation{k}.jpeg", dpi=300, bbox_inches='tight')
+        g.fig.savefig(f"Barplot{k}.jpeg", dpi=300, bbox_inches='tight')
+        g.set(title="Ratio of each compounds between the number of poses in the predominant binding mode selected and the number of total poses.")
+
         if self.streamlit == True :
             st.session_state.barplot = g
 
@@ -1225,6 +1262,7 @@ class ConformationTool :
         g.set_yticklabels(fontsize = size_ylabels)
         g.set_xticklabels(fontsize = size_xlabels)
         g.fig.savefig(f"Box_Plot{k}.jpeg", dpi=300, bbox_inches='tight')
+        g.set(title=f"Boxplot built following the descending order of the {self.score}.")
         if self.streamlit == True :
             st.session_state.box_plot = g
 
@@ -1239,15 +1277,16 @@ class ConformationTool :
         def label_point(x, y, val, ax):
             a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
             for i, point in a.iterrows():
-                ax.text(point['x'], point['y'], str(point['val']), fontsize = 7.5)
+                ax.text(point['x'], point['y'], str(point['val']), fontsize = 15)
   
         sns.set_style('darkgrid')
         sns.set_context('talk')
-        g = sns.relplot(x='Median', y='Ratio', data = df5, aspect=2,
-                        height=5)
+        g = sns.relplot(x='Median', y='Ratio', data = df5, aspect=3,
+                        height=10)
         label_point(df5.Median, df5.Ratio, df5.Name, plt.gca())
         g.set_axis_labels(self.score, "Ratio")
-        g.set(ylim=(0, 1), yticks=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        #g.set(ylim=(0, 1), yticks=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
         g.fig.savefig(f"Scatter_Plot{k}.jpeg", dpi=300, bbox_inches='tight')
+        g.set(title=f"Scatter plot built with the ratio as function of the {self.score}.")
         if self.streamlit == True :
             st.session_state.scatterplot = g
