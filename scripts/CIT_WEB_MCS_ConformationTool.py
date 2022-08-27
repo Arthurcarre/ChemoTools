@@ -103,8 +103,7 @@ def main():
     ###############################################
 
     first_checkbox = st.checkbox(
-        'Get the Maximum Common Substructure between molecules of your SDF file (Attention ! Before closing this app,'
-        ' please, UNCHECK THIS BOX)',  key = 'CIT_WEB_MCS_ConformationTool')
+        'Get the Maximum Common Substructure between molecules of your SDF file',  key = 'CIT_WEB_MCS_ConformationTool')
 
     if first_checkbox :
         st.session_state.MCS_delete_activated = True
@@ -175,7 +174,7 @@ def main():
             size_sample = 200
         else :
             size_sample = st.session_state.mols
-        individuals = st.slider('Select the size of your sample. Default size of sample = 200', 0, 500, size_sample,
+        individuals = st.slider('Select the size of your sample. Default sample size = 200', 0, 1000, size_sample,
                                 help='If you want to change this setting during the program, make sure the box below is unchecked!',
                                 key = 'CIT_WEB_MCS_ConformationTool')
 
@@ -194,17 +193,18 @@ def main():
             if 'heatmap' in st.session_state:
                 del st.session_state.heatmap
 
-        RMSD_Target = st.slider('RMSD threshold: Select the maximum RMSD threshold that should constitute a conformation.'
-                                ' Default RMSD threshold = 2 A',
-                                 0.0, 15.0, 2.0,
-                                help='If you want to change this setting during the program, make sure the box below'
-                                ' is unchecked!',  key = 'CIT_WEB_MCS_ConformationTool')
 
-        Proportion = st.slider('Minimum size of the sample defining a conformation. Default proportion = 0.05',
-                             0.0, 1.0, 0.05,
+        RMSD_threshold = st.slider('RMSD threshold: Select the maximum RMSD threshold that should constitute a predominant binding mode.'
+                        ' Default RMSD threshold = 2 A',
+                         0.0, 15.0, 2.0,
+                        help='If you want to change this setting during the program, make sure the box below'
+                        ' is unchecked!',  key = 'CIT_WEB_MCS_ConformationTool')
+        Proportion = st.slider('Minimum size of the sample defining a predominant binding mode. Default proportion = 0.05',
+                             0.0, 1.0, 0.15,
                                help=('This setting define the minimum proportion (value between 0 and 1) of individuals'
                                      ' in a group within the sample to consider that group large enough to be'
-                                     ' representative of a full conformation.'),  key = 'CIT_WEB_MCS_ConformationTool')
+                                     ' representative of a full predominant binding mode.'),  key = 'CIT_WEB_MCS_ConformationTool')
+
 
     ###############################################
     #--   CHECKBOX "GET THE SORTED HEATMAP"     --#                                                     
@@ -219,7 +219,7 @@ def main():
                     with st.spinner('Please wait, the sorted heatmap is coming...'):
                         st.session_state.ConformationClass.get_sorted_heatmap(
                             individuals,
-                            RMSD_Target,
+                            RMSD_threshold,
                             loop = 1,
                             p = Proportion)
                 else:
@@ -245,8 +245,8 @@ def main():
                         best_mols = [x for x in Chem.SDMolSupplier('Best_PLPScore_Poses.sdf')]
                         for i, mol in enumerate(best_mols) :
                             merged = Chem.CombineMols(pdb_file, mol)
-                            Chem.MolToPDBFile(merged, f'Conformation n°{i+1}.pdb')
-                            xyz_pdb = open(f'Conformation n°{i+1}.pdb', 'r', encoding='utf-8')
+                            Chem.MolToPDBFile(merged, f'Predominant Binding Mode n°{i+1}.pdb')
+                            xyz_pdb = open(f'Predominant Binding Mode n°{i+1}.pdb', 'r', encoding='utf-8')
                             pdb = xyz_pdb.read().strip()
                             xyz_pdb.close()
                             xyzview = py3Dmol.view(width=700,height=500)
@@ -256,23 +256,23 @@ def main():
                             xyzview.setStyle({'resn':'UNL'},{'stick':{}})
                             xyzview.zoomTo({'resn':'UNL'})
                             showmol(xyzview, height = 500,width=1000)
-                            os.remove(f'Conformation n°{i+1}.pdb')
-                            st.write(f'Conformation n°{i+1}')
-                            with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                            os.remove(f'PredominantBinding Mode n°{i+1}.pdb')
+                            st.write(f'PredominantBinding Mode n°{i+1}')
+                            with open(f"Sample_Predominant_Binding_Mode{i+1}.sdf", "rb") as file:
                                  btn = st.download_button(
-                                            label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
+                                            label=f"Download all the poses of the predominant binding mode n°{i+1} from the SAMPLE",
                                             data=file,
-                                             file_name=f"Sample_Conformation{i+1}.sdf")
+                                             file_name=f"Sample_Predominant_Binding_Mode{i+1}.sdf")
 
                     with open("Best_PLPScore_Poses.sdf", "rb") as file:
                          btn = st.download_button(
-                                    label="Download the SDF file including each of the representatives of a conformation",
+                                    label="Download the SDF file including each of the representatives of a predominant binding mode",
                                     data=file,
                                     file_name="Best_Score_Poses.sdf")
 
                     for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
                         st.write(
-                            f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                            f"The predominant binding mode n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
                             f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
 
                     st.write("\nIn order to check that each group is different from each other, a table taking " 
@@ -280,20 +280,20 @@ def main():
 
                     st.dataframe(st.session_state.df1)
 
-                    st.write("RMSD value between each representative of each conformation.")
+                    st.write("RMSD value between each representative of each predominant binding mode.")
 
-                    st.pyplot(st.session_state.histplot)
-
-                    st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
-                     " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
-
-                    with open("Histograms_Best_Score.jpeg", "rb") as file:
-                         btn = st.download_button(
-                                    label="Download PLOT Histograms",
+                    for i, fig in enumerate(st.session_state.histplot) :
+                        st.pyplot(fig)
+                        with open(f"Histograms_Best_Score n°{i+1}.jpeg", "rb") as file:
+                            btn = st.download_button(
+                                    label=f"Download PLOT Histograms n°{i+1}",
                                     data=file,
-                                    file_name="Histograms_Best_Score.jpeg",
+                                    file_name=f"Histograms_Best_Score n°{i+1}.jpeg",
                                     mime="image/jpeg",
                                     key = 'CIT_WEB_MCS_ConformationTool')
+
+                    st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each predominant binding mode"
+                     " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
 
                     ###############################################
                     #--    BUTTON "PREPARE YOUR SDF FILE"       --#                                                     
@@ -305,14 +305,14 @@ def main():
                     if "temp" not in st.session_state :
                         st.session_state.temp = 1
                     
-                    st.session_state.temp = st.select_slider("You want a sdf file or plots including molecules in the conformation n°",
+                    st.session_state.temp = st.select_slider("You want a sdf file or plots including molecules in the predominant binding mode n°",
                                                              options=temp_options, value = st.session_state.temp,
                                                              key = 'CIT_WEB_MCS_ConformationTool')
-                    st.write(f"The Conformation selected is {st.session_state.temp}")
+                    st.write(f"The predominant binding mode selected is {st.session_state.temp}")
 
-                    st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
+                    st.session_state.RMSD_threshold_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
                                                                           key = 'CIT_WEB_MCS_ConformationTool')
-                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+                    st.write(f"The RMSD threshold selected is {st.session_state.RMSD_threshold_conformation}")
 
                     st.session_state.help_paragraph = (
                         "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
@@ -342,13 +342,13 @@ def main():
                     if st.button('Prepare your sdf file and build plots', key = 'CIT_WEB_MCS_ConformationTool'):             
                         st.session_state.ConformationClass.get_sdf_conformations(
                             st.session_state.temp,
-                            st.session_state.RMSD_Target_conformation
+                            st.session_state.RMSD_threshold_conformation
                             )
-                        with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                        with open(f'Predominant Binding Mode n°{st.session_state.temp}.sdf', "rb") as file:
                              btn = st.download_button(
                                         label="Download your sdf file",
                                         data=file,
-                                        file_name=f"Conformation n°{st.session_state.temp}.sdf",
+                                        file_name=f"Predominant Binding Mode n°{st.session_state.temp}.sdf",
                                         key = 'CIT_WEB_MCS_ConformationTool')
 
                         if "barplot" in st.session_state :
@@ -378,13 +378,13 @@ def main():
                                     size_ylabels = st.session_state.size_ylabels)
 
                                 st.pyplot(st.session_state.barplot)
-                                st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+                                st.write("Ratio of each compounds between the number of poses in the predominant binding mode selected and the number of total poses.")
 
-                                with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                with open(f"Barplot{st.session_state.temp}.jpeg", "rb") as file:
                                      btn = st.download_button(
-                                             label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                             label=f"Download Bar PLOT Predominant Binding Mode n°{st.session_state.temp} ",
                                              data=file,
-                                             file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                             file_name=f"Barplot n°{st.session_state.temp}.jpeg",
                                              mime="image/jpeg",
                                              key = 'CIT_WEB_MCS_ConformationTool')
 
@@ -392,9 +392,9 @@ def main():
                                 st.pyplot(st.session_state.box_plot)
                                 with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
                                      btn = st.download_button(
-                                             label=f"Download Box PLOT Conformation n°{st.session_state.temp} ",
+                                             label=f"Download Box PLOT Predominant Binding Mode n°{st.session_state.temp} ",
                                              data=file,
-                                             file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                             file_name=f"Boxplot2_Predominant_Binding_Mode n°{st.session_state.temp}.jpeg",
                                              mime="image/jpeg",
                                              key = 'CIT_WEB_MCS_ConformationTool')
                                      
@@ -402,7 +402,7 @@ def main():
                                 st.pyplot(st.session_state.scatterplot)
                                 with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
                                      btn = st.download_button(
-                                             label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                             label=f"Download Scatter Plot Predominant Binding Mode n°{st.session_state.temp} ",
                                              data=file,
                                              file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
                                              mime="image/jpeg",
@@ -411,35 +411,35 @@ def main():
                                 st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
                                      f"'{st.session_state.molecule_name_MCS}'. Please correct it.") 
                     else :
-                        if os.path.exists(f'Conformation{st.session_state.temp}.sdf') == True :
-                            with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                        if os.path.exists(f'Predominant Binding Mode{st.session_state.temp}.sdf') == True :
+                            with open(f'Predominant Binding Mode n°{st.session_state.temp}.sdf', "rb") as file:
                                  btn = st.download_button(
                                             label="Download your sdf file",
                                             data=file,
-                                            file_name=f"Conformation n°{st.session_state.temp}.sdf",
+                                            file_name=f"Predominant Binding Mode n°{st.session_state.temp}.sdf",
                                             key = 'CIT_WEB_MCS_ConformationTool')
 
-                        if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                        if os.path.exists(f'Barplot{st.session_state.temp}.jpeg') == True :
                             st.pyplot(st.session_state.barplot)
 
                             st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-                            with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                            with open(f"Barplot{st.session_state.temp}.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
+                                         label=f"Download Bar PLOT Predominant Binding Mode n°{st.session_state.temp} ",
                                          data=file,
-                                         file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                         file_name=f"Barplot n°{st.session_state.temp}.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
 
-                        if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                        if os.path.exists(f'Barplot{st.session_state.temp}.jpeg') == True :
                             st.pyplot(st.session_state.box_plot)
                             
                             st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
                             with open(f"Box_Plot{st.session_state.temp}.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Box Plot Conformation n°{st.session_state.temp} ",
+                                         label=f"Download Box Plot Predominant Binding Mode n°{st.session_state.temp} ",
                                          data=file,
-                                         file_name=f"Boxplot2_Conformation n°{st.session_state.temp}.jpeg",
+                                         file_name=f"Boxplot_Predominant_Binding_Mode n°{st.session_state.temp}.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
                         
@@ -449,20 +449,20 @@ def main():
                             st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_MCS}.")
                             with open(f"Scatter_Plot{st.session_state.temp}.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Scatter Plot Conformation n°{st.session_state.temp} ",
+                                         label=f"Download Scatter Plot Predominant Binding Mode n°{st.session_state.temp} ",
                                          data=file,
                                          file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
 
                 else :                              
-                    st.session_state.RMSD_Target_conformation = st.slider(
-                        'You want a sdf file and/or plot analysis including molecules in the unique predominant conformation with all poses under a RMSD =',
+                    st.session_state.RMSD_threshold_conformation = st.slider(
+                        'You want a sdf file and/or plot analysis including molecules in the unique predominant binding mode with all poses under a RMSD =',
                         0.0, 15.0, 2.0, key = 'CIT_WEB_MCS_ConformationTool')
 
-                    st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+                    st.write(f"The RMSD threshold selected is {st.session_state.RMSD_threshold_conformation}")
 
-                    st.info('There is only one predominant conformation. Do you want to have the sdf file of poses in this conformation OR see analysis of this conformation ? ')
+                    st.info('There is only one predominant binding mode. Do you want to have the sdf file of poses in this binding mode OR see analysis of this conformation ? ')
 
                     st.session_state.help_paragraph = (
                         "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
@@ -488,16 +488,16 @@ def main():
                                                                   key = 'CIT_WEB_MCS_ConformationTool')
 
 
-                    bouton = st.button('Prepare your sdf file of poses in this conformation.', key = 'CIT_WEB_MCS_ConformationTool')
+                    bouton = st.button('Prepare your sdf file of poses in this predominant binding mode.', key = 'CIT_WEB_MCS_ConformationTool')
                     if bouton :
                         st.session_state.ConformationClass.get_sdf_conformations(
-                            1, st.session_state.RMSD_Target_conformation)
+                            1, st.session_state.RMSD_threshold_conformation)
 
-                        with open('Conformation1.sdf', "rb") as file:
+                        with open('Predominant Binding Mode n°1.sdf', "rb") as file:
                          btn = st.download_button(
                                     label="Download your sdf file",
                                     data=file,
-                                    file_name=f"Unique Conformation.sdf",
+                                    file_name=f"Unique Predominant Predominant Binding Mode.sdf",
                                     key = 'CIT_WEB_MCS_ConformationTool')
 
                         if "barplot" in st.session_state :
@@ -526,13 +526,13 @@ def main():
                                 size_ylabels = st.session_state.size_ylabels)
 
                             st.pyplot(st.session_state.barplot)
-                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+                            st.write("Ratio of each compounds between the number of poses in the predominant binding mode selected and the number of total poses.")
 
-                            with open(f"Barplot_Conformation1.jpeg", "rb") as file:
+                            with open(f"Barplot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Bar PLOT Conformation n°1 ",
+                                         label=f"Download Bar PLOT Predominant Binding_Mode n°1 ",
                                          data=file,
-                                         file_name=f"Barplot_Conformation n°1.jpeg",
+                                         file_name=f"Barplot n°1.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
 
@@ -540,9 +540,9 @@ def main():
                             st.pyplot(st.session_state.box_plot)
                             with open(f"Box_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Box Plot Conformation n°1 ",
+                                         label=f"Download Box Plot Predominant Binding_Mode n°1 ",
                                          data=file,
-                                         file_name=f"Boxplot2_Conformation n°1.jpeg",
+                                         file_name=f"Boxplot2_Predominant_Binding_Mode n°1.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
 
@@ -550,7 +550,7 @@ def main():
                             st.pyplot(st.session_state.scatterplot)
                             with open(f"Scatter_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Scatter Plot Conformation n°1 ",
+                                         label=f"Download Scatter Plot Predominant Binding_Mode n°1 ",
                                          data=file,
                                          file_name=f"Scatter_Plot n°1.jpeg",
                                          mime="image/jpeg",
@@ -559,23 +559,23 @@ def main():
                             st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
                                      f"'{st.session_state.molecule_name_MCS}'. Please correct it.")         
                     else :
-                        if os.path.exists(f'Conformation1.sdf') == True :
-                            with open(f'Conformation1.sdf', "rb") as file:
+                        if os.path.exists(f'Predominant Binding Mode n°1.sdf') == True :
+                            with open(f'Predominant Binding Mode n°1.sdf', "rb") as file:
                                  btn = st.download_button(
                                             label="Download your sdf file",
                                             data=file,
-                                            file_name=f"Conformation n°1.sdf",
+                                            file_name=f"Predominant Binding_Mode n°1.sdf",
                                             key = 'CIT_WEB_MCS_ConformationTool')
                         
-                        if os.path.exists(f'Barplot_Conformation1.jpeg') == True :
+                        if os.path.exists(f'Barplot1.jpeg') == True :
                             st.pyplot(st.session_state.barplot)
-                            st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
+                            st.write("Ratio of each compounds between the number of poses in the predominant binding mode selected and the number of total poses.")
 
-                            with open(f"Barplot_Conformation1.jpeg", "rb") as file:
+                            with open(f"Barplot1.jpeg", "rb") as file:
                                  btn = st.download_button(
                                          label=f"Download Bar PLOT Conformation n°1 ",
                                          data=file,
-                                         file_name=f"Barplot_Conformation n°1.jpeg",
+                                         file_name=f"Barplot n°1.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
                         
@@ -584,9 +584,9 @@ def main():
                             st.pyplot(st.session_state.box_plot)
                             with open(f"Box_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Box Plot Conformation n°1 ",
+                                         label=f"Download Box Plot Predominant Binding Mode n°1 ",
                                          data=file,
-                                         file_name=f"Boxplot2_Conformation n°1.jpeg",
+                                         file_name=f"Boxplot n°1.jpeg",
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
                         
@@ -595,7 +595,7 @@ def main():
                             st.pyplot(st.session_state.scatterplot)
                             with open(f"Scatter_Plot1.jpeg", "rb") as file:
                                  btn = st.download_button(
-                                         label=f"Download Scatter Plot Conformation n°1 ",
+                                         label=f"Download Scatter Plot Predominant Binding Mode n°1 ",
                                          data=file,
                                          file_name=f"Scatter_Plot n°1.jpeg",
                                          mime="image/jpeg",
@@ -606,12 +606,12 @@ def main():
                     del st.session_state.sorted_heatmap
                     if 'temp' in st.session_state:
                         del st.session_state.temp
-                    if 'RMSD_Target_conformation' in st.session_state:
-                        del st.session_state.RMSD_Target_conformation
+                    if 'RMSD_threshold_conformation' in st.session_state:
+                        del st.session_state.RMSD_threshold_conformation
                     if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
                         os.remove('Sorted_Heatmap.jpeg')
-                    if os.path.exists(f'Histograms_Best_Score.jpeg') == True :
-                        os.remove('Histograms_Best_Score.jpeg')
+                    if os.path.exists(f'Cluster_Hierarchy_Heatmap.jpeg') == True :
+                        os.remove('Cluster_Hierarchy_Heatmap.jpeg')
                     if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
                         os.remove('Sample_Best_PLPScore_Poses.sdf')
                     if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
@@ -619,12 +619,14 @@ def main():
 
                     if "n_conformations" in st.session_state :
                         for i in range(st.session_state.n_conformations):
-                            if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
-                                os.remove(f'Sample_Conformation{i+1}.sdf')
-                            if os.path.exists(f'Conformation{i+1}.sdf') == True :
-                                os.remove(f'Conformation{i+1}.sdf')
-                            if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
-                                os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                            if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
+                                os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                            if os.path.exists(f'Predominant_Binding_Mode{i+1}.sdf') == True :
+                                os.remove(f'Predominant_Binding_Mode{i+1}.sdf')
+                            if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
+                                os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
+                            if os.path.exists(f'Barplot{i+1}.jpeg') == True :
+                                os.remove(f'Barplot{i+1}.jpeg')
                             if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
                                 os.remove(f'Box_Plot{i+1}.jpeg')
                             if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
@@ -705,12 +707,12 @@ def main():
                                         xyzview.zoomTo({'resn':'UNL'})
                                         showmol(xyzview, height = 500,width=1000)
                                         os.remove(f'Conformation n°{i+1}.pdb')
-                                        st.write(f'Conformation n°{i+1}')
-                                        with open(f"Sample_Conformation{i+1}.sdf", "rb") as file:
+                                        st.write(f'Predominant_Binding_Mode n°{i+1}')
+                                        with open(f"Sample_Predominant_Binding_Mode{i+1}.sdf", "rb") as file:
                                              btn = st.download_button(
                                                  label=f"Download all the poses of the conformation n°{i+1} from the SAMPLE",
                                                  data=file,
-                                                 file_name=f"Sample_Conformation{i+1}.sdf",
+                                                 file_name=f"Sample_Predominant_Binding_Mode{i+1}.sdf",
                                                  key = 'CIT_WEB_MCS_ConformationTool')
 
                                 with open("Best_PLPScore_Poses.sdf", "rb") as file:
@@ -723,7 +725,7 @@ def main():
                                 st.info(f"There is (are) {st.session_state.n_conformations} predominant pose(s) among all poses.\n")
                                 for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
                                     st.write(
-                                        f"The predominant pose n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
+                                        f"The predominant binding mode n°{i+1} represents {len(predominant_pose)/len(st.session_state.sample)*100:.1f}" 
                                         f"% of the sample, i.e. {len(predominant_pose)} on {len(st.session_state.sample)} poses in total.")
 
                                 st.write("\nIn order to check that each group is different from each other, a table taking " 
@@ -733,17 +735,18 @@ def main():
 
                                 st.write("RMSD value between each representative of each conformation.")
 
-                                st.pyplot(st.session_state.histplot)
+                                for i, fig in enumerate(st.session_state.histplot) :
+                                    st.pyplot(fig)
+                                    with open(f"Histograms_Best_Score n°{i+1}.jpeg", "rb") as file:
+                                        btn = st.download_button(
+                                                label=f"Download PLOT Histograms n°{i+1}",
+                                                data=file,
+                                                file_name=f"Histograms_Best_Score n°{i+1}.jpeg",
+                                                mime="image/jpeg",
+                                                key = 'CIT_WEB_MCS_ConformationTool')
 
                                 st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
                                  " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
-
-                                with open("Histograms_Best_Score.jpeg", "rb") as file:
-                                     btn = st.download_button(
-                                                label="Download PLOT Histograms",
-                                                data=file,
-                                                file_name="Histograms_Best_Score.jpeg",
-                                                mime="image/jpeg", key = 'CIT_WEB_MCS_ConformationTool')
                                 
                                 temp_options = range(1, st.session_state.n_conformations + 1)
                                 if "temp" not in st.session_state :
@@ -753,11 +756,11 @@ def main():
                                                                          value = st.session_state.temp,
                                                                          key = 'CIT_WEB_MCS_ConformationTool')
                                 
-                                st.write(f"The Conformation selected is {st.session_state.temp}")
+                                st.write(f"The Predominant Binding Mode selected is {st.session_state.temp}")
 
-                                st.session_state.RMSD_Target_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
+                                st.session_state.RMSD_threshold_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
                                                                                       key = 'CIT_WEB_MCS_ConformationTool')
-                                st.write(f"The RMSD Target selected is {st.session_state.RMSD_Target_conformation}")
+                                st.write(f"The RMSD threshold selected is {st.session_state.RMSD_threshold_conformation}")
                            
                                 st.session_state.help_paragraph = (
                                     "To give an idea, if your number of molecules (not number of poses) = 15 :\n"
@@ -782,13 +785,13 @@ def main():
                                 if st.button('Prepare your sdf file', key = 'CIT_WEB_MCS_ConformationTool'):
                                     st.session_state.ConformationClass.get_sdf_conformations(
                                         st.session_state.temp,
-                                        st.session_state.RMSD_Target_conformation)
+                                        st.session_state.RMSD_threshold_conformation)
                                     
-                                    with open(f'Conformation{st.session_state.temp}.sdf', "rb") as file:
+                                    with open(f'Predominant Binding Mode n°{st.session_state.temp}.sdf', "rb") as file:
                                          btn = st.download_button(
                                                     label="Download your sdf file",
                                                     data=file,
-                                                     file_name=f"Conformation n°{st.session_state.temp}.sdf")
+                                                    file_name=f"Predominant Binding Mode n°{st.session_state.temp}.sdf")
 
                                     if "barplot" in st.session_state :
                                         del st.session_state.barplot
@@ -819,11 +822,11 @@ def main():
                                             st.pyplot(st.session_state.barplot)
                                             st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
 
-                                            with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                            with open(f"Barplot{st.session_state.temp}.jpeg", "rb") as file:
                                                  btn = st.download_button(
                                                          label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
                                                          data=file,
-                                                         file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                                         file_name=f"Barplot n°{st.session_state.temp}.jpeg",
                                                          mime="image/jpeg")
 
                                             st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
@@ -853,18 +856,18 @@ def main():
                                                         data=file,
                                                          file_name=f"Conformation n°{st.session_state.temp}.sdf")
 
-                                    if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                                    if os.path.exists(f'Barplo{st.session_state.temp}.jpeg') == True :
                                         st.pyplot(st.session_state.barplot)
 
                                         st.write("Ratio of each compounds between the number of poses in the conformation selected and the number of total poses.")
-                                        with open(f"Barplot_Conformation{st.session_state.temp}.jpeg", "rb") as file:
+                                        with open(f"Barplot{st.session_state.temp}.jpeg", "rb") as file:
                                              btn = st.download_button(
                                                      label=f"Download Bar PLOT Conformation n°{st.session_state.temp} ",
                                                      data=file,
-                                                     file_name=f"Barplot_Conformation n°{st.session_state.temp}.jpeg",
+                                                     file_name=f"Barplot n°{st.session_state.temp}.jpeg",
                                                      mime="image/jpeg")
 
-                                    if os.path.exists(f'Barplot_Conformation{st.session_state.temp}.jpeg') == True :
+                                    if os.path.exists(f'Barplot{st.session_state.temp}.jpeg') == True :
                                         st.pyplot(st.session_state.box_plot)
                                         
                                         st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
@@ -893,38 +896,38 @@ def main():
                         del st.session_state.n_conformations
                     if 'temp' in st.session_state:
                         del st.session_state.temp
-                    if 'RMSD_Target_conformation' in st.session_state:
-                        del st.session_state.RMSD_Target_conformation
+                    if 'RMSD_threshold_conformation' in st.session_state:
+                        del st.session_state.RMSD_threshold_conformation
                     if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
                         os.remove('Sorted_Heatmap.jpeg')
-                    if os.path.exists(f'Histograms_Best_Score.jpeg') == True :
-                        os.remove('Histograms_Best_Score.jpeg')
+                    if os.path.exists(f'Cluster_Hierarchy_Heatmap.jpeg') == True :
+                        os.remove('Cluster_Hierarchy_Heatmap.jpeg')
                     if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
                         os.remove('Sample_Best_PLPScore_Poses.sdf')
                     if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
                         os.remove('Best_PLPScore_Poses.sdf')
 
-                    if "n_conformations" in st.session_state :
-                        for i in range(st.session_state.n_conformations):
-                            if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
-                                os.remove(f'Sample_Conformation{i+1}.sdf')
-                            if os.path.exists(f'Conformation{i+1}.sdf') == True :
-                                os.remove(f'Conformation{i+1}.sdf')
-                            if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
-                                os.remove(f'Barplot_Conformation{i+1}.jpeg')
-                            if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
-                                os.remove(f'Box_Plot{i+1}.jpeg')
-                            if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
-                                os.remove(f'Scatter_Plot{i+1}.jpeg')
-              
+                if "n_clusters" in st.session_state :
+                    for i in range(st.session_state.n_clusters):
+                        if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
+                            os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                        if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
+                            os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
+                        if os.path.exists(f'Predominant Binding Mode n°{i+1}.sdf') == True :
+                            os.remove(f'Predominant Binding Mode n°{i+1}.sdf')
+                        if os.path.exists(f'Barplot{i+1}.jpeg') == True :
+                            os.remove(f'Barplot{i+1}.jpeg')
+                        if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
+                            os.remove(f'Box_Plot{i+1}.jpeg')
+                        if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
+                            os.remove(f'Scatter_Plot{i+1}.jpeg')
+                  
     else :
         if 'MCS_delete_activated' in st.session_state:
             if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
                 os.remove('Sorted_Heatmap.jpeg')
-            if os.path.exists(f'Cluster_Hierarchy_Heatmap.jpeg.jpeg') == True :
-                os.remove('Cluster_Hierarchy_Heatmap.jpeg.jpeg')
-            if os.path.exists(f'Histograms_Best_Score.jpeg') == True :
-                os.remove('Histograms_Best_Score.jpeg')
+            if os.path.exists(f'Cluster_Hierarchy_Heatmap.jpeg') == True :
+                os.remove('Cluster_Hierarchy_Heatmap.jpeg')
             if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
                 os.remove('Sample_Best_PLPScore_Poses.sdf')
             if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
@@ -932,12 +935,14 @@ def main():
 
             if "n_conformations" in st.session_state :
                 for i in range(st.session_state.n_conformations):
-                    if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
-                        os.remove(f'Sample_Conformation{i+1}.sdf')
-                    if os.path.exists(f'Conformation{i+1}.sdf') == True :
-                        os.remove(f'Conformation{i+1}.sdf')
-                    if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
-                        os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                    if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
+                        os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                    if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
+                        os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
+                    if os.path.exists(f'Predominant Binding Mode n°{i+1}.sdf') == True :
+                        os.remove(f'Predominant Binding Mode n°{i+1}.sdf')
+                    if os.path.exists(f'Barplot{i+1}.jpeg') == True :
+                        os.remove(f'Barplot{i+1}.jpeg')
                     if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
                         os.remove(f'Box_Plot{i+1}.jpeg')
                     if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
@@ -945,12 +950,14 @@ def main():
             
             if "n_clusters" in st.session_state :
                 for i in range(st.session_state.n_clusters):
-                    if os.path.exists(f'Sample_Conformation{i+1}.sdf') == True :
-                        os.remove(f'Sample_Conformation{i+1}.sdf')
-                    if os.path.exists(f'Conformation{i+1}.sdf') == True :
-                        os.remove(f'Conformation{i+1}.sdf')
-                    if os.path.exists(f'Barplot_Conformation{i+1}.jpeg') == True :
-                        os.remove(f'Barplot_Conformation{i+1}.jpeg')
+                    if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
+                        os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                    if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
+                        os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
+                    if os.path.exists(f'Predominant Binding Mode n°{i+1}.sdf') == True :
+                        os.remove(f'Predominant Binding Mode n°{i+1}.sdf')
+                    if os.path.exists(f'Barplot{i+1}.jpeg') == True :
+                        os.remove(f'Barplot{i+1}.jpeg')
                     if os.path.exists(f'Box_Plot{i+1}.jpeg') == True :
                         os.remove(f'Box_Plot{i+1}.jpeg')
                     if os.path.exists(f'Scatter_Plot{i+1}.jpeg') == True :
