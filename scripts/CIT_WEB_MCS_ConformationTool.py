@@ -431,7 +431,7 @@ def main():
                                          mime="image/jpeg",
                                          key = 'CIT_WEB_MCS_ConformationTool')
 
-                        if os.path.exists(f'Barplot{st.session_state.temp}.jpeg') == True :
+                        if os.path.exists(f'Box_Plot{st.session_state.temp}.jpeg') == True :
                             st.pyplot(st.session_state.box_plot)
                             
                             st.write(f"Boxplot built following the descending order of the {st.session_state.score_MCS}.")
