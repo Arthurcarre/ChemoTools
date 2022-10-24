@@ -595,9 +595,7 @@ class ConformationTool :
                     plt.yticks(fontsize=15)
                     plt.xlabel("RMSD (Å)", fontsize=15)
                     figs.append(fig)
-                    plt.show()
-                    
-                                  
+                    plt.show()                  
 
             if self.streamlit == True :
                 for i, fig in enumerate(figs) :
