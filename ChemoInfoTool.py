@@ -524,7 +524,7 @@ class ConformationTool :
                     try :
                         sdf_to_hist = [CalcRMS(Get_MCS_Fusion(self, input_list[0]), mol) for mol in self.MCS_mols]
                     except RuntimeError:
-                        sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mol
+                        sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
                                        
                 a, b, c, d = 0, 0, 0, 0
                 figs = []
