@@ -524,25 +524,32 @@ class ConformationTool :
                     try :
                         sdf_to_hist = [CalcRMS(Get_MCS_Fusion(self, input_list[0]), mol) for mol in self.MCS_mols]
                     except RuntimeError:
-                        sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mols]
-                
-                fig, ax = plt.subplots(len(input_list), 1, figsize=(10, 0.2*len(input_list)*9))
-                a, b, c = 0, 0, 0
-                for RMSD in sdf_to_hist : 
-                    if RMSD < 2 :
+                        sdf_to_hist = [CalcRMS(mol, Get_MCS_Fusion(self, input_list[0])) for mol in self.MCS_mol
+                                       
+                figs = []
+                a, b, c, d = 0, 0, 0, 0
+                for i in sdf_to_hist : 
+                    if i < 1 :
                         a += 1
-                    if RMSD < 3 :
+                    if i < 2 :
                         b += 1
-                    if RMSD < 4 :
+                    if i < 3 :
                         c += 1
-                ax.hist(sdf_to_hist, bins =100, range=(0, 5), label = "Predominant Binding Mode n°1")
-                ax.axvline(x=2, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(a, (1.5, 0.01*len(self.mols)), fontsize=15)
-                ax.axvline(x=3, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(b-a, (2.5, 0.001*len(self.mols)), fontsize=15)
-                ax.axvline(x=4, ymin=0, ymax=1, color="black", linestyle="--")
-                ax.annotate(c-b, (3.5, 0.0001*len(self.mols)), fontsize=15)
-                ax.legend(loc='upper right', shadow=True, markerfirst = False)
+                    if i < 4 :
+                        d += 1
+                fig, ax = plt.subplots(figsize=(15, 2))
+                ax.hist(group, bins=100, range=(0, 6))
+                ax.set_title(f"Predominant Binding Mode n°1", loc="left", fontsize=15)
+                ax.axvline(x=1, ymin=0, ymax=1, color="orange", linestyle="-", linewidth=2.5, label=f"{a} poses below 1 Å")
+                ax.axvline(x=2, ymin=0, ymax=1, color="orange", linestyle="--", linewidth=2.5, label=f"{b} poses below 2 Å")
+                ax.axvline(x=3, ymin=0, ymax=1, color="orange", linestyle="-.", linewidth=2.5, label=f"{c} poses below 3 Å")
+                ax.axvline(x=4, ymin=0, ymax=1, color="orange", linestyle=":", linewidth=2.5, label=f"{d} poses below 4 Å")
+                ax.legend(loc='upper right', fontsize = 'large', shadow=True, markerfirst = False)
+                plt.xticks(fontsize=15)
+                plt.yticks(fontsize=15)
+                plt.xlabel("RMSD (Å)", fontsize=15)
+                figs.append(fig)
+                plt.show()
             
             else :
                 if self.conformation_tool == "Unique":
