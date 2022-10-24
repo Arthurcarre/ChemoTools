@@ -538,7 +538,7 @@ class ConformationTool :
                     if i < 4 :
                         d += 1
                 fig, ax = plt.subplots(figsize=(15, 2))
-                ax.hist(group, bins=100, range=(0, 6))
+                ax.hist(sdf_to_hist, bins=100, range=(0, 6))
                 ax.set_title(f"Predominant Binding Mode n°1", loc="left", fontsize=15)
                 ax.axvline(x=1, ymin=0, ymax=1, color="orange", linestyle="-", linewidth=2.5, label=f"{a} poses below 1 Å")
                 ax.axvline(x=2, ymin=0, ymax=1, color="orange", linestyle="--", linewidth=2.5, label=f"{b} poses below 2 Å")
