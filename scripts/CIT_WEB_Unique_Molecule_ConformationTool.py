@@ -515,7 +515,7 @@ def main():
             if os.path.exists(f'Sorted_Heatmap.jpeg') == True :
                 os.remove('Sorted_Heatmap.jpeg')
             if os.path.exists('Cluster_Hierarchy_Heatmap.jpeg') == True :
-                os.remove('Cluster_Hierarchy_Heatmap.jpeg.')
+                os.remove('Cluster_Hierarchy_Heatmap.jpeg')
             if os.path.exists(f'Sample_Best_PLPScore_Poses.sdf') == True :
                 os.remove('Sample_Best_PLPScore_Poses.sdf')
             if os.path.exists(f'Best_PLPScore_Poses.sdf') == True :
