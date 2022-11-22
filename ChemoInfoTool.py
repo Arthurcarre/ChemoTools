@@ -325,7 +325,7 @@ class ConformationTool :
             for individual in group :
                 n += 1
                 suppl.append(self.mols[self.sample[predominant_poses[m][n]]])
-            PLPscore = [np.abs(x.GetProp(self.score)) for x in suppl]
+            PLPscore = [np.abs(float(x.GetProp(self.score))) for x in suppl]
             best_score = 0
             for k in PLPscore :
                 if float(k) > float(best_score) :
@@ -407,9 +407,9 @@ class ConformationTool :
 
         indice_best_score = []
         for group in a_supprimer : 
-            PLPscore = [np.abs(mol.GetProp(self.score)) for mol in group]
-            st.write(np.abs(mols[0].GetProp(self.score)))
-            st.write(type(np.abs(mols[0].GetProp(self.score))))
+            PLPscore = [np.abs(float(mol.GetProp(self.score))) for mol in group]
+            st.write(np.abs(float(mols[0].GetProp(self.score))))
+            st.write(type(np.abs(float(mols[0].GetProp(self.score)))))
             best_score = 0
             for k in PLPscore :
                 if float(k) > float(best_score) :
@@ -1240,7 +1240,7 @@ class ConformationTool :
         
         for i, mol in enumerate(file_synt):
                     index2.append(mol.GetProp(molecule_name))
-                    array2[i, 0] = np.abs(mol.GetProp(self.score))
+                    array2[i, 0] = np.abs(float(mol.GetProp(self.score)))
         
         data_frame2 = pd.DataFrame(array2, index=index2, columns=[self.score, "Zero"])
         
