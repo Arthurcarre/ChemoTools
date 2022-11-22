@@ -360,7 +360,7 @@ def main():
                     if "n_clusters" not in st.session_state :
                         st.session_state.n_clusters = 2
                         
-                    n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 30, st.session_state.n_clusters,
+                    n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 10, st.session_state.n_clusters,
                                             key = 'CIT_WEB_Unique_Molecule_ConformationTool')
                     st.session_state.n_clusters = n_clusters
                     st.session_state.n_clusters_selected = n_clusters
@@ -377,7 +377,7 @@ def main():
                                      file_name="Cluster_Hierarchy_Heatmap.jpeg",
                                      mime="image/jpeg",
                                      key = 'CIT_WEB_Unique_Molecule_ConformationTool')                         
-                        n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 30,
+                        n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 10,
                                                st.session_state.n_clusters, key = 'CIT_WEB_Unique_Molecule_ConformationTool')
                         st.session_state.n_clusters = n_clusters
                         
