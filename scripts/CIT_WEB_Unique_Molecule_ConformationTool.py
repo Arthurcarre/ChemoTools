@@ -337,7 +337,7 @@ def main():
             col1, col2 = st.columns(2)
             with col1 :                
                 metric = st.selectbox('Which metric do you want to use to compute the pairwise distances between observations in n-dimensional space ?',
-                                      ('canberra', 'euclidean', 'hamming', 'braycurtis','chebyshev', 'cityblock', 'correlation',
+                                      ('euclidean', 'canberra', 'hamming', 'braycurtis','chebyshev', 'cityblock', 'correlation',
                                        'cosine', 'dice', 'hamming', 'jaccard', 'jensenshannon', 'kulsinski', 'mahalanobis',
                                        'matching', 'minkowski', 'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener',
                                        'sokalsneath', 'sqeuclidean', 'yule'), key = 'CIT_WEB_Unique_Molecule_ConformationTool',
@@ -346,7 +346,7 @@ def main():
                 
             with col2 :
                 method = st.selectbox('Which method do you want to use to compute the distance  between two clusters ?',
-                                        ('average', 'single', 'complete', 'weighted', 'centroid', 'median', 'ward'),
+                                        ('ward', 'average', 'single', 'complete', 'weighted', 'centroid', 'median'),
                                        key = 'CIT_WEB_Unique_Molecule_ConformationTool',
                                        help = "Before changing this setting, make sure the following checkbox is unchecked")
                 st.session_state.method = method
