@@ -408,8 +408,6 @@ class ConformationTool :
         indice_best_score = []
         for group in a_supprimer : 
             PLPscore = [np.abs(float(mol.GetProp(self.score))) for mol in group]
-            st.write(np.abs(float(mols[0].GetProp(self.score))))
-            st.write(type(np.abs(float(mols[0].GetProp(self.score)))))
             best_score = 0
             for k in PLPscore :
                 if float(k) > float(best_score) :
