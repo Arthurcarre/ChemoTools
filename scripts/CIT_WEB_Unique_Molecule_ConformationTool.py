@@ -67,6 +67,7 @@ def main():
             del st.session_state.sdf_file_stock_unique
         if "mol1_unique" in st.session_state :
             del st.session_state.mol1_unique
+            del st.session_state.molref_stock_unique
 
     #BENCHMARK MOLECULE SECTION#
     
