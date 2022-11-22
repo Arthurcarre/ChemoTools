@@ -326,8 +326,6 @@ class ConformationTool :
                 n += 1
                 suppl.append(self.mols[self.sample[predominant_poses[m][n]]])
             PLPscore = [np.abs(float(x.GetProp(self.score))) for x in suppl]
-            for x in suppl :
-                st.write(np.abs(float(x.GetProp(self.score))))
             best_score = 0
             for k in PLPscore :
                 if float(k) > float(best_score) :
@@ -410,8 +408,6 @@ class ConformationTool :
         indice_best_score = []
         for group in a_supprimer : 
             PLPscore = [np.abs(float(mol.GetProp(self.score))) for mol in group]
-            for mol in group :
-                st.write(np.abs(float(mol.GetProp(self.score))))
             best_score = 0
             for k in PLPscore :
                 if float(k) > float(best_score) :
