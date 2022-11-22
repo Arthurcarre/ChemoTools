@@ -358,7 +358,7 @@ class ConformationTool :
         w.close()
 
         for k, group in enumerate(sample_predominant_poses) :
-            with Chem.SDWriter(f"Sample_Predominant_Binding_Mode{k+1}.sdf") as w : 
+            with Chem.SDWriter(f"Sample_Predominant_Binding_Mode n°{k+1}.sdf") as w : 
                 for m in group :
                     mol = self.mols[self.sample[m]]
                     w.write(mol)
@@ -706,11 +706,11 @@ class ConformationTool :
                     showmol(xyzview, height = 500,width=1000)
                     os.remove(f'Predominant Binding Mode n°{i+1}.pdb')
                     st.write(f'Predominant Binding Mode n°{i+1}')
-                    with open(f"Sample_Predominant_Binding_Mode{i+1}.sdf", "rb") as file:
+                    with open(f"Sample_Predominant_Binding_Mode n°{i+1}.sdf", "rb") as file:
                          btn = st.download_button(
                                     label=f"Download all the poses of the predominant binding mode n°{i+1} from the SAMPLE",
                                     data=file,
-                                     file_name=f"Sample_Predominant_Binding_Mode{i+1}.sdf")
+                                     file_name=f"Sample_Predominant_Binding_Mode n°{i+1}.sdf")
         
             with open("Best_PLPScore_Poses.sdf", "rb") as file:
                  btn = st.download_button(
