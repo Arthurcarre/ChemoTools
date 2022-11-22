@@ -208,7 +208,7 @@ def main():
                             showmol(xyzview, height = 500,width=1000)
                             os.remove(f'Conformation n°{i+1}.pdb')
                             st.write(f'Predominant Binding Mode n° n°{i+1}')
-                            with open(f"Sample_Predominant_Binding_Mode{i+1}.sdf", "rb") as file:
+                            with open(f"Sample_Predominant_Binding_Mode n°{i+1}.sdf", "rb") as file:
                                  btn = st.download_button(
                                      label=f"Download all the poses of the Predominant Binding Mode n°{i+1} from the SAMPLE",
                                      data=file,
@@ -323,8 +323,8 @@ def main():
                         os.remove('Best_PLPScore_Poses.sdf')     
                     if "n_conformations" in st.session_state :
                         for i in range(st.session_state.n_conformations):
-                            if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
-                                os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                            if os.path.exists(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf') == True :
+                                os.remove(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf')
                             if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
                                 os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
                             if os.path.exists(f'Predominant Binding Mode n°{i+1}.sdf') == True :
@@ -500,8 +500,8 @@ def main():
                         os.remove('Best_PLPScore_Poses.sdf')     
                     if "n_clusters" in st.session_state :
                         for i in range(st.session_state.n_clusters):
-                            if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
-                                os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                            if os.path.exists(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf') == True :
+                                os.remove(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf')
                             if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
                                 os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
                             if os.path.exists(f'Predominant Binding Mode n°{i+1}.sdf') == True :
@@ -522,8 +522,8 @@ def main():
 
             if "n_conformations" in st.session_state :
                 for i in range(st.session_state.n_conformations):
-                    if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
-                        os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                    if os.path.exists(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf') == True :
+                        os.remove(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf')
                     if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
                         os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
                     if os.path.exists(f'Predominant Binding Mode n°{i+1}.sdf') == True :
@@ -531,8 +531,8 @@ def main():
                         
             if "n_clusters" in st.session_state :
                 for i in range(st.session_state.n_clusters):
-                    if os.path.exists(f'Sample_Predominant_Binding_Mode{i+1}.sdf') == True :
-                        os.remove(f'Sample_Predominant_Binding_Mode{i+1}.sdf')
+                    if os.path.exists(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf') == True :
+                        os.remove(f'Sample_Predominant_Binding_Mode n°{i+1}.sdf')
                     if os.path.exists(f'Histograms_Best_Score n°{i+1}.jpeg') == True :
                         os.remove(f'Histograms_Best_Score n°{i+1}.jpeg')
                     if os.path.exists(f'Predominant Binding Mode n°{i+1}.sdf') == True :
