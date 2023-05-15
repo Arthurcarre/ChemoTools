@@ -69,7 +69,7 @@ def main():
     #PDB PROTEIN SECTION#
 
     pdb = st.file_uploader("Upload a pdb file for viewing purposes. (FACULTATIVE)",
-                                        type = ["pdb"],  key = 'CIT_WEB_MCS_ConformationTool')
+                                        type = ["pdb"],  key = 'Nombre aleatoire')
     if pdb :
         st.session_state.pdb = pdb
         with open("pdb_file.pdb", "wb") as pdb_file:
