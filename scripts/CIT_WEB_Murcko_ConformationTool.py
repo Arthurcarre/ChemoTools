@@ -49,15 +49,15 @@ def main():
 
     #SDF FILE SECTION#
     sdf = st.file_uploader("Upload the coordinates of the docked ligand in SDF format:",
-                                        type = ["sdf"],  key = 'CIT_WEB_Murcko_ConformationTool')
+                                        type = ["sdf"],  key = 'button27819')
     if sdf:
         molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
                           " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name',
-                                      key = 'CIT_WEB_Murcko_ConformationTool')
+                                      key = 'button728937')
         st.session_state.molecule_name_murcko = molecule_name
         score = st.text_input(
                      'What is the scoring function used in your sdf file ?',
-                     'Gold.PLP.Fitness', key = 'CIT_WEB_Murcko_ConformationTool')
+                     'Gold.PLP.Fitness', key = 'button28283')
         st.session_state.score_murcko = score
         if 'sdf_file_stock_murcko' not in st.session_state :
             st.session_state.sdf_file_stock_murcko = sdf
@@ -81,13 +81,13 @@ def main():
         if 'mol1_murcko' in st.session_state :
             code_smiles = Chem.MolToSmiles(st.session_state.mol1_murcko)
             smiles = st.text_input('Upload the benchmark molecule SMILES code',
-                                                      code_smiles, key = 'CIT_WEB_Murcko_ConformationTool')
+                                                      code_smiles, key = 'button8718923')
         else :
             smiles = st.text_input('Upload the benchmark molecule SMILES code',
-                                                      'OC(COC1=C2C=CC=CC2=CC=C1)CNC(C)C', key = 'CIT_WEB_Murcko_ConformationTool')
+                                                      'OC(COC1=C2C=CC=CC2=CC=C1)CNC(C)C', key = 'button89128')
 
     with col2 :
-        molref = st.file_uploader("OR Upload your benchmark molecule (mol file in 2D or 3D) here.", key = 'CIT_WEB_Murcko_ConformationTool')
+        molref = st.file_uploader("OR Upload your benchmark molecule (mol file in 2D or 3D) here.", key = 'buttton8191212')
 
     if molref :
         with open("mol_ref.mol", "wb") as molref_file:
@@ -108,7 +108,7 @@ def main():
     #PDB PROTEIN SECTION#
 
     pdb = st.file_uploader("Upload a pdb file for viewing purposes. (FACULTATIVE)",
-                                        type = ["pdb"], key = 'CIT_WEB_Murcko_ConformationTool')
+                                        type = ["pdb"], key = 'button912828"')
     if pdb :
         st.session_state.pdb_murcko = pdb
         with open("pdb_file.pdb", "wb") as pdb_file:
@@ -120,7 +120,7 @@ def main():
     ###############################################
 
     first_checkbox = st.checkbox(
-        'Check your sdf', key = 'CIT_WEB_Murcko_ConformationTool')
+        'Check your sdf', key = 'button8117892')
     if first_checkbox :
         st.session_state.murcko_delete_activated = True
         try : 
@@ -151,7 +151,7 @@ def main():
             im = Draw.MolToImage(scaff_mol_bench)
             st.image(im, caption='Chemical structure of the scaffold of the benchmark molecule')    
 
-        show_molecules = st.checkbox('Show molecules name which will be not included in the algorithm', key = 'CIT_WEB_Murcko_ConformationTool')
+        show_molecules = st.checkbox('Show molecules name which will be not included in the algorithm', key = 'button8976217')
         if show_molecules:
             if st.session_state.error_mols == None :
                 st.write('All molecules are good !')
@@ -222,13 +222,13 @@ def main():
                                 ' Default RMSD threshold = 2 A',
                                  0.0, 15.0, 2.0,
                                 help='If you want to change this setting during the program, make sure the box below'
-                                ' is unchecked!', key = 'CIT_WEB_Murcko_ConformationTool')
+                                ' is unchecked!', key = 'button871656723')
 
         Proportion = st.slider('Minimum size of the sample defining a predominant binding mode. Default proportion = 0.05',
                              0.0, 1.0, 0.15,
                                help=('This setting define the minimum proportion (value between 0 and 1) of individuals'
                                      ' in a group within the sample to consider that group large enough to be'
-                                     ' representative of a full predominant binding mode.'), key = 'CIT_WEB_Murcko_ConformationTool')
+                                     ' representative of a full predominant binding mode.'), key = 'button61278912')
 
     ###############################################
     #--   CHECKBOX "GET THE SORTED HEATMAP"     --#                                                     
@@ -237,7 +237,7 @@ def main():
         tab1, tab2 = st.tabs(["Sorting Process", "Cluster Hierarchy"])
         
         with tab1:
-            third_checkbox = st.checkbox('Get the sorted heatmap', key = 'CIT_WEB_Murcko_ConformationTool')
+            third_checkbox = st.checkbox('Get the sorted heatmap', key = 'button816183')
             if third_checkbox :
                 if 'sorted_heatmap' not in st.session_state:
                     with st.spinner('Please wait, the sorted heatmap is coming...'):
@@ -258,7 +258,7 @@ def main():
                                   data=file,
                                   file_name="Sorted_Heatmap.jpeg",
                                   mime="image/jpeg",
-                                  key = 'CIT_WEB_Murcko_ConformationTool')
+                                  key = 'button87162637')
                     
                     st.info(f"There is (are) {st.session_state.n_conformations} predominant pose(s) among all poses.\n")
 
@@ -287,14 +287,14 @@ def main():
                                               label=f"Download all the poses of the predominant binding mode n°{i+1} from the SAMPLE",
                                               data=file,
                                               file_name=f"Sample_Predominant_Binding_Mode{i+1}.sdf",
-                                              key = 'CIT_WEB_Murcko_ConformationTool')
+                                              key = 'button8682U76837')
 
                     with open("Best_PLPScore_Poses.sdf", "rb") as file:
                          btn = st.download_button(
                                      label="Download the SDF file including each of the representatives of a predominant binding mode",
                                      data=file,
                                      file_name="Best_Score_Poses.sdf",
-                                     key = 'CIT_WEB_Murcko_ConformationTool')
+                                     key = 'button2989IHG27UH')
 
                     for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
                         st.write(
@@ -316,7 +316,7 @@ def main():
                                          data=file,
                                          file_name=f"Histograms_Best_Score n°{i+1}.jpeg",
                                          mime="image/jpeg",
-                                         key = 'CIT_WEB_Murcko_ConformationTool')
+                                         key = 'button9287GH3J7')
 
                     st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each"
                     " predominant binding mode and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
@@ -345,7 +345,7 @@ def main():
                         " Height = 18, Xlabels Size = 25, Ylabels Size = 15")
                     
                     settings_checkbox = st.checkbox('Plot Settings (to configure size and some elements of the plots) *Facultative',
-                                                    help=st.session_state.help_paragraph, key = 'CIT_WEB_Murcko_ConformationTool')
+                                                    help=st.session_state.help_paragraph, key = 'button827879H87')
                     if settings_checkbox :
                         st.session_state.aspect_plot = st.slider(
                              'Configure the aspect ratio of the plots', 0.0, 10.0, 1.75,
@@ -354,12 +354,12 @@ def main():
 
                         st.session_state.height_plot = st.slider(
                             'Configure the height of the plots', 0, 50, 18,
-                            help="Height (in inches) of each facet.", key = 'CIT_WEB_Murcko_ConformationTool')
+                            help="Height (in inches) of each facet.", key = 'button87892H9')
 
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25,
-                                                                  key = 'CIT_WEB_Murcko_ConformationTool')
+                                                                  key = 'button8726UHI')
                         st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15,
-                                                                  key = 'CIT_WEB_Murcko_ConformationTool')
+                                                                  key = 'button987YU2J')
 
 
                     if st.button('Prepare your sdf file and build plots'):             
@@ -372,7 +372,7 @@ def main():
                                          label="Download your sdf file",
                                          data=file,
                                          file_name=f"Predominant Binding Mode n°{st.session_state.temp}.sdf",
-                                         key = 'CIT_WEB_Murcko_ConformationTool')
+                                         key = 'button98786YTUUOJH')
 
                         if "barplot" in st.session_state :
                             del st.session_state.barplot
@@ -410,7 +410,7 @@ def main():
                                               data=file,
                                               file_name=f"Barplot n°{st.session_state.temp}.jpeg",
                                               mime="image/jpeg",
-                                              key = 'CIT_WEB_Murcko_ConformationTool')
+                                              key = 'button9878YT7U')
 
                                 st.write(f"Boxplot built following the descending order of the {st.session_state.score_murcko}.")
                                 st.pyplot(st.session_state.box_plot)
@@ -420,7 +420,7 @@ def main():
                                               data=file,
                                               file_name=f"Boxplot n°{st.session_state.temp}.jpeg",
                                               mime="image/jpeg",
-                                              key = 'CIT_WEB_Murcko_ConformationTool')
+                                              key = 'button9897TUGHI')
                                 
                                 st.write(f"Scatter plot built with the ratio as function of the {st.session_state.score_murcko}.")
                                 st.pyplot(st.session_state.scatterplot)
@@ -430,7 +430,7 @@ def main():
                                               data=file,
                                               file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
                                               mime="image/jpeg",
-                                              key = 'CIT_WEB_Murcko_ConformationTool')
+                                              key = 'button98978T7RF')
                             except KeyError :
                                 st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
                                      f"'{st.session_state.molecule_name_murcko}'. Please correct it.") 
@@ -441,7 +441,7 @@ def main():
                                              label="Download your sdf file",
                                              data=file,
                                              file_name=f"Predominant Binding Mode n°{st.session_state.temp}.sdf",
-                                             key = 'CIT_WEB_Murcko_ConformationTool')
+                                             key = 'buttonO9IUIYUT75')
 
                         if os.path.exists(f'Barplot{st.session_state.temp}.jpeg') == True :
                             st.pyplot(st.session_state.barplot)
@@ -454,7 +454,7 @@ def main():
                                           data=file,
                                           file_name=f"Barplot n°{st.session_state.temp}.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttonKJHYUT76789')
 
                         if os.path.exists(f'Barplot{st.session_state.temp}.jpeg') == True :
                             st.pyplot(st.session_state.box_plot)
@@ -466,7 +466,7 @@ def main():
                                           data=file,
                                           file_name=f"Boxplot n°{st.session_state.temp}.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttonJHT576789OIU')
                         
                         if os.path.exists(f'Scatter_Plot{st.session_state.temp}.jpeg') == True :    
                             st.pyplot(st.session_state.scatterplot)
@@ -478,7 +478,7 @@ def main():
                                           data=file,
                                           file_name=f"Scatter_Plot n°{st.session_state.temp}.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'button1290387YH')
 
                 else :                              
                     st.session_state.RMSD_threshold_conformation = st.slider(
@@ -501,7 +501,7 @@ def main():
                         st.session_state.aspect_plot = st.slider(
                             'Configure the aspect ratio of the plts', 0.0, 10.0, 1.75,
                             help="Aspect ratio of each facet, so that aspect * height gives the width of each facet in inches.",
-                            key = 'CIT_WEB_Murcko_ConformationTool')
+                            key = 'buttonIBTR789')
 
                         st.session_state.height_plot = st.slider(
                             'Configure the height of the plots', 0, 50, 18,
@@ -509,9 +509,9 @@ def main():
                             key = 'CIT_WEB_Murcko_ConformationTool')
 
                         st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25,
-                                                                  key = 'CIT_WEB_Murcko_ConformationTool')
+                                                                  key = 'buttonUVYT678IUJH')
                         st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15,
-                                                                  key = 'CIT_WEB_Murcko_ConformationTool')
+                                                                  key = 'button9876TGHJIU76')
 
 
                     bouton = st.button('Prepare your sdf file of poses in this predominant binding mode.')
@@ -524,7 +524,7 @@ def main():
                                      label="Download your sdf file",
                                      data=file,
                                      file_name=f"Unique Predominant Binding Mode.sdf",
-                                     key = 'CIT_WEB_Murcko_ConformationTool')
+                                     key = 'buttonU1829OI2UU')
 
                         if "barplot" in st.session_state :
                             del st.session_state.barplot
@@ -561,7 +561,7 @@ def main():
                                           data=file,
                                           file_name=f"Barplot n°1.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttoniUY78IUYT678')
 
                             st.write(f"Boxplot built following the descending order of the {st.session_state.score_murcko}.")
                             st.pyplot(st.session_state.box_plot)
@@ -571,7 +571,7 @@ def main():
                                           data=file,
                                           file_name=f"Boxplot n°1.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttoniUY78IU987898U')
 
                             st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score_murcko}.")
                             st.pyplot(st.session_state.scatterplot)
@@ -581,7 +581,7 @@ def main():
                                           data=file,
                                           file_name=f"Scatter_Plot n°1.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttoniUY79876YTG678')
                         except KeyError :
                             st.error("The name of the column in your sdf file that contains the names of the molecules doesn't seem to be "
                                      f"'{st.session_state.molecule_name_murcko}'. Please correct it.")         
@@ -592,7 +592,7 @@ def main():
                                              label="Download your sdf file",
                                              data=file,
                                              file_name=f"Predominant Binding Mode n°1.sdf",
-                                             key = 'CIT_WEB_Murcko_ConformationTool')
+                                             key = 'buttoniY67UYTGT678')
                         
                         if os.path.exists(f'Barplot.jpeg') == True :
                             st.pyplot(st.session_state.barplot)
@@ -605,7 +605,7 @@ def main():
                                           data=file,
                                           file_name=f"Barplot n°1.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttoniUY78I876TGHJ78')
                         
                         if os.path.exists('Box_Plot1.jpeg') == True :
                             st.write(f"Boxplot built following the descending order of the {st.session_state.score_murcko}.")
@@ -616,7 +616,7 @@ def main():
                                           data=file,
                                           file_name=f"Boxplot n°1.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttoni987678IU7Y6TRT678')
                         
                         if os.path.exists('Scatter_Plot1.jpeg') == True :
                             st.write(f"Scatterplot built with the ratio as a function of the {st.session_state.score_murcko}.")
@@ -627,7 +627,7 @@ def main():
                                           data=file,
                                           file_name=f"Scatter_Plot n°1.jpeg",
                                           mime="image/jpeg",
-                                          key = 'CIT_WEB_Murcko_ConformationTool')
+                                          key = 'buttoniU789IU76TRFCVBYT678')
 
             else :
                 if 'sorted_heatmap' in st.session_state:
@@ -669,7 +669,7 @@ def main():
                                       ('canberra', 'euclidean', 'hamming', 'braycurtis','chebyshev', 'cityblock', 'correlation',
                                        'cosine', 'dice', 'hamming', 'jaccard', 'jensenshannon', 'kulsinski', 'mahalanobis',
                                        'matching', 'minkowski', 'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener',
-                                       'sokalsneath', 'sqeuclidean', 'yule'), key = 'CIT_WEB_Murcko_ConformationTool',
+                                       'sokalsneath', 'sqeuclidean', 'yule'), key = 'button98I97H8HT678',
                                        help = "Before changing this setting, make sure the following checkbox is unchecked")
                 st.session_state.metric = metric
                 
@@ -679,7 +679,7 @@ def main():
                                        key = 'CIT_WEB_Murcko_ConformationTool',
                                        help = "Before changing this setting, make sure the following checkbox is unchecked")
                 st.session_state.method = method
-            third_checkbox_2 = st.checkbox('Get the cluster hierarchy heatmap', key = 'CIT_WEB_Murcko_ConformationTool')
+            third_checkbox_2 = st.checkbox('Get the cluster hierarchy heatmap', key = 'button0976TGHJI87YTG T678')
             if third_checkbox_2 :
                 if "cluster_hierarchy_heatmap" not in st.session_state :
                     st.session_state.ConformationClass.get_cluster_heatmap(individuals,
@@ -690,11 +690,11 @@ def main():
                         st.session_state.n_clusters = 2
                     
                     n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 30, st.session_state.n_clusters,
-                                            key = 'CIT_WEB_Murcko_ConformationTool')
+                                            key = 'button98I9299JZJ88')
                     st.session_state.n_clusters = n_clusters
                     st.session_state.n_clusters_selected = n_clusters
                     
-                    if st.button('Get analysis', key = 'CIT_WEB_Murcko_ConformationTool'):
+                    if st.button('Get analysis', key = 'button98IOJH9ZJ90JO'):
                         st.session_state.ConformationClass.analyze_cluster_heatmap(st.session_state.n_clusters, p = Proportion)
                 else :
                     if "cluster_hierarchy_heatmap" in st.session_state :
@@ -705,16 +705,16 @@ def main():
                                      data=file,
                                      file_name="Cluster_Hierarchy_Heatmap.jpeg",
                                      mime="image/jpeg",
-                                     key = 'CIT_WEB_Murcko_ConformationTool')                       
+                                     key = 'button98I97098UIJ098U678')                       
                             
                         n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 30,
-                                               st.session_state.n_clusters, key = 'CIT_WEB_Murcko_ConformationTool')
+                                               st.session_state.n_clusters, key = 'button98789J287H8HT678')
                         st.session_state.n_clusters = n_clusters
                         
-                        if st.button('Get analysis', key = 'CIT_WEB_Murcko_ConformationTool'):
+                        if st.button('Get analysis', key = 'button98OUBNIS2HT678'):
                             st.session_state.n_clusters_selected = st.session_state.n_clusters
                             st.session_state.ConformationClass.analyze_cluster_heatmap(st.session_state.n_clusters, p = Proportion)
-                            if st.button('Continue', key = 'CIT_WEB_Murcko_ConformationTool'):
+                            if st.button('Continue', key = 'button98IJHBIOINYB78'):
                                 "Rerun"
                             
                         else :
@@ -744,14 +744,14 @@ def main():
                                                  label=f"Download all the poses of the predominant binding mode n°{i+1} from the SAMPLE",
                                                  data=file,
                                                  file_name=f"Sample_Predominant_Binding_Mode{i+1}.sdf",
-                                                 key = 'CIT_WEB_Murcko_ConformationTool')
+                                                 key = 'button9828UYZ9872YT678')
 
                                 with open("Best_PLPScore_Poses.sdf", "rb") as file:
                                      btn = st.download_button(
                                                 label="Download the SDF file including each of the representatives of a predominant binding mode",
                                                 data=file,
                                                 file_name="Best_Score_Poses.sdf",
-                                                key = 'CIT_WEB_Murcko_ConformationTool')
+                                                key = 'button9I92ZJON678')
 
                                 st.info(f"There is (are) {st.session_state.n_conformations} predominant pose(s) among all poses.\n")
                                 for i, predominant_pose in enumerate(st.session_state.predominant_poses) :
@@ -774,7 +774,7 @@ def main():
                                                      data=file,
                                                      file_name=f"Histograms_Best_Score n°{i+1}.jpeg",
                                                      mime="image/jpeg",
-                                                     key = 'CIT_WEB_Murcko_ConformationTool')
+                                                     key = 'button98I97333')
 
                                 st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each conformation"
                                  " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
@@ -785,12 +785,12 @@ def main():
                                 st.session_state.temp = st.select_slider("You want a sdf file and/or a analysis plots including molecules in the conformation n°",
                                                                          options=temp_options,
                                                                          value = st.session_state.temp,
-                                                                         key = 'CIT_WEB_Murcko_ConformationTool')
+                                                                         key = 'button98I97H8HT20202')
                                 
                                 st.write(f"The Predominant Binding Mode selected is {st.session_state.temp}")
 
                                 st.session_state.RMSD_threshold_conformation = st.slider('... With all poses under a RMSD =', 0.0, 15.0, 2.0,
-                                                                                      key = 'CIT_WEB_Murcko_ConformationTool')
+                                                                                      key = 'button99JU28HHT678')
                                 st.write(f"The RMSD Target selected is {st.session_state.RMSD_threshold_conformation}")
                            
                                 st.session_state.help_paragraph = (
@@ -813,7 +813,7 @@ def main():
                                     st.session_state.size_xlabels = st.slider('Configure the size of the axis X labels', 0, 50, 25)
                                     st.session_state.size_ylabels = st.slider('Configure the size of the axis Y labels', 0, 50, 15)
                                 
-                                if st.button('Prepare your sdf file', key = 'CIT_WEB_Murcko_ConformationTool'):
+                                if st.button('Prepare your sdf file', key = 'button987YGHBN678'):
                                     st.session_state.ConformationClass.get_sdf_conformations(
                                         st.session_state.temp,
                                         st.session_state.RMSD_threshold_conformation)
