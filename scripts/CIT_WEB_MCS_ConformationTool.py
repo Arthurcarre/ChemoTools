@@ -46,7 +46,7 @@ def main():
     if sdf:
         molecule_name = st.text_input("What is the name of the column in your sdf file that contains the names of the molecules"
                           " (and not the names of each poses resulting from the docking simulations)?", 'Compound Name',
-                                       key = 'CIT_WEB_MCS_ConformationTool')
+                                       key = 'Nombre aleatoire')
         st.session_state.molecule_name_MCS = molecule_name
         score = st.text_input(
              'What is the scoring function used in your sdf file ?',
