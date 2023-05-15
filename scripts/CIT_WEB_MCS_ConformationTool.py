@@ -659,7 +659,7 @@ def main():
                         st.session_state.n_clusters = 2
                         
                     n_clusters = st.slider('In how many clusters do you want to cut the tree (dendrogram) ?', 2, 30, st.session_state.n_clusters,
-                                            key = 'button720'
+                                            key = 'button720')
                     st.session_state.n_clusters = n_clusters
                     st.session_state.n_clusters_selected = n_clusters
                     
