@@ -638,7 +638,7 @@ def main():
                                       ('canberra', 'euclidean', 'hamming', 'braycurtis','chebyshev', 'cityblock', 'correlation',
                                        'cosine', 'dice', 'hamming', 'jaccard', 'jensenshannon', 'kulsinski', 'mahalanobis',
                                        'matching', 'minkowski', 'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener',
-                                       'sokalsneath', 'sqeuclidean', 'yule'), key = 'CIT_WEB_MCS_ConformationTool',
+                                       'sokalsneath', 'sqeuclidean', 'yule'), key = 'fcrftguyijnk',
                                        help = "Before changing this setting, make sure the following checkbox is unchecked")
                 st.session_state.metric = metric
                 
@@ -648,7 +648,7 @@ def main():
                                        key = 'button712',
                                        help = "Before changing this setting, make sure the following checkbox is unchecked")
                 st.session_state.method = method
-            third_checkbox_2 = st.checkbox('Get the cluster hierarchy heatmap', key = 'CIT_WEB_MCS_ConformationTool')
+            third_checkbox_2 = st.checkbox('Get the cluster hierarchy heatmap', key = 'dezertyukj')
             if third_checkbox_2 :
                 if "cluster_hierarchy_heatmap" not in st.session_state :
                     st.session_state.ConformationClass.get_cluster_heatmap(individuals,
