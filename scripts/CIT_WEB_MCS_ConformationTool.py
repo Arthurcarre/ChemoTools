@@ -290,7 +290,7 @@ def main():
                                     data=file,
                                     file_name=f"Histograms_Best_Score n°{i+1}.jpeg",
                                     mime="image/jpeg",
-                                    key = 'button25')
+                                    key = 'button25' + str(i))
 
                     st.write("Density of the number of poses as a function of the RMSD calculated between the representative of each predominant binding mode"
                      " and all poses of all molecules in the docking solutions of the filtered incoming sdf file.")      
